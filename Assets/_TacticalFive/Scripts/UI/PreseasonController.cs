@@ -192,7 +192,7 @@ public class PreseasonController : UIScreenController
 
         var empty = new Label();
         empty.AddToClassList("game-slot-empty-text");
-        empty.text = "SIN RIVAL";
+        empty.text = LocalizationService.T("ui.code.preseason_controller.sin_rival");
 
         slot.Add(num);
         slot.Add(empty);
@@ -247,17 +247,17 @@ public class PreseasonController : UIScreenController
         if (game.is_home == 1)
         {
             location.AddToClassList("game-slot-location--home");
-            location.text = "LOCAL";
+            location.text = LocalizationService.T("ui.code.preseason_controller.local");
         }
         else
         {
             location.AddToClassList("game-slot-location--away");
-            location.text = "VISITANTE";
+            location.text = LocalizationService.T("ui.code.preseason_controller.visitante");
         }
 
         var btnRemove = new Button();
         btnRemove.AddToClassList("btn-remove-slot");
-        btnRemove.text = "BORRAR";
+        btnRemove.text = LocalizationService.T("ui.code.preseason_controller.borrar");
         int captured = index;
         btnRemove.clicked += () => { PlayClick(); RemoveGame(captured); };
         if (CursorManager.Instance != null)
@@ -469,7 +469,7 @@ public class PreseasonController : UIScreenController
             {
                 Debug.LogError("[Preseason] Fallo al generar/guardar el calendario. La temporada NO se marca como generada.");
                 if (_infoBarSeason != null)
-                    _infoBarSeason.text = "ERROR: no se pudo guardar el calendario. Vuelve a intentarlo.";
+                    _infoBarSeason.text = LocalizationService.T("ui.code.preseason_controller.error_no_se_pudo_guardar_el_calendario_v_b1fa5371");
                 return;
             }
 

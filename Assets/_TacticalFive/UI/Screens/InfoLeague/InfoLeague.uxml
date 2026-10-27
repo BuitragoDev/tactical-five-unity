@@ -17,7 +17,7 @@
             <ui:VisualElement class="infoleague-screen-header panel--gold">
                 <ui:VisualElement class="infoleague-screen-header-row">
                     <ui:VisualElement name="InfoLeagueScreenIcon" class="infoleague-screen-icon" />
-                    <ui:Label text="INFORMACIÓN DE LA LIGA" class="infoleague-screen-title" />
+                    <ui:Label text="{loc:ui.info_league.informacion_de_la_liga}" class="infoleague-screen-title" />
                 </ui:VisualElement>
                 <ui:Label name="InfoLeagueSubtitle" text="" class="infoleague-screen-subtitle" />
             </ui:VisualElement>
@@ -27,8 +27,8 @@
 
                 <!-- TABS -->
                 <ui:VisualElement class="infoleague-tabs">
-                    <ui:Button name="BtnTabFinanzas" class="infoleague-tab" text="FINANZAS" />
-                    <ui:Button name="BtnTabEquipos" class="infoleague-tab" text="EQUIPOS" />
+                    <ui:Button name="BtnTabFinanzas" class="infoleague-tab" text="{loc:ui.info_league.btn_tab_finanzas}" />
+                    <ui:Button name="BtnTabEquipos" class="infoleague-tab" text="{loc:ui.info_league.btn_tab_equipos}" />
                 </ui:VisualElement>
 
                 <!-- TAB FINANZAS -->
@@ -41,28 +41,28 @@
                                        horizontal-scrolling-enabled="false"
                                        mode="Vertical">
                             <ui:VisualElement name="ReglasPanel" class="infoleague-reglas">
-                            <ui:Label class="infoleague-reglas-title" text="REGLAS DEL JUEGO" />
+                            <ui:Label class="infoleague-reglas-title" text="{loc:ui.info_league.reglas_del_juego}" />
 
-                            <ui:Label class="infoleague-regla-titulo" text="LÍMITE SALARIAL" />
-                            <ui:Label class="infoleague-regla-texto" text="Los equipos pueden gastar hasta este tope en la nómina de su plantilla. Con las excepciones y los derechos Bird se puede firmar por encima del límite para retener a jugadores propios." />
+                            <ui:Label class="infoleague-regla-titulo" text="{loc:ui.info_league.limite_salarial}" />
+                            <ui:Label class="infoleague-regla-texto" text="{loc:ui.info_league.los_equipos_pueden_gastar_hasta_este_top_82bc40f0}" />
 
-                            <ui:Label class="infoleague-regla-titulo" text="LUXURY TAX" />
-                            <ui:Label class="infoleague-regla-texto" text="Los equipos cuya nómina supere este umbral pagan un impuesto progresivo calculado mensualmente (nómina anual / 12). El juego modela el impuesto estándar; el repeater tax no está incluido en esta versión." />
+                            <ui:Label class="infoleague-regla-titulo" text="{loc:ui.info_league.luxury_tax}" />
+                            <ui:Label class="infoleague-regla-texto" text="{loc:ui.info_league.los_equipos_cuya_nomina_supere_este_umbr_a043ff25}" />
 
-                            <ui:Label class="infoleague-regla-titulo" text="APRONS" />
-                            <ui:Label class="infoleague-regla-texto" text="El primer apron restringe las firmas de agentes libres y las excepciones disponibles. El segundo apron añade más limitaciones: no se pueden agrupar salarios en traspasos ni usar excepciones de varios años. Superar el primer apron tras usar la NT-MLE activa el hard cap." />
+                            <ui:Label class="infoleague-regla-titulo" text="{loc:ui.info_league.aprons}" />
+                            <ui:Label class="infoleague-regla-texto" text="{loc:ui.info_league.el_primer_apron_restringe_las_firmas_de_9d703a8d}" />
 
-                            <ui:Label class="infoleague-regla-titulo" text="MID-LEVEL EXCEPTION" />
-                            <ui:Label class="infoleague-regla-texto" text="La NT-MLE puede usarse una vez por temporada cuando el equipo está por encima del límite salarial y por debajo del primer apron, pero activa el hard cap en el primer apron. La T-MLE está disponible para equipos en o por encima del primer apron. Ambas se actualizan cada temporada con la tabla CBA." />
+                            <ui:Label class="infoleague-regla-titulo" text="{loc:ui.info_league.mid_level_exception}" />
+                            <ui:Label class="infoleague-regla-texto" text="{loc:ui.info_league.la_nt_mle_puede_usarse_una_vez_por_tempo_cfdac408}" />
 
-                            <ui:Label class="infoleague-regla-titulo" text="EXCEPCIÓN BI-ANUAL" />
-                            <ui:Label class="infoleague-regla-texto" text="Permite firmar a un agente libre solo una vez cada dos años. Se pierde si se usa la NT-MLE o la T-MLE. Su importe se actualiza cada temporada con la tabla CBA." />
+                            <ui:Label class="infoleague-regla-titulo" text="{loc:ui.info_league.excepcion_bi_anual}" />
+                            <ui:Label class="infoleague-regla-texto" text="{loc:ui.info_league.permite_firmar_a_un_agente_libre_solo_un_108e5461}" />
 
-                            <ui:Label class="infoleague-regla-titulo" text="SALARIO MÍNIMO" />
-                            <ui:Label class="infoleague-regla-texto" text="Importe mínimo por contrato de jugador. Los equipos pueden firmar jugadores al mínimo sin necesidad de espacio salarial." />
+                            <ui:Label class="infoleague-regla-titulo" text="{loc:ui.info_league.salario_minimo}" />
+                            <ui:Label class="infoleague-regla-texto" text="{loc:ui.info_league.importe_minimo_por_contrato_de_jugador_l_1e8c3311}" />
 
-                            <ui:Label class="infoleague-regla-titulo" text="BIRD RIGHTS Y HARD CAP" />
-                            <ui:Label class="infoleague-regla-texto" text="Un equipo puede renovar a sus propios agentes libres por encima del límite salarial (derechos Bird) si el jugador lleva al menos tres temporadas en el equipo. El límite, el impuesto, los aprons y las excepciones se actualizan cada temporada con las cifras oficiales del CBA; las temporadas futuras sin cifra publicada se marcan como proyección. La ventana de traspasos cierra el 7 de febrero (deadline)." />
+                            <ui:Label class="infoleague-regla-titulo" text="{loc:ui.info_league.bird_rights_y_hard_cap}" />
+                            <ui:Label class="infoleague-regla-texto" text="{loc:ui.info_league.un_equipo_puede_renovar_a_sus_propios_ag_6504cba7}" />
                         </ui:VisualElement>
                         </ui:ScrollView>
                     </ui:VisualElement>
@@ -72,11 +72,11 @@
                 <ui:VisualElement name="TabEquipos" class="infoleague-tab-panel" style="display: none;">
                     <ui:VisualElement class="infoleague-columns">
                         <ui:VisualElement class="infoleague-column">
-                            <ui:Label class="infoleague-column-title" text="CONFERENCIA ESTE" />
+                            <ui:Label class="infoleague-column-title" text="{loc:ui.info_league.conferencia_este}" />
                             <ui:VisualElement name="TeamsEast" class="infoleague-team-list" />
                         </ui:VisualElement>
                         <ui:VisualElement class="infoleague-column">
-                            <ui:Label class="infoleague-column-title" text="CONFERENCIA OESTE" />
+                            <ui:Label class="infoleague-column-title" text="{loc:ui.info_league.conferencia_oeste}" />
                             <ui:VisualElement name="TeamsWest" class="infoleague-team-list" />
                         </ui:VisualElement>
                     </ui:VisualElement>
@@ -89,12 +89,12 @@
         <!-- ══ MODAL CONFIGURACIÓN ══ -->
         <ui:VisualElement name="ConfigModalOverlay" class="modal-overlay">
             <ui:VisualElement name="ConfigModalBox" class="modal-box">
-                <ui:Label class="modal-title" text="CONFIGURACIÓN" />
+                <ui:Label class="modal-title" text="{loc:ui.info_league.configuracion}" />
                 <ui:VisualElement class="modal-body">
                     <ui:VisualElement class="settings-section">
-                        <ui:Label class="settings-section-title" text="AUDIO" />
+                        <ui:Label class="settings-section-title" text="{loc:ui.info_league.audio}" />
                         <ui:VisualElement class="settings-row">
-                            <ui:Label class="settings-label" text="Volumen General" />
+                            <ui:Label class="settings-label" text="{loc:ui.info_league.volumen_general}" />
                             <ui:VisualElement name="ConfigSliderMaster" class="custom-slider">
                                 <ui:VisualElement class="custom-slider-track" />
                                 <ui:VisualElement name="ConfigFillMaster" class="custom-slider-fill" />
@@ -103,7 +103,7 @@
                             <ui:Label name="ConfigLabelMaster" class="settings-value" text="100%" />
                         </ui:VisualElement>
                         <ui:VisualElement class="settings-row">
-                            <ui:Label class="settings-label" text="Música" />
+                            <ui:Label class="settings-label" text="{loc:ui.info_league.musica}" />
                             <ui:VisualElement name="ConfigSliderMusic" class="custom-slider">
                                 <ui:VisualElement class="custom-slider-track" />
                                 <ui:VisualElement name="ConfigFillMusic" class="custom-slider-fill" />
@@ -112,7 +112,7 @@
                             <ui:Label name="ConfigLabelMusic" class="settings-value" text="100%" />
                         </ui:VisualElement>
                         <ui:VisualElement class="settings-row">
-                            <ui:Label class="settings-label" text="Efectos" />
+                            <ui:Label class="settings-label" text="{loc:ui.info_league.efectos}" />
                             <ui:VisualElement name="ConfigSliderSFX" class="custom-slider">
                                 <ui:VisualElement class="custom-slider-track" />
                                 <ui:VisualElement name="ConfigFillSFX" class="custom-slider-fill" />
@@ -122,39 +122,39 @@
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement class="settings-section">
-                        <ui:Label class="settings-section-title" text="GRÁFICOS" />
+                        <ui:Label class="settings-section-title" text="{loc:ui.info_league.graficos}" />
                         <ui:VisualElement class="settings-quality-row">
-                            <ui:Label class="settings-label" text="Calidad" />
+                            <ui:Label class="settings-label" text="{loc:ui.info_league.calidad}" />
                             <ui:VisualElement class="settings-quality-options">
-                                <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="Baja" />
-                                <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="Media" />
-                                <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="Alta" />
-                                <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="Ultra" />
+                                <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="{loc:ui.info_league.config_btn_quality_low}" />
+                                <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="{loc:ui.info_league.config_btn_quality_medium}" />
+                                <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="{loc:ui.info_league.config_btn_quality_high}" />
+                                <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="{loc:ui.info_league.config_btn_quality_ultra}" />
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement class="settings-section">
-                        <ui:Label class="settings-section-title" text="JUEGO" />
-                        <ui:Button name="ConfigBtnMainMenu" class="settings-btn settings-btn--secondary" text="VOLVER AL MENÚ PRINCIPAL" />
-                        <ui:Button name="ConfigBtnExit" class="settings-btn settings-btn--danger" text="SALIR DEL JUEGO" />
+                        <ui:Label class="settings-section-title" text="{loc:ui.info_league.juego}" />
+                        <ui:Button name="ConfigBtnMainMenu" class="settings-btn settings-btn--secondary" text="{loc:ui.info_league.config_btn_main_menu}" />
+                        <ui:Button name="ConfigBtnExit" class="settings-btn settings-btn--danger" text="{loc:ui.info_league.config_btn_exit}" />
                     </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:Button name="ConfigBtnCerrar" class="modal-close" text="CERRAR" />
+                <ui:Button name="ConfigBtnCerrar" class="modal-close" text="{loc:ui.info_league.config_btn_cerrar}" />
             </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- ══ MODAL CONFIRMAR VOLVER AL MENÚ PRINCIPAL ══ -->
         <ui:VisualElement name="ConfigMainMenuConfirmOverlay" class="modal-overlay">
             <ui:VisualElement name="ConfigMainMenuConfirmBox" class="modal-box">
-                <ui:Label class="modal-title" text="VOLVER AL MENÚ PRINCIPAL" />
+                <ui:Label class="modal-title" text="{loc:ui.info_league.volver_al_menu_principal}" />
                 <ui:VisualElement class="modal-body">
-                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres volver al menú principal?" />
-                    <ui:Label class="modal-paragraph" text="Se perderá el progreso no guardado de la partida actual. Asegúrate de haber guardado antes de continuar." />
+                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="{loc:ui.info_league.estas_seguro_de_que_quieres_volver_al_me_6f548452}" />
+                    <ui:Label class="modal-paragraph" text="{loc:ui.info_league.se_perdera_el_progreso_no_guardado_de_la_b10b7334}" />
                 </ui:VisualElement>
                 <ui:VisualElement class="modal-actions">
-                    <ui:Button name="ConfigBtnMainMenuNo" class="modal-btn modal-btn--secondary" text="NO, QUEDARME" />
+                    <ui:Button name="ConfigBtnMainMenuNo" class="modal-btn modal-btn--secondary" text="{loc:ui.info_league.config_btn_main_menu_no}" />
                     <ui:VisualElement class="modal-spacer" />
-                    <ui:Button name="ConfigBtnMainMenuYes" class="modal-btn modal-btn--danger" text="SÍ, VOLVER" />
+                    <ui:Button name="ConfigBtnMainMenuYes" class="modal-btn modal-btn--danger" text="{loc:ui.info_league.config_btn_main_menu_yes}" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
@@ -162,15 +162,15 @@
         <!-- ══ MODAL CONFIRMAR SALIR DEL JUEGO ══ -->
         <ui:VisualElement name="ConfigExitConfirmOverlay" class="modal-overlay">
             <ui:VisualElement name="ConfigExitConfirmBox" class="modal-box">
-                <ui:Label class="modal-title" text="SALIR DEL JUEGO" />
+                <ui:Label class="modal-title" text="{loc:ui.info_league.salir_del_juego}" />
                 <ui:VisualElement class="modal-body">
-                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres salir del juego?" />
-                    <ui:Label class="modal-paragraph" text="Tu progreso se guarda automáticamente durante la partida. Al volver a cargarla continuarás desde el último estado guardado." />
+                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="{loc:ui.info_league.estas_seguro_de_que_quieres_salir_del_ju_c65dd5f1}" />
+                    <ui:Label class="modal-paragraph" text="{loc:ui.info_league.tu_progreso_se_guarda_automaticamente_du_10fb1edb}" />
                 </ui:VisualElement>
                 <ui:VisualElement class="modal-actions">
-                    <ui:Button name="ConfigBtnExitNo" class="modal-btn modal-btn--secondary" text="NO" />
+                    <ui:Button name="ConfigBtnExitNo" class="modal-btn modal-btn--secondary" text="{loc:ui.info_league.config_btn_exit_no}" />
                     <ui:VisualElement class="modal-spacer" />
-                    <ui:Button name="ConfigBtnExitYes" class="modal-btn modal-btn--danger" text="SÍ, SALIR" />
+                    <ui:Button name="ConfigBtnExitYes" class="modal-btn modal-btn--danger" text="{loc:ui.info_league.config_btn_exit_yes}" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>

@@ -10,7 +10,7 @@
                     <ui:VisualElement class="header-team-info">
                         <ui:VisualElement class="header-team-name-row">
                             <ui:Label name="HeaderTeamName" text="" class="header-team-name"/>
-                            <ui:Label name="HeaderSubtitle" text="(RESULTADOS DE LA JORNADA)" class="header-subtitle"/>
+                            <ui:Label name="HeaderSubtitle" text="{loc:ui.game_results.header_subtitle}" class="header-subtitle"/>
                         </ui:VisualElement>
                         <ui:Label name="HeaderManagerName" text="" class="header-manager-name"/>
                     </ui:VisualElement>
@@ -22,7 +22,7 @@
                     <ui:Label name="HeaderDate" text="" class="header-date-label"/>
                     <ui:Label name="HeaderGameDay" text="" class="header-game-day-label"/>
                     <ui:VisualElement name="LoadingSpinner" class="loading-spinner" />
-                    <ui:Button name="BtnDashboard" text="MENU PRINCIPAL" class="btn-action"/>
+                    <ui:Button name="BtnDashboard" text="{loc:ui.game_results.btn_dashboard}" class="btn-action"/>
                 </ui:VisualElement>
             </ui:VisualElement>
             <ui:ScrollView horizontal-scrolling-enabled="false" mode="Vertical" class="gresults-scroll">
@@ -30,54 +30,54 @@
                     <ui:VisualElement class="gresults-layout">
                         <ui:VisualElement class="gresults-left">
                             <ui:VisualElement class="gresults-section-header">
-                                <ui:Label text="RESULTADOS" class="gresults-section-title"/>
+                                <ui:Label text="{loc:ui.game_results.resultados}" class="gresults-section-title"/>
                             </ui:VisualElement>
                             <ui:VisualElement name="GamesBody" class="games-body"/>
                         </ui:VisualElement>
                         <ui:VisualElement class="gresults-right">
                             <ui:VisualElement name="MvpPanel" class="mvp-panel" style="border-left-color: rgb(218, 165, 32); border-right-color: rgb(218, 165, 32); border-top-color: rgb(218, 165, 32); border-bottom-color: rgb(218, 165, 32); border-top-width: 2px; border-right-width: 2px; border-bottom-width: 2px; border-left-width: 2px;">
                                 <ui:VisualElement class="mvp-badge">
-                                    <ui:Label text="★ MVP DE LA JORNADA" class="mvp-badge-text"/>
+                                    <ui:Label text="{loc:ui.game_results.mvp_de_la_jornada}" class="mvp-badge-text"/>
                                 </ui:VisualElement>
                                 <ui:VisualElement class="mvp-content">
                                     <ui:VisualElement class="mvp-player-info">
                                         <ui:VisualElement name="MvpLogo" class="mvp-team-logo"/>
                                         <ui:VisualElement class="mvp-player-details">
-                                            <ui:Label name="MvpName" text="ANTHONY&#10;EDWARDS" class="mvp-player-name"/>
-                                            <ui:Label name="MvpTeam" text="Minnesota Timberwolves" class="mvp-player-team" style="-unity-text-align: middle-left;"/>
+                                            <ui:Label name="MvpName" text="{loc:ui.game_results.mvp_name}" class="mvp-player-name"/>
+                                            <ui:Label name="MvpTeam" text="{loc:ui.game_results.mvp_team}" class="mvp-player-team" style="-unity-text-align: middle-left;"/>
                                         </ui:VisualElement>
                                     </ui:VisualElement>
                                     <ui:VisualElement class="mvp-stats">
                                         <ui:VisualElement class="mvp-stat">
                                             <ui:Label name="MvpPts" text="49" class="mvp-stat-val" style="-unity-text-align: middle-center;"/>
-                                            <ui:Label text="PTS" class="mvp-stat-label" style="-unity-text-align: middle-center;"/>
+                                            <ui:Label text="{loc:ui.game_results.pts}" class="mvp-stat-label" style="-unity-text-align: middle-center;"/>
                                         </ui:VisualElement>
                                         <ui:VisualElement class="mvp-stat">
                                             <ui:Label name="MvpReb" text="5" class="mvp-stat-val" style="-unity-text-align: middle-center;"/>
-                                            <ui:Label text="REB" class="mvp-stat-label" style="-unity-text-align: middle-center;"/>
+                                            <ui:Label text="{loc:ui.game_results.reb}" class="mvp-stat-label" style="-unity-text-align: middle-center;"/>
                                         </ui:VisualElement>
                                         <ui:VisualElement class="mvp-stat">
                                             <ui:Label name="MvpAst" text="1" class="mvp-stat-val" style="-unity-text-align: middle-center;"/>
-                                            <ui:Label text="AST" class="mvp-stat-label" style="-unity-text-align: middle-center;"/>
+                                            <ui:Label text="{loc:ui.game_results.ast}" class="mvp-stat-label" style="-unity-text-align: middle-center;"/>
                                         </ui:VisualElement>
                                         <ui:VisualElement class="mvp-stat mvp-rating">
                                             <ui:Label name="MvpVal" text="45" class="mvp-stat-val" style="-unity-text-align: middle-center;"/>
-                                            <ui:Label text="VAL" class="mvp-stat-label" style="-unity-text-align: middle-center;"/>
+                                            <ui:Label text="{loc:ui.game_results.val}" class="mvp-stat-label" style="-unity-text-align: middle-center;"/>
                                         </ui:VisualElement>
                                     </ui:VisualElement>
                                 </ui:VisualElement>
                             </ui:VisualElement>
                             <ui:VisualElement name="Leaderboards" class="leaderboards">
                                 <ui:VisualElement name="LbScorers" class="leaderboard-section" style="margin-bottom: 10px;">
-                                    <ui:Label text="🏀 Máximos Anotadores" class="leaderboard-title"/>
+                                    <ui:Label text="{loc:ui.game_results.maximos_anotadores}" class="leaderboard-title"/>
                                     <ui:VisualElement name="LbScorersBody" class="leaderboard-body"/>
                                 </ui:VisualElement>
                                 <ui:VisualElement name="LbRebounders" class="leaderboard-section" style="margin-bottom: 10px;">
-                                    <ui:Label text="⛹️ Máximos Reboteadores" class="leaderboard-title"/>
+                                    <ui:Label text="{loc:ui.game_results.maximos_reboteadores}" class="leaderboard-title"/>
                                     <ui:VisualElement name="LbReboundersBody" class="leaderboard-body"/>
                                 </ui:VisualElement>
                                 <ui:VisualElement name="LbAssisters" class="leaderboard-section">
-                                    <ui:Label text="🎯 Máximos Asistentes" class="leaderboard-title"/>
+                                    <ui:Label text="{loc:ui.game_results.maximos_asistentes}" class="leaderboard-title"/>
                                     <ui:VisualElement name="LbAssistersBody" class="leaderboard-body"/>
                                 </ui:VisualElement>
                             </ui:VisualElement>

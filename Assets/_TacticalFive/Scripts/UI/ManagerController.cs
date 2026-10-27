@@ -155,7 +155,7 @@ using System.Globalization;
         if (headerTeamName != null) headerTeamName.text = _myTeam.name.ToUpper();
 
         var headerManagerName = _root.Q<Label>("HeaderManagerName");
-        if (headerManagerName != null) headerManagerName.text = $"Manager: {_manager.name}";
+        if (headerManagerName != null) headerManagerName.text = LocalizationService.T("ui.common.manager", _manager.name);
 
         var budgetLabel = _root.Q<Label>("HeaderBudget");
         if (budgetLabel != null)
@@ -169,7 +169,7 @@ using System.Globalization;
         if (_season != null)
         {
             var headerSeason = _root.Q<Label>("HeaderSeason");
-            if (headerSeason != null) headerSeason.text = $"Temporada {_season.year_start}-{_season.year_end}";
+            if (headerSeason != null) headerSeason.text = LocalizationService.T("ui.common.season", _season.year_start, _season.year_end);
 
             var headerDate = _root.Q<Label>("HeaderDate");
             if (headerDate != null && _season.current_game_day >= 0 && !string.IsNullOrEmpty(_season.current_date))
@@ -304,13 +304,13 @@ using System.Globalization;
             }
             else if (met)
             {
-                _managerObjectiveStatus.text = "OBJETIVO CUMPLIDO";
+                _managerObjectiveStatus.text = LocalizationService.T("ui.code.manager_controller.objetivo_cumplido");
                 _managerObjectiveStatus.RemoveFromClassList("manager-objective-status--not-met");
                 _managerObjectiveStatus.AddToClassList("manager-objective-status--met");
             }
             else
             {
-                _managerObjectiveStatus.text = "OBJETIVO NO CUMPLIDO";
+                _managerObjectiveStatus.text = LocalizationService.T("ui.code.manager_controller.objetivo_no_cumplido");
                 _managerObjectiveStatus.RemoveFromClassList("manager-objective-status--met");
                 _managerObjectiveStatus.AddToClassList("manager-objective-status--not-met");
             }
@@ -454,28 +454,28 @@ using System.Globalization;
 
             if (coach.status == "historical")
             {
-                var badge = new Label("HISTÓRICO");
+                var badge = new Label(LocalizationService.T("ui.code.manager_controller.historico"));
                 badge.AddToClassList("ranking-badge");
                 badge.AddToClassList("ranking-badge--historical");
                 badgeContainer.Add(badge);
             }
             else if (coach.status == "inactive")
             {
-                var badge = new Label("INACTIVO");
+                var badge = new Label(LocalizationService.T("ui.code.manager_controller.inactivo"));
                 badge.AddToClassList("ranking-badge");
                 badge.AddToClassList("ranking-badge--inactive");
                 badgeContainer.Add(badge);
             }
             else if (coach.status == "player")
             {
-                var badge = new Label("TÚ");
+                var badge = new Label(LocalizationService.T("ui.code.manager_controller.tu"));
                 badge.AddToClassList("ranking-badge");
                 badge.AddToClassList("ranking-badge--player");
                 badgeContainer.Add(badge);
             }
             else if (coach.status == "active")
             {
-                var badge = new Label("ACTIVO");
+                var badge = new Label(LocalizationService.T("ui.code.manager_controller.activo"));
                 badge.AddToClassList("ranking-badge");
                 badge.AddToClassList("ranking-badge--active");
                 badgeContainer.Add(badge);

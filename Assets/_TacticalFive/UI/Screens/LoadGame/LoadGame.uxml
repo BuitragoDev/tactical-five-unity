@@ -10,18 +10,18 @@
         <!-- ══ HEADER ══ -->
         <ui:VisualElement class="loadgame-header">
             <ui:VisualElement class="header-logo-wrap">
-                <ui:Label class="header-logo-icon" text="TF" />
-                <ui:Label class="header-logo-text" text="TACTICAL" />
-                <ui:Label class="header-logo-text-gold" text="FIVE" />
+                <ui:Label class="header-logo-icon" text="{loc:ui.load_game.tf}" />
+                <ui:Label class="header-logo-text" text="{loc:ui.load_game.tactical}" />
+                <ui:Label class="header-logo-text-gold" text="{loc:ui.load_game.five}" />
             </ui:VisualElement>
             <ui:VisualElement class="header-spacer" />
-            <ui:Button name="BtnBack" class="btn-back" text="VOLVER AL MENU" />
+            <ui:Button name="BtnBack" class="btn-back" text="{loc:ui.load_game.btn_back}" />
         </ui:VisualElement>
 
         <!-- ══ TITLE ══ -->
         <ui:VisualElement class="loadgame-title-wrap">
-            <ui:Label class="loadgame-title" text="CARGAR PARTIDA" />
-            <ui:Label class="loadgame-subtitle" text="Selecciona una partida guardada para continuar" />
+            <ui:Label class="loadgame-title" text="{loc:ui.load_game.cargar_partida}" />
+            <ui:Label class="loadgame-subtitle" text="{loc:ui.load_game.selecciona_una_partida_guardada_para_con_94180361}" />
             <ui:VisualElement class="loadgame-divider" />
         </ui:VisualElement>
 
@@ -34,8 +34,8 @@
         <!-- ══ EMPTY STATE ══ -->
         <ui:VisualElement name="EmptyState" class="empty-state" style="display: none;">
             <ui:Label class="empty-icon" text="📁" />
-            <ui:Label class="empty-label" text="NO HAY PARTIDAS GUARDADAS" />
-            <ui:Label class="empty-hint" text="Empieza una nueva partida desde el menu principal" />
+            <ui:Label class="empty-label" text="{loc:ui.load_game.no_hay_partidas_guardadas}" />
+            <ui:Label class="empty-hint" text="{loc:ui.load_game.empieza_una_nueva_partida_desde_el_menu_0dc2c75a}" />
         </ui:VisualElement>
 
         <!-- ══ CONTENT OVERLAY (difuminado detrás del modal) ══ -->
@@ -44,16 +44,16 @@
         <!-- ══ MODAL BORRAR PARTIDA ══ -->
         <ui:VisualElement name="DeleteModalOverlay" class="modal-overlay">
             <ui:VisualElement name="DeleteModalBox" class="modal-box">
-                <ui:Label class="modal-title" text="BORRAR PARTIDA" />
+                <ui:Label class="modal-title" text="{loc:ui.load_game.borrar_partida}" />
                 <ui:VisualElement class="modal-body">
                     <ui:Label class="modal-paragraph"
-                        text="¿Estás seguro de que quieres borrar esta partida?" />
+                        text="{loc:ui.load_game.estas_seguro_de_que_quieres_borrar_esta_ff5a3c70}" />
                     <ui:Label class="modal-paragraph"
-                        text="Esta acción no se puede deshacer y todos los datos de la partida se perderán." />
+                        text="{loc:ui.load_game.esta_accion_no_se_puede_deshacer_y_todos_90d6ff3b}" />
                 </ui:VisualElement>
                 <ui:VisualElement class="modal-actions">
-                    <ui:Button name="BtnDeleteNo" class="modal-btn modal-btn--secondary" text="NO" />
-                    <ui:Button name="BtnDeleteYes" class="modal-btn modal-btn--danger" text="SÍ, BORRAR" />
+                    <ui:Button name="BtnDeleteNo" class="modal-btn modal-btn--secondary" text="{loc:ui.load_game.btn_delete_no}" />
+                    <ui:Button name="BtnDeleteYes" class="modal-btn modal-btn--danger" text="{loc:ui.load_game.btn_delete_yes}" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>

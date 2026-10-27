@@ -19,87 +19,87 @@
             <ui:VisualElement class="thecity-content">
                 <ui:VisualElement class="city-pulse-row">
                     <ui:VisualElement class="city-pulse-brand">
-                        <ui:Label class="city-pulse-kicker" text="PULSO DE LA CIUDAD" />
+                        <ui:Label class="city-pulse-kicker" text="{loc:ui.the_city.pulso_de_la_ciudad}" />
                         <ui:Label name="CityPulseTeam" class="city-pulse-team" text="" />
                     </ui:VisualElement>
                     <ui:VisualElement class="city-pulse-card">
-                        <ui:Label class="city-pulse-label" text="PRESUPUESTO" />
+                        <ui:Label class="city-pulse-label" text="{loc:ui.the_city.presupuesto}" />
                         <ui:Label name="CityPulseBudget" class="city-pulse-value" text="—" />
                     </ui:VisualElement>
                     <ui:VisualElement class="city-pulse-card">
-                        <ui:Label class="city-pulse-label" text="AFICIÓN" />
+                        <ui:Label class="city-pulse-label" text="{loc:ui.the_city.aficion}" />
                         <ui:Label name="CityPulseFan" class="city-pulse-value" text="—" />
                     </ui:VisualElement>
                     <ui:VisualElement class="city-pulse-card">
-                        <ui:Label class="city-pulse-label" text="OBJETIVO" />
+                        <ui:Label class="city-pulse-label" text="{loc:ui.the_city.objetivo}" />
                         <ui:Label name="CityPulseObjective" class="city-pulse-value city-pulse-value--small" text="—" />
                     </ui:VisualElement>
                     <ui:VisualElement class="city-pulse-card">
-                        <ui:Label class="city-pulse-label" text="PRÓXIMO PARTIDO" />
+                        <ui:Label class="city-pulse-label" text="{loc:ui.the_city.proximo_partido}" />
                         <ui:Label name="CityPulseNextGame" class="city-pulse-value city-pulse-value--small" text="—" />
                     </ui:VisualElement>
                     <ui:VisualElement class="city-pulse-card city-pulse-card--alert">
-                        <ui:Label class="city-pulse-label" text="CIUDAD" />
-                        <ui:Label name="CityPulseNotice" class="city-pulse-value city-pulse-value--small" text="Sin avisos" />
+                        <ui:Label class="city-pulse-label" text="{loc:ui.the_city.ciudad}" />
+                        <ui:Label name="CityPulseNotice" class="city-pulse-value city-pulse-value--small" text="{loc:ui.the_city.city_pulse_notice}" />
                     </ui:VisualElement>
                 </ui:VisualElement>
 
                 <ui:VisualElement class="city-workspace">
                     <ui:VisualElement class="city-map">
                         <ui:VisualElement class="city-hotspot city-hotspot--hospital">
-                            <ui:Button name="CityHospital" class="city-bubble" text="CENTRO MÉDICO" />
+                            <ui:Button name="CityHospital" class="city-bubble" text="{loc:ui.the_city.city_hospital}" />
                             <ui:VisualElement class="city-bubble-tail" />
                             <ui:Label name="CityHospitalStatus" class="city-status" text="" />
                         </ui:VisualElement>
                         <ui:VisualElement class="city-hotspot city-hotspot--arena">
-                            <ui:Button name="CityArena" class="city-bubble" text="PABELLÓN" />
+                            <ui:Button name="CityArena" class="city-bubble" text="{loc:ui.the_city.city_arena}" />
                             <ui:VisualElement class="city-bubble-tail" />
                             <ui:Label name="CityArenaStatus" class="city-status" text="" />
                         </ui:VisualElement>
                         <ui:VisualElement class="city-hotspot city-hotspot--training">
-                            <ui:Button name="CityTraining" class="city-bubble" text="ENTRENAMIENTO" />
+                            <ui:Button name="CityTraining" class="city-bubble" text="{loc:ui.the_city.city_training}" />
                             <ui:VisualElement class="city-bubble-tail" />
                             <ui:Label name="CityTrainingStatus" class="city-status" text="" />
                         </ui:VisualElement>
                         <ui:VisualElement class="city-hotspot city-hotspot--league">
-                            <ui:Button name="CityLeague" class="city-bubble" text="OFICINA DE LA LIGA" />
+                            <ui:Button name="CityLeague" class="city-bubble" text="{loc:ui.the_city.city_league}" />
                             <ui:VisualElement class="city-bubble-tail" />
                             <ui:Label name="CityLeagueStatus" class="city-status" text="" />
                         </ui:VisualElement>
                         <ui:VisualElement class="city-hotspot city-hotspot--personnel">
-                            <ui:Button name="CityPersonnel" class="city-bubble" text="OFICINA DE PERSONAL" />
+                            <ui:Button name="CityPersonnel" class="city-bubble" text="{loc:ui.the_city.city_personnel}" />
                             <ui:VisualElement class="city-bubble-tail" />
                             <ui:Label name="CityPersonnelStatus" class="city-status" text="" />
                         </ui:VisualElement>
                         <ui:VisualElement class="city-hotspot city-hotspot--bank">
-                            <ui:Button name="CityBank" class="city-bubble" text="BANCO" />
+                            <ui:Button name="CityBank" class="city-bubble" text="{loc:ui.the_city.city_bank}" />
                             <ui:VisualElement class="city-bubble-tail" />
                             <ui:Label name="CityBankStatus" class="city-status" text="" />
                         </ui:VisualElement>
                         <ui:VisualElement class="city-hotspot city-hotspot--newspaper">
-                            <ui:Button name="CityNewspaper" class="city-bubble" text="NOTICIAS" />
+                            <ui:Button name="CityNewspaper" class="city-bubble" text="{loc:ui.the_city.city_newspaper}" />
                             <ui:VisualElement class="city-bubble-tail" />
                             <ui:Label name="CityNewspaperStatus" class="city-status" text="" />
                         </ui:VisualElement>
                         <ui:VisualElement class="city-hotspot city-hotspot--statistics">
-                            <ui:Button name="CityStatistics" class="city-bubble" text="ESTADÍSTICAS" />
+                            <ui:Button name="CityStatistics" class="city-bubble" text="{loc:ui.the_city.city_statistics}" />
                             <ui:VisualElement class="city-bubble-tail" />
                             <ui:Label name="CityStatisticsStatus" class="city-status" text="" />
                         </ui:VisualElement>
                         <ui:VisualElement class="city-hotspot city-hotspot--museum">
-                            <ui:Button name="CityMuseum" class="city-bubble" text="MUSEO" />
+                            <ui:Button name="CityMuseum" class="city-bubble" text="{loc:ui.the_city.city_museum}" />
                             <ui:VisualElement class="city-bubble-tail" />
                             <ui:Label name="CityMuseumStatus" class="city-status" text="" />
                         </ui:VisualElement>
                     </ui:VisualElement>
 
                     <ui:VisualElement class="city-inspector">
-                        <ui:Label name="CityInspectorTitle" class="city-inspector-title" text="LA CIUDAD" />
+                        <ui:Label name="CityInspectorTitle" class="city-inspector-title" text="{loc:ui.the_city.city_inspector_title}" />
                         <ui:Label name="CityInspectorSubtitle" class="city-inspector-subtitle" text="" />
                         <ui:VisualElement class="city-tabs">
-                            <ui:Button name="CityTabBuilding" class="city-tab city-tab--active" text="EDIFICIO" />
-                            <ui:Button name="CityTabProjects" class="city-tab" text="PROYECTOS" />
-                            <ui:Button name="CityTabEvents" class="city-tab" text="EVENTOS" />
+                            <ui:Button name="CityTabBuilding" class="city-tab city-tab--active" text="{loc:ui.the_city.city_tab_building}" />
+                            <ui:Button name="CityTabProjects" class="city-tab" text="{loc:ui.the_city.city_tab_projects}" />
+                            <ui:Button name="CityTabEvents" class="city-tab" text="{loc:ui.the_city.city_tab_events}" />
                         </ui:VisualElement>
                         <ui:VisualElement name="CityInspectorBody" class="city-inspector-body" />
                         <ui:Label name="CityNotice" class="city-notice" text="" />
@@ -113,12 +113,12 @@
     <!-- ══ MODAL CONFIGURACIÓN ══ -->
     <ui:VisualElement name="ConfigModalOverlay" class="modal-overlay">
         <ui:VisualElement name="ConfigModalBox" class="modal-box">
-            <ui:Label class="modal-title" text="CONFIGURACIÓN" />
+            <ui:Label class="modal-title" text="{loc:ui.the_city.configuracion}" />
             <ui:VisualElement class="modal-body">
                 <ui:VisualElement class="settings-section">
-                    <ui:Label class="settings-section-title" text="AUDIO" />
+                    <ui:Label class="settings-section-title" text="{loc:ui.the_city.audio}" />
                     <ui:VisualElement class="settings-row">
-                        <ui:Label class="settings-label" text="Volumen General" />
+                        <ui:Label class="settings-label" text="{loc:ui.the_city.volumen_general}" />
                         <ui:VisualElement name="ConfigSliderMaster" class="custom-slider">
                             <ui:VisualElement class="custom-slider-track" />
                             <ui:VisualElement name="ConfigFillMaster" class="custom-slider-fill" />
@@ -127,7 +127,7 @@
                         <ui:Label name="ConfigLabelMaster" class="settings-value" text="100%" />
                     </ui:VisualElement>
                     <ui:VisualElement class="settings-row">
-                        <ui:Label class="settings-label" text="Música" />
+                        <ui:Label class="settings-label" text="{loc:ui.the_city.musica}" />
                         <ui:VisualElement name="ConfigSliderMusic" class="custom-slider">
                             <ui:VisualElement class="custom-slider-track" />
                             <ui:VisualElement name="ConfigFillMusic" class="custom-slider-fill" />
@@ -136,7 +136,7 @@
                         <ui:Label name="ConfigLabelMusic" class="settings-value" text="100%" />
                     </ui:VisualElement>
                     <ui:VisualElement class="settings-row">
-                        <ui:Label class="settings-label" text="Efectos" />
+                        <ui:Label class="settings-label" text="{loc:ui.the_city.efectos}" />
                         <ui:VisualElement name="ConfigSliderSFX" class="custom-slider">
                             <ui:VisualElement class="custom-slider-track" />
                             <ui:VisualElement name="ConfigFillSFX" class="custom-slider-fill" />
@@ -146,39 +146,39 @@
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement class="settings-section">
-                    <ui:Label class="settings-section-title" text="GRÁFICOS" />
+                    <ui:Label class="settings-section-title" text="{loc:ui.the_city.graficos}" />
                     <ui:VisualElement class="settings-quality-row">
-                        <ui:Label class="settings-label" text="Calidad" />
+                        <ui:Label class="settings-label" text="{loc:ui.the_city.calidad}" />
                         <ui:VisualElement class="settings-quality-options">
-                            <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="Baja" />
-                            <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="Media" />
-                            <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="Alta" />
-                            <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="Ultra" />
+                            <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="{loc:ui.the_city.config_btn_quality_low}" />
+                            <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="{loc:ui.the_city.config_btn_quality_medium}" />
+                            <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="{loc:ui.the_city.config_btn_quality_high}" />
+                            <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="{loc:ui.the_city.config_btn_quality_ultra}" />
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement class="settings-section">
-                    <ui:Label class="settings-section-title" text="JUEGO" />
-                    <ui:Button name="ConfigBtnMainMenu" class="settings-btn settings-btn--secondary" text="VOLVER AL MENÚ PRINCIPAL" />
-                    <ui:Button name="ConfigBtnExit" class="settings-btn settings-btn--danger" text="SALIR DEL JUEGO" />
+                    <ui:Label class="settings-section-title" text="{loc:ui.the_city.juego}" />
+                    <ui:Button name="ConfigBtnMainMenu" class="settings-btn settings-btn--secondary" text="{loc:ui.the_city.config_btn_main_menu}" />
+                    <ui:Button name="ConfigBtnExit" class="settings-btn settings-btn--danger" text="{loc:ui.the_city.config_btn_exit}" />
                 </ui:VisualElement>
             </ui:VisualElement>
-            <ui:Button name="ConfigBtnCerrar" class="modal-close" text="CERRAR" />
+            <ui:Button name="ConfigBtnCerrar" class="modal-close" text="{loc:ui.the_city.config_btn_cerrar}" />
         </ui:VisualElement>
     </ui:VisualElement>
 
     <!-- ══ MODAL CONFIRMAR VOLVER AL MENÚ PRINCIPAL ══ -->
     <ui:VisualElement name="ConfigMainMenuConfirmOverlay" class="modal-overlay">
         <ui:VisualElement name="ConfigMainMenuConfirmBox" class="modal-box">
-            <ui:Label class="modal-title" text="VOLVER AL MENÚ PRINCIPAL" />
+            <ui:Label class="modal-title" text="{loc:ui.the_city.volver_al_menu_principal}" />
             <ui:VisualElement class="modal-body">
-                <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres volver al menú principal?" />
-                <ui:Label class="modal-paragraph" text="Se perderá el progreso no guardado de la partida actual. Asegúrate de haber guardado antes de continuar." />
+                <ui:Label class="modal-paragraph modal-paragraph--highlight" text="{loc:ui.the_city.estas_seguro_de_que_quieres_volver_al_me_6f548452}" />
+                <ui:Label class="modal-paragraph" text="{loc:ui.the_city.se_perdera_el_progreso_no_guardado_de_la_b10b7334}" />
             </ui:VisualElement>
             <ui:VisualElement class="modal-actions">
-                <ui:Button name="ConfigBtnMainMenuNo" class="modal-btn modal-btn--secondary" text="NO, QUEDARME" />
+                <ui:Button name="ConfigBtnMainMenuNo" class="modal-btn modal-btn--secondary" text="{loc:ui.the_city.config_btn_main_menu_no}" />
                 <ui:VisualElement class="modal-spacer" />
-                <ui:Button name="ConfigBtnMainMenuYes" class="modal-btn modal-btn--danger" text="SÍ, VOLVER" />
+                <ui:Button name="ConfigBtnMainMenuYes" class="modal-btn modal-btn--danger" text="{loc:ui.the_city.config_btn_main_menu_yes}" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
@@ -186,15 +186,15 @@
     <!-- ══ MODAL CONFIRMAR SALIR DEL JUEGO ══ -->
     <ui:VisualElement name="ConfigExitConfirmOverlay" class="modal-overlay">
         <ui:VisualElement name="ConfigExitConfirmBox" class="modal-box">
-            <ui:Label class="modal-title" text="SALIR DEL JUEGO" />
+            <ui:Label class="modal-title" text="{loc:ui.the_city.salir_del_juego}" />
             <ui:VisualElement class="modal-body">
-                <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres salir del juego?" />
-                <ui:Label class="modal-paragraph" text="Tu progreso se guarda automáticamente durante la partida. Al volver a cargarla continuarás desde el último estado guardado." />
+                <ui:Label class="modal-paragraph modal-paragraph--highlight" text="{loc:ui.the_city.estas_seguro_de_que_quieres_salir_del_ju_c65dd5f1}" />
+                <ui:Label class="modal-paragraph" text="{loc:ui.the_city.tu_progreso_se_guarda_automaticamente_du_10fb1edb}" />
             </ui:VisualElement>
             <ui:VisualElement class="modal-actions">
-                <ui:Button name="ConfigBtnExitNo" class="modal-btn modal-btn--secondary" text="NO" />
+                <ui:Button name="ConfigBtnExitNo" class="modal-btn modal-btn--secondary" text="{loc:ui.the_city.config_btn_exit_no}" />
                 <ui:VisualElement class="modal-spacer" />
-                <ui:Button name="ConfigBtnExitYes" class="modal-btn modal-btn--danger" text="SÍ, SALIR" />
+                <ui:Button name="ConfigBtnExitYes" class="modal-btn modal-btn--danger" text="{loc:ui.the_city.config_btn_exit_yes}" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

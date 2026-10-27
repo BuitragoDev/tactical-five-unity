@@ -17,7 +17,7 @@
                     <ui:VisualElement class="header-team-info">
                         <ui:VisualElement class="header-team-name-row">
                             <ui:Label name="HeaderTeamName" class="header-team-name" text="" />
-                            <ui:Label name="HeaderSubtitle" class="header-subtitle" text="(RESUMEN DE PARTIDO)" />
+                            <ui:Label name="HeaderSubtitle" class="header-subtitle" text="{loc:ui.match_day.header_subtitle}" />
                         </ui:VisualElement>
                         <ui:Label name="HeaderManagerName" class="header-manager-name" text="" />
                     </ui:VisualElement>
@@ -28,7 +28,7 @@
                     </ui:VisualElement>
                     <ui:Label name="HeaderDate" class="header-date-label" text="" />
                     <ui:Label name="HeaderGameDay" class="header-game-day-label" text="" />
-                    <ui:Button name="BtnContinue" class="btn-action" text="CONTINUAR" />
+                    <ui:Button name="BtnContinue" class="btn-action" text="{loc:ui.match_day.btn_continue}" />
                 </ui:VisualElement>
             </ui:VisualElement>
 
@@ -44,7 +44,7 @@
                             <ui:VisualElement name="HomeTeamBlock" class="match-team">
                                 <ui:VisualElement name="HomeLogo" class="match-team-logo" />
                                 <ui:Label name="HomeName" class="match-team-name" text="" />
-                                <ui:Label name="HomeMyTeamBadge" class="my-team-badge" text="MI EQUIPO" style="display: none;" />
+                                <ui:Label name="HomeMyTeamBadge" class="my-team-badge" text="{loc:ui.match_day.home_my_team_badge}" style="display: none;" />
                             </ui:VisualElement>
                             <ui:VisualElement class="match-score">
                                 <ui:Label name="HomeScore" class="score-home" text="" />
@@ -54,7 +54,7 @@
                             <ui:VisualElement name="AwayTeamBlock" class="match-team">
                                 <ui:VisualElement name="AwayLogo" class="match-team-logo" />
                                 <ui:Label name="AwayName" class="match-team-name" text="" />
-                                <ui:Label name="AwayMyTeamBadge" class="my-team-badge" text="MI EQUIPO" style="display: none;" />
+                                <ui:Label name="AwayMyTeamBadge" class="my-team-badge" text="{loc:ui.match_day.away_my_team_badge}" style="display: none;" />
                             </ui:VisualElement>
                         </ui:VisualElement>
                         <ui:VisualElement class="match-venue">
@@ -71,19 +71,19 @@
                             </ui:VisualElement>
                             <ui:VisualElement class="box-table-wrapper">
                                 <ui:VisualElement class="box-table-header">
-                                    <ui:Label class="col-player col-stat--header" text="Jugador" />
-                                    <ui:Label class="col-min col-stat--header" text="MIN" />
-                                    <ui:Label class="col-pts col-stat--header" text="PTS" />
-                                    <ui:Label class="col-fg col-stat--header" text="TC" />
-                                    <ui:Label class="col-3p col-stat--header" text="3P" />
-                                    <ui:Label class="col-ft col-stat--header" text="TL" />
-                                    <ui:Label class="col-reb col-stat--header" text="REB" />
-                                    <ui:Label class="col-ast col-stat--header" text="AST" />
-                                    <ui:Label class="col-stl col-stat--header" text="ROB" />
-                                    <ui:Label class="col-blk col-stat--header" text="TAP" />
-                                    <ui:Label class="col-to col-stat--header" text="TO" />
-                                    <ui:Label class="col-pf col-stat--header" text="FP" />
-                                    <ui:Label class="col-val col-stat--header" text="VAL" />
+                                    <ui:Label class="col-player col-stat--header" text="{loc:ui.match_day.jugador}" />
+                                    <ui:Label class="col-min col-stat--header" text="{loc:ui.match_day.min}" />
+                                    <ui:Label class="col-pts col-stat--header" text="{loc:ui.match_day.pts}" />
+                                    <ui:Label class="col-fg col-stat--header" text="{loc:ui.match_day.tc}" />
+                                    <ui:Label class="col-3p col-stat--header" text="{loc:ui.match_day.3_p}" />
+                                    <ui:Label class="col-ft col-stat--header" text="{loc:ui.match_day.tl}" />
+                                    <ui:Label class="col-reb col-stat--header" text="{loc:ui.match_day.reb}" />
+                                    <ui:Label class="col-ast col-stat--header" text="{loc:ui.match_day.ast}" />
+                                    <ui:Label class="col-stl col-stat--header" text="{loc:ui.match_day.rob}" />
+                                    <ui:Label class="col-blk col-stat--header" text="{loc:ui.match_day.tap}" />
+                                    <ui:Label class="col-to col-stat--header" text="{loc:ui.match_day.to}" />
+                                    <ui:Label class="col-pf col-stat--header" text="{loc:ui.match_day.fp}" />
+                                    <ui:Label class="col-val col-stat--header" text="{loc:ui.match_day.val}" />
                                 </ui:VisualElement>
                                 <ui:VisualElement name="HomeBoxBody" class="box-table-body" />
                                 <ui:VisualElement name="HomeBoxFooter" class="box-table-footer" />
@@ -96,19 +96,19 @@
                             </ui:VisualElement>
                             <ui:VisualElement class="box-table-wrapper">
                                 <ui:VisualElement class="box-table-header">
-                                    <ui:Label class="col-player col-stat--header" text="Jugador" />
-                                    <ui:Label class="col-min col-stat--header" text="MIN" />
-                                    <ui:Label class="col-pts col-stat--header" text="PTS" />
-                                    <ui:Label class="col-fg col-stat--header" text="TC" />
-                                    <ui:Label class="col-3p col-stat--header" text="3P" />
-                                    <ui:Label class="col-ft col-stat--header" text="TL" />
-                                    <ui:Label class="col-reb col-stat--header" text="REB" />
-                                    <ui:Label class="col-ast col-stat--header" text="AST" />
-                                    <ui:Label class="col-stl col-stat--header" text="ROB" />
-                                    <ui:Label class="col-blk col-stat--header" text="TAP" />
-                                    <ui:Label class="col-to col-stat--header" text="TO" />
-                                    <ui:Label class="col-pf col-stat--header" text="FP" />
-                                    <ui:Label class="col-val col-stat--header" text="VAL" />
+                                    <ui:Label class="col-player col-stat--header" text="{loc:ui.match_day.jugador}" />
+                                    <ui:Label class="col-min col-stat--header" text="{loc:ui.match_day.min}" />
+                                    <ui:Label class="col-pts col-stat--header" text="{loc:ui.match_day.pts}" />
+                                    <ui:Label class="col-fg col-stat--header" text="{loc:ui.match_day.tc}" />
+                                    <ui:Label class="col-3p col-stat--header" text="{loc:ui.match_day.3_p}" />
+                                    <ui:Label class="col-ft col-stat--header" text="{loc:ui.match_day.tl}" />
+                                    <ui:Label class="col-reb col-stat--header" text="{loc:ui.match_day.reb}" />
+                                    <ui:Label class="col-ast col-stat--header" text="{loc:ui.match_day.ast}" />
+                                    <ui:Label class="col-stl col-stat--header" text="{loc:ui.match_day.rob}" />
+                                    <ui:Label class="col-blk col-stat--header" text="{loc:ui.match_day.tap}" />
+                                    <ui:Label class="col-to col-stat--header" text="{loc:ui.match_day.to}" />
+                                    <ui:Label class="col-pf col-stat--header" text="{loc:ui.match_day.fp}" />
+                                    <ui:Label class="col-val col-stat--header" text="{loc:ui.match_day.val}" />
                                 </ui:VisualElement>
                                 <ui:VisualElement name="AwayBoxBody" class="box-table-body" />
                                 <ui:VisualElement name="AwayBoxFooter" class="box-table-footer" />
@@ -148,12 +148,12 @@
                 <ui:VisualElement name="PbpAwayBox" class="pbp-box-panel" />
             </ui:VisualElement>
             <ui:VisualElement class="pbp-controls">
-                <ui:Button name="PbpBtnSpeed1" class="pbp-speed-btn" text="x1" />
-                <ui:Button name="PbpBtnSpeed3" class="pbp-speed-btn" text="x3" />
-                <ui:Button name="PbpBtnSpeed5" class="pbp-speed-btn pbp-speed-btn--active" text="x5" />
-                <ui:Button name="PbpBtnSpeed10" class="pbp-speed-btn" text="x10" />
+                <ui:Button name="PbpBtnSpeed1" class="pbp-speed-btn" text="{loc:ui.match_day.pbp_btn_speed1}" />
+                <ui:Button name="PbpBtnSpeed3" class="pbp-speed-btn" text="{loc:ui.match_day.pbp_btn_speed3}" />
+                <ui:Button name="PbpBtnSpeed5" class="pbp-speed-btn pbp-speed-btn--active" text="{loc:ui.match_day.pbp_btn_speed5}" />
+                <ui:Button name="PbpBtnSpeed10" class="pbp-speed-btn" text="{loc:ui.match_day.pbp_btn_speed10}" />
                 <ui:VisualElement class="pbp-spacer" />
-                <ui:Button name="PbpSkip" class="pbp-skip" text="SALTAR ►" />
+                <ui:Button name="PbpSkip" class="pbp-skip" text="{loc:ui.match_day.pbp_skip}" />
             </ui:VisualElement>
         </ui:VisualElement>
 

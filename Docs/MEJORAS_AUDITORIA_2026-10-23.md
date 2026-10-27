@@ -24,13 +24,13 @@
 | **2** | Motor de simulación | 12 | 10 |
 | **3** | Calibración y reproducibilidad | 7 | 6 |
 | **4** | Mercado, CBA y economía | 8 | 7 |
-| **5** | Calendario y competiciones | 5 | 0 |
-| **6** | Histórico y estadísticas | 4 | 0 |
-| **7** | UX/UI, resoluciones e idioma | 6 | 0 |
+| **5** | Calendario y competiciones | 5 | 5 |
+| **6** | Histórico y estadísticas | 4 | 4 |
+| **7** | UX/UI, resoluciones e idioma | 6 | 6 |
 | **8** | Arquitectura y rendimiento | 8 | 0 |
 | **9** | Proceso y documentación | 2 | 0 |
 | **NF** | Apuestas de producto (sin fecha) | 4 | 0 |
-| | **TOTAL** | **70** | **37** |
+| | **TOTAL** | **70** | **52** |
 
 ### Grafo de dependencias
 
@@ -514,12 +514,15 @@ flowchart LR
   - *Implementación:* franja **PULSO DE LA CIUDAD** (presupuesto, afición, objetivo/ranking, próximo partido y avisos); hotspots con estado en vivo (lesionados, aforo, instalaciones, clasificación, personal, caja, mensajes sin leer, líder anotador, HOF/dorsales); inspector con pestañas EDIFICIO / PROYECTOS / EVENTOS. Proyectos (`city_projects`): entorno del pabellón (+4 % asistencia/nivel), centro de rendimiento (+2 físico en descanso/nivel), programa de afición (confianza al completar) y centro de medios (confianza + moral). Eventos (`city_events`): queja vecinal, campaña de abonados, visita escolar, ola de calor y rueda de prensa, con dos decisiones y costes/efectos pequeños. Lógica en `CityCatalog` (catálogo puro) y `CityService` (proyectos/eventos); la asistencia y la recuperación diaria consumen el nivel del proyecto; los eventos generan `MessageData` (`NewsType.EVENTO_CIUDAD`).
   - *Pruebas:* `CityCatalogTests` (catálogo, costes, topes de efecto y eventos) + `CityUiTests` (UXML/USS cargan y exponen inspector/hotspots) + suite EditMode completa.
 
-- [ ] **F7-06 · Extraer textos y preparar localización**
+- [x] **F7-06 · Extraer textos y preparar localización**
   - *Ref:* `UX-03` · *Esfuerzo:* L · *Depende:* F7-03
   - *Criterio:* los literales de UXML/C# salen de una fuente única con claves; el español es el idioma base y añadir otro no requiere tocar controllers.
   - *Punto de partida:* `Packages/manifest.json` sin paquete de Localization.
+  - *Decisión (D8 resuelta):* español como idioma base y **UI preparada para añadir idiomas por tabla**, sin meter una dependencia pesada de Localization/Addressables. La resolución sigue siendo 1920×1080 con escalado verificado en F7-03.
+  - *Implementación:* `LocalizationService` carga `Resources/Localization/{code}.json` (tabla española en `es.json`), resuelve tokens `{loc:clave}` en textos/tooltips/placeholders al final de `UIScreenController.OnEnable`, y expone `T("clave", args)` para plantillas con argumentos. Se extrajeron **2.118 textos estáticos** de los 52 UXML y de los controllers (`text =`, `new Label(...)`) con claves estables; las cadenas dinámicas comunes de cabecera (`Manager`, `Temporada`, edades) ya usan plantillas con argumentos. `Tools/localization_extract.py` permite regenerar/validar la tabla y `LocalizationTests` impide que vuelvan literales estáticos o tokens sin entrada. Añadir otro idioma = crear su JSON y llamar a `SetLanguage` (sin tocar controllers).
+  - *Pruebas:* `LocalizationTests` (tabla, fallback, formato, `Apply` de textos/tooltips/placeholder, cobertura de tokens y auditoría de literales) + suite completa.
 
-**Puerta de salida F7:** 0 `rgba()`, 0 `-unity-text-transform`, 5 resoluciones verificadas y checklist visual firmada.
+**Puerta de salida F7:** 0 `rgba()`, 0 `-unity-text-transform`, 5 resoluciones verificadas, 0 literales UI estáticos sin clave y checklist visual firmada.
 
 ---
 
@@ -621,7 +624,7 @@ Estas preguntas no son código: son respuestas que hay que escribir antes de eje
 | D5 | ¿Motor de resultados estadístico o aleatoriedad opaca? | F3-01, F3-02 | Técnico |
 | D6 | **Resuelta (F6-02):** la métrica propia por 48 minutos se llama **EFI/48**; no se presenta como PER oficial. | F6-02 | Diseño |
 | D7 | **Resuelta (F7-05):** `TheCity` es el centro de mando de la franquicia (hub vivo + proyectos/eventos acotados), no una economía paralela. | F7-05 | Producto |
-| D8 | ¿Solo español y 1920×1080, o multi-idioma y multi-resolución? | F7-03, F7-06 | Producto |
+| D8 | **Resuelta (F7-06):** español como idioma base; UI preparada para idiomas por tabla (`LocalizationService` + `es.json`), sin dependencia de Localization. 1920×1080 verificado en F7-03. | F7-03, F7-06 | Producto |
 
 **D1 resuelta (F1-01):** “media de equipo” es la media de los OVR canónicos de todos los jugadores asignados; 85 no es un mínimo ni un objetivo de balance.
 **D2 resuelta:** `DatabaseManager.Seeding.cs` contiene los jugadores con los que empieza la partida (plantillas y agentes libres). El usuario actualizará manualmente esos datos cuando cambien las plantillas; el total no es fijo y puede añadir/quitar jugadores y sus fotos. El snapshot actual contiene 479 asignados y 129 FA. **Consecuencia (F1-02):** el tamaño de plantilla no se valida — 14–17 es referencia de juego y el auditor lo publica como dato informativo.
@@ -691,6 +694,7 @@ Recogido de las invariantes del proyecto y de los errores que esta auditoría ha
 | 2026-10-26 | F4 | `F4-04` | `d5aad586` | Separación de 15 plazas estándar, 2 contratos two-way e IR. `GetRosterCount` excluye two-way e IR; contratos two-way persisten en traspasos y se validan por separado; fichajes pendientes, renovaciones, recuperación IR y rollover respetan cada cupo. La simulación sigue incluyendo two-way elegibles. D4 resuelta: conservar máximo 2. Pipeline local: build Linux + **471/471 EditMode**. |
 | 2026-10-26 | F4 | `F4-05` | `46f4bba8` | Service time, derechos RFA/UFA simplificados, QO, tabla `team_cap_holds`, nómina efectiva (cap holds + contratos estándar; two-way excluidos), matching IA, renuncia desde Finanzas y proyección cap sheet. Estimación legacy editable en Editor; baseline seed excluye campos de carrera no estáticos. Build Linux + **482/482 EditMode**. |
 | 2026-10-26 | F4 | `F4-06` | `46f4bba8` | `RookieScale` sustituye el salario aleatorio del draft por una tabla determinista por pick y temporada (base 2025-26, crecimiento por el cap de `CbaTable`): primera ronda 1–30, segunda 31–60 cercana al mínimo y two-way por temporada. `DraftPickSlot.DraftYear` fija la temporada del debut; desaparece el plus salarial de generacionales (conserva OVR/potencial). Tests de monotonía, determinismo, crecimiento, clamp y redondeo. Build Linux + **490/490 EditMode**. |
+| 2026-10-27 | F7 | `F7-06` | — | Localización ligera: `LocalizationService` + `Resources/Localization/es.json` (2.118 entradas); tokens `{loc:...}` en UXML y `LocalizationService.T` en C#; placeholders/tooltips resueltos en `UIScreenController.OnEnable`. Extractor `Tools/localization_extract.py` y tests `LocalizationTests`; español base y fallback por tabla. **549/549 EditMode**; build Linux correcto. |
 | 2026-10-27 | F7 | `F7-05` | — | `TheCity` pasa a centro de mando: pulso de ciudad, hotspots con estado e inspector por edificio; proyectos persistentes (`city_projects`) y eventos con decisiones (`city_events`). Proyectos: entorno/asistencia, centro de rendimiento/recuperación, programa de afición y centro de medios; eventos con coste/confianza/moral/físico acotados. `CityCatalog` + `CityService`; integración en asistencia, descanso y ciclo diario. Tests `CityCatalogTests` y `CityUiTests`. **538/538 EditMode**; build Linux correcto. |
 | 2026-10-27 | F7 | `F7-04` | `1e8af182` | `CustomScrollbar` único (`Bind<T>` idempotente, thumb dinámico, `Reset`/`Refresh`). Eliminadas las implementaciones locales de Cartera, GLeague, Historial, Injured, Buscador, Palmares, Messages y Market; borrado `ScrollBarBinder`. `ScrollView` nativo justificado en pantallas acotadas; tablas grandes con paginación o scroll propio. Tests de idempotencia. **532/532 EditMode**. |
 | 2026-10-27 | F7 | `F7-03` | `fae0d449` | Verificado `ScaleWithScreenSize` (1920×1080, match 0.5). Modal máximo 1700×675 de referencia: 1133×450 a 1280×720, 1209×480 a 1366×768, 2267×900 a 2560×1440 y 2626×1043 en ultrawide 3440×1440. Añadido `max-width/max-height: 100%` a modales y tests de matriz. **530/530 EditMode**. |

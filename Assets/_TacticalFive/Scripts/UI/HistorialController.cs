@@ -148,14 +148,14 @@ using System.Linq;
         if (CursorManager.Instance != null)
             CursorManager.Instance.SetDefaultCursor();
         _root.Q<Button>("SubmenuHistorial")?.AddToClassList("nav-submenu-item--active");
-        if (_btnAction != null) _btnAction.text = "MENÚ PRINCIPAL";
+        if (_btnAction != null) _btnAction.text = LocalizationService.T("ui.code.historial_controller.menu_principal");
 
         if (_myTeam != null)
         {
             if (_headerTeamName != null)
                 _headerTeamName.text = _myTeam.name.ToUpper();
             if (_headerManagerName != null)
-                _headerManagerName.text = $"Manager: {_manager?.name ?? ""}";
+                _headerManagerName.text = LocalizationService.T("ui.common.manager", _manager?.name ?? "");
             if (_headerTeamLogo != null)
             {
                 var logos = TeamImages.Logos(64);
@@ -203,7 +203,7 @@ using System.Linq;
         if (_season != null)
         {
             var headerSeason = _root.Q<Label>("HeaderSeason");
-            if (headerSeason != null) headerSeason.text = $"Temporada {_season.year_start}-{_season.year_end}";
+            if (headerSeason != null) headerSeason.text = LocalizationService.T("ui.common.season", _season.year_start, _season.year_end);
             var headerDate = _root.Q<Label>("HeaderDate");
             if (headerDate != null) headerDate.text = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
         }

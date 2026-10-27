@@ -9,12 +9,12 @@
 
         <!-- HEADER -->
         <ui:VisualElement name="Header" class="header">
-            <ui:Button name="BtnBack" text="VOLVER" class="btn-back"/>
+            <ui:Button name="BtnBack" text="{loc:ui.pre_game.btn_back}" class="btn-back"/>
             <ui:VisualElement class="header-title">
-                <ui:Label name="HeaderTitleType" text="LIGA" class="header-title-white"/>
-                <ui:Label text="· PREVIA DEL PARTIDO" class="header-title-gold"/>
+                <ui:Label name="HeaderTitleType" text="{loc:ui.pre_game.header_title_type}" class="header-title-white"/>
+                <ui:Label text="{loc:ui.pre_game.previa_del_partido}" class="header-title-gold"/>
             </ui:VisualElement>
-            <ui:Button name="BtnGoMatch" text="IR AL PARTIDO" class="btn-continue"/>
+            <ui:Button name="BtnGoMatch" text="{loc:ui.pre_game.btn_go_match}" class="btn-continue"/>
         </ui:VisualElement>
 
         <!-- CONTENT -->
@@ -37,7 +37,7 @@
                             <ui:Label name="MPVHomeRecord" class="mpv-record" text="" />
                             <ui:Label name="MPVHomeConf" class="mpv-conf" text="" />
                             <ui:VisualElement class="mpv-streak-row">
-                                <ui:Label class="mpv-streak-label" text="ULTIMOS 10" />
+                                <ui:Label class="mpv-streak-label" text="{loc:ui.pre_game.ultimos_10}" />
                                 <ui:VisualElement name="MPVHomeLast10" class="mpv-streak-dots" />
                             </ui:VisualElement>
                         </ui:VisualElement>
@@ -45,21 +45,21 @@
 
                     <ui:VisualElement class="mpv-col-stats">
                         <ui:VisualElement class="mpv-stat-card mpv-stat-card--ataque">
-                            <ui:Label class="mpv-stat-label" text="ATAQUE" />
+                            <ui:Label class="mpv-stat-label" text="{loc:ui.pre_game.ataque}" />
                             <ui:Label name="MPVHomeOff" class="mpv-stat-val" text="" />
                             <ui:Label name="MPVHomeOffRank" class="mpv-stat-rank" text="" />
                         </ui:VisualElement>
                         <ui:VisualElement class="mpv-stat-card mpv-stat-card--defensa">
-                            <ui:Label class="mpv-stat-label" text="DEFENSA" />
+                            <ui:Label class="mpv-stat-label" text="{loc:ui.pre_game.defensa}" />
                             <ui:Label name="MPVHomeDef" class="mpv-stat-val" text="" />
                             <ui:Label name="MPVHomeDefRank" class="mpv-stat-rank" text="" />
                         </ui:VisualElement>
                     </ui:VisualElement>
 
                     <ui:VisualElement class="mpv-panel">
-                        <ui:Label class="mpv-roster-title" text="QUINTETO" />
+                        <ui:Label class="mpv-roster-title" text="{loc:ui.pre_game.quinteto}" />
                         <ui:VisualElement name="MPVHomeStarters" class="mpv-starter-row" />
-                        <ui:Label class="mpv-roster-title" text="BANQUILLO" />
+                        <ui:Label class="mpv-roster-title" text="{loc:ui.pre_game.banquillo}" />
                         <ui:VisualElement name="MPVHomeBench" class="mpv-bench-list" />
                     </ui:VisualElement>
                 </ui:VisualElement>
@@ -68,10 +68,10 @@
                 <ui:VisualElement class="mpv-col mpv-col--center">
                     <ui:Label class="mpv-date" name="MPVDate" text="" />
                     <ui:Label class="mpv-arena" name="MPVArena" text="" />
-                    <ui:Label class="mpv-vs" text="VS" />
+                    <ui:Label class="mpv-vs" text="{loc:ui.pre_game.vs}" />
 
                     <ui:VisualElement class="mpv-panel mpv-panel--center mpv-panel--bajas">
-                        <ui:Label class="mpv-bajas-title" text="BAJAS" />
+                        <ui:Label class="mpv-bajas-title" text="{loc:ui.pre_game.bajas}" />
                         <ui:VisualElement class="mpv-bajas-cols">
                             <ui:VisualElement class="mpv-bajas-col">
                                 <ui:Label name="MPVHomeBajasTitle" class="mpv-bajas-col-title" text="" />
@@ -85,7 +85,7 @@
                     </ui:VisualElement>
 
                     <ui:VisualElement class="mpv-panel mpv-panel--center">
-                        <ui:Label class="mpv-key-title" text="JUGADORES CLAVE" />
+                        <ui:Label class="mpv-key-title" text="{loc:ui.pre_game.jugadores_clave}" />
                         <ui:VisualElement name="MPVKeyRow1" class="mpv-key-row" />
                         <ui:VisualElement name="MPVKeyRow2" class="mpv-key-row" />
                         <ui:VisualElement name="MPVKeyRow3" class="mpv-key-row" />
@@ -101,7 +101,7 @@
                             <ui:Label name="MPVAwayRecord" class="mpv-record" text="" />
                             <ui:Label name="MPVAwayConf" class="mpv-conf" text="" />
                             <ui:VisualElement class="mpv-streak-row mpv-streak-row--right">
-                                <ui:Label class="mpv-streak-label" text="ULTIMOS 10" />
+                                <ui:Label class="mpv-streak-label" text="{loc:ui.pre_game.ultimos_10}" />
                                 <ui:VisualElement name="MPVAwayLast10" class="mpv-streak-dots" />
                             </ui:VisualElement>
                         </ui:VisualElement>
@@ -111,21 +111,21 @@
 
                     <ui:VisualElement class="mpv-col-stats">
                         <ui:VisualElement class="mpv-stat-card mpv-stat-card--ataque">
-                            <ui:Label class="mpv-stat-label" text="ATAQUE" />
+                            <ui:Label class="mpv-stat-label" text="{loc:ui.pre_game.ataque}" />
                             <ui:Label name="MPVAwayOff" class="mpv-stat-val" text="" />
                             <ui:Label name="MPVAwayOffRank" class="mpv-stat-rank" text="" />
                         </ui:VisualElement>
                         <ui:VisualElement class="mpv-stat-card mpv-stat-card--defensa">
-                            <ui:Label class="mpv-stat-label" text="DEFENSA" />
+                            <ui:Label class="mpv-stat-label" text="{loc:ui.pre_game.defensa}" />
                             <ui:Label name="MPVAwayDef" class="mpv-stat-val" text="" />
                             <ui:Label name="MPVAwayDefRank" class="mpv-stat-rank" text="" />
                         </ui:VisualElement>
                     </ui:VisualElement>
 
                     <ui:VisualElement class="mpv-panel">
-                        <ui:Label class="mpv-roster-title" text="QUINTETO" />
+                        <ui:Label class="mpv-roster-title" text="{loc:ui.pre_game.quinteto}" />
                         <ui:VisualElement name="MPVAwayStarters" class="mpv-starter-row" />
-                        <ui:Label class="mpv-roster-title" text="BANQUILLO" />
+                        <ui:Label class="mpv-roster-title" text="{loc:ui.pre_game.banquillo}" />
                         <ui:VisualElement name="MPVAwayBench" class="mpv-bench-list" />
                     </ui:VisualElement>
                 </ui:VisualElement>

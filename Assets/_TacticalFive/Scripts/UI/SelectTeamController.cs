@@ -437,31 +437,31 @@ public class SelectTeamController : UIScreenController
         nameLbl.AddToClassList("modal-header-label");
         nameLbl.style.flexGrow = 1;
         nameLbl.style.unityTextAlign = TextAnchor.MiddleLeft;
-        nameLbl.text = "NOMBRE";
+        nameLbl.text = LocalizationService.T("ui.code.select_team_controller.nombre");
         header.Add(nameLbl);
 
         var posLbl = new Label();
         posLbl.AddToClassList("modal-header-label");
         posLbl.style.width = 70;
-        posLbl.text = "POS";
+        posLbl.text = LocalizationService.T("ui.code.select_team_controller.pos");
         header.Add(posLbl);
 
         var nacLbl = new Label();
         nacLbl.AddToClassList("modal-header-label");
         nacLbl.style.width = 36;
-        nacLbl.text = "NAC";
+        nacLbl.text = LocalizationService.T("ui.code.select_team_controller.nac");
         header.Add(nacLbl);
 
         var ageLbl = new Label();
         ageLbl.AddToClassList("modal-header-label");
         ageLbl.style.width = 30;
-        ageLbl.text = "EDAD";
+        ageLbl.text = LocalizationService.T("ui.code.select_team_controller.edad");
         header.Add(ageLbl);
 
         var avgLbl = new Label();
         avgLbl.AddToClassList("modal-header-label");
         avgLbl.style.width = 40;
-        avgLbl.text = "MED";
+        avgLbl.text = LocalizationService.T("ui.code.select_team_controller.med");
         header.Add(avgLbl);
 
         return header;

@@ -14,7 +14,7 @@
             <ui:VisualElement class="screen-header panel--gold">
                 <ui:VisualElement class="screen-header-row">
                     <ui:VisualElement name="ManagerScreenIcon" class="screen-icon" />
-                    <ui:Label class="screen-title" text="INFORMACIÓN DEL MÁNAGER" />
+                    <ui:Label class="screen-title" text="{loc:ui.manager.informacion_del_manager}" />
                 </ui:VisualElement>
             </ui:VisualElement>
 
@@ -25,80 +25,80 @@
 
                     <!-- Estadísticas Liga Regular -->
                     <ui:VisualElement class="manager-panel">
-                        <ui:Label class="manager-panel-title" text="TEMPORADA REGULAR" />
+                        <ui:Label class="manager-panel-title" text="{loc:ui.manager.temporada_regular}" />
                         <ui:VisualElement class="manager-stats-grid">
                             <ui:VisualElement class="manager-stat-item">
                                 <ui:Label class="manager-stat-value" name="RegGames" text="0" />
-                                <ui:Label class="manager-stat-label" text="Partidos" />
+                                <ui:Label class="manager-stat-label" text="{loc:ui.manager.partidos}" />
                             </ui:VisualElement>
                             <ui:VisualElement class="manager-stat-item">
                                 <ui:Label class="manager-stat-value manager-stat-value--win" name="RegWins" text="0" />
-                                <ui:Label class="manager-stat-label" text="Victorias" />
+                                <ui:Label class="manager-stat-label" text="{loc:ui.manager.victorias}" />
                             </ui:VisualElement>
                             <ui:VisualElement class="manager-stat-item">
                                 <ui:Label class="manager-stat-value manager-stat-value--loss" name="RegLosses" text="0" />
-                                <ui:Label class="manager-stat-label" text="Derrotas" />
+                                <ui:Label class="manager-stat-label" text="{loc:ui.manager.derrotas}" />
                             </ui:VisualElement>
                             <ui:VisualElement class="manager-stat-item">
                                 <ui:Label class="manager-stat-value" name="RegPct" text=".000" />
-                                <ui:Label class="manager-stat-label" text="% Victorias" />
+                                <ui:Label class="manager-stat-label" text="{loc:ui.manager.victorias_2}" />
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
 
                     <!-- Estadísticas Playoffs -->
                     <ui:VisualElement class="manager-panel">
-                        <ui:Label class="manager-panel-title" text="PLAYOFFS" />
+                        <ui:Label class="manager-panel-title" text="{loc:ui.manager.playoffs}" />
                         <ui:VisualElement class="manager-stats-grid">
                             <ui:VisualElement class="manager-stat-item">
                                 <ui:Label class="manager-stat-value" name="PoGames" text="0" />
-                                <ui:Label class="manager-stat-label" text="Partidos" />
+                                <ui:Label class="manager-stat-label" text="{loc:ui.manager.partidos}" />
                             </ui:VisualElement>
                             <ui:VisualElement class="manager-stat-item">
                                 <ui:Label class="manager-stat-value manager-stat-value--win" name="PoWins" text="0" />
-                                <ui:Label class="manager-stat-label" text="Victorias" />
+                                <ui:Label class="manager-stat-label" text="{loc:ui.manager.victorias}" />
                             </ui:VisualElement>
                             <ui:VisualElement class="manager-stat-item">
                                 <ui:Label class="manager-stat-value manager-stat-value--loss" name="PoLosses" text="0" />
-                                <ui:Label class="manager-stat-label" text="Derrotas" />
+                                <ui:Label class="manager-stat-label" text="{loc:ui.manager.derrotas}" />
                             </ui:VisualElement>
                             <ui:VisualElement class="manager-stat-item">
                                 <ui:Label class="manager-stat-value" name="PoPct" text=".000" />
-                                <ui:Label class="manager-stat-label" text="% Victorias" />
+                                <ui:Label class="manager-stat-label" text="{loc:ui.manager.victorias_2}" />
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
 
                     <!-- Relaciones -->
                     <ui:VisualElement class="manager-panel">
-                        <ui:Label class="manager-panel-title" text="RELACIONES" />
+                        <ui:Label class="manager-panel-title" text="{loc:ui.manager.relaciones}" />
                         <ui:VisualElement class="board-columns">
                             <ui:VisualElement class="board-col">
                                 <ui:VisualElement name="CircleTrust" class="board-circle">
                                     <ui:Label name="ValTrust" class="board-circle-val" text="50%" />
                                 </ui:VisualElement>
-                                <ui:Label class="board-col-label" text="DIRECTIVA" />
+                                <ui:Label class="board-col-label" text="{loc:ui.manager.directiva}" />
                             </ui:VisualElement>
                             <ui:VisualElement class="board-col-sep" />
                             <ui:VisualElement class="board-col">
                                 <ui:VisualElement name="CircleMorale" class="board-circle">
                                     <ui:Label name="ValMorale" class="board-circle-val" text="50%" />
                                 </ui:VisualElement>
-                                <ui:Label class="board-col-label" text="JUGADORES" />
+                                <ui:Label class="board-col-label" text="{loc:ui.manager.jugadores}" />
                             </ui:VisualElement>
                             <ui:VisualElement class="board-col-sep" />
                             <ui:VisualElement class="board-col">
                                 <ui:VisualElement name="CircleFanConfidence" class="board-circle">
                                     <ui:Label name="ValFanConfidence" class="board-circle-val" text="50%" />
                                 </ui:VisualElement>
-                                <ui:Label class="board-col-label" text="FANS" />
+                                <ui:Label class="board-col-label" text="{loc:ui.manager.fans}" />
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
 
                     <!-- Objetivo -->
                     <ui:VisualElement class="manager-panel">
-                        <ui:Label name="ManagerObjectiveTitle" class="manager-panel-title" text="OBJETIVO DE TEMPORADA" />
+                        <ui:Label name="ManagerObjectiveTitle" class="manager-panel-title" text="{loc:ui.manager.manager_objective_title}" />
                         <ui:Label name="ManagerObjectivePosition" class="manager-objective-position" text="" />
                         <ui:Label name="ManagerObjectiveStatus" class="manager-objective-status" text="" />
                     </ui:VisualElement>
@@ -109,7 +109,7 @@
                             <ui:VisualElement class="manager-rings-row">
                                 <ui:VisualElement name="ManagerRingsTrophy" class="manager-rings-trophy" />
                                 <ui:VisualElement class="manager-rings-info">
-                                    <ui:Label class="manager-rings-label" text="CAMPEONATOS GANADOS" />
+                                    <ui:Label class="manager-rings-label" text="{loc:ui.manager.campeonatos_ganados}" />
                                     <ui:Label name="ManagerRingsCount" class="manager-rings-count" text="0" />
                                 </ui:VisualElement>
                             </ui:VisualElement>
@@ -118,7 +118,7 @@
                             <ui:VisualElement class="manager-rings-row">
                                 <ui:VisualElement name="ManagerMonthlyAwardsIcon" class="manager-rings-trophy" />
                                 <ui:VisualElement class="manager-rings-info">
-                                    <ui:Label class="manager-rings-label" text="VECES MANAGER DEL MES" />
+                                    <ui:Label class="manager-rings-label" text="{loc:ui.manager.veces_manager_del_mes}" />
                                     <ui:Label name="ManagerMonthlyAwards" class="manager-rings-count" text="0" />
                                 </ui:VisualElement>
                             </ui:VisualElement>
@@ -127,11 +127,11 @@
                             <ui:VisualElement class="manager-rings-row">
                                 <ui:VisualElement name="ManagerAchievementsIcon" class="manager-rings-trophy" />
                                 <ui:VisualElement class="manager-rings-info">
-                                    <ui:Label class="manager-rings-label" text="LOGROS" />
+                                    <ui:Label class="manager-rings-label" text="{loc:ui.manager.logros}" />
                                     <ui:Label name="ManagerAchievementsCount" class="manager-rings-count" text="0" />
                                 </ui:VisualElement>
                             </ui:VisualElement>
-                            <ui:Button name="ManagerBtnLogros" class="manager-btn-logros" text="VER LOGROS" />
+                            <ui:Button name="ManagerBtnLogros" class="manager-btn-logros" text="{loc:ui.manager.manager_btn_logros}" />
                         </ui:VisualElement>
                     </ui:VisualElement>
 
@@ -140,12 +140,12 @@
                 <!-- RIGHT COLUMN — RANKING -->
                 <ui:VisualElement class="manager-right">
                     <ui:VisualElement class="manager-panel manager-ranking-panel">
-                        <ui:Label class="manager-panel-title" text="RANKING DE ENTRENADORES" />
+                        <ui:Label class="manager-panel-title" text="{loc:ui.manager.ranking_de_entrenadores}" />
                         <ui:VisualElement name="RankingHeader" class="ranking-header">
                             <ui:Label class="ranking-col-rank-header" text="#" />
-                            <ui:Label class="ranking-col-name-header" text="ENTRENADOR" />
-                            <ui:Label class="ranking-col-team-header" text="EQUIPO" />
-                            <ui:Label class="ranking-col-score-header" text="PUNTOS" />
+                            <ui:Label class="ranking-col-name-header" text="{loc:ui.manager.entrenador}" />
+                            <ui:Label class="ranking-col-team-header" text="{loc:ui.manager.equipo}" />
+                            <ui:Label class="ranking-col-score-header" text="{loc:ui.manager.puntos}" />
                             <ui:Label class="ranking-col-badge-header" text="" />
                         </ui:VisualElement>
                         <ui:VisualElement name="RankingBody" class="ranking-body" />
@@ -161,12 +161,12 @@
 
     <ui:VisualElement name="ConfigModalOverlay" class="modal-overlay">
         <ui:VisualElement name="ConfigModalBox" class="modal-box">
-            <ui:Label class="modal-title" text="CONFIGURACIÓN" />
+            <ui:Label class="modal-title" text="{loc:ui.manager.configuracion}" />
             <ui:VisualElement class="modal-body">
                 <ui:VisualElement class="settings-section">
-                    <ui:Label class="settings-section-title" text="AUDIO" />
+                    <ui:Label class="settings-section-title" text="{loc:ui.manager.audio}" />
                     <ui:VisualElement class="settings-row">
-                        <ui:Label class="settings-label" text="Volumen General" />
+                        <ui:Label class="settings-label" text="{loc:ui.manager.volumen_general}" />
                         <ui:VisualElement name="ConfigSliderMaster" class="custom-slider">
                             <ui:VisualElement class="custom-slider-track" />
                             <ui:VisualElement name="ConfigFillMaster" class="custom-slider-fill" />
@@ -175,7 +175,7 @@
                         <ui:Label name="ConfigLabelMaster" class="settings-value" text="100%" />
                     </ui:VisualElement>
                     <ui:VisualElement class="settings-row">
-                        <ui:Label class="settings-label" text="Música" />
+                        <ui:Label class="settings-label" text="{loc:ui.manager.musica}" />
                         <ui:VisualElement name="ConfigSliderMusic" class="custom-slider">
                             <ui:VisualElement class="custom-slider-track" />
                             <ui:VisualElement name="ConfigFillMusic" class="custom-slider-fill" />
@@ -184,7 +184,7 @@
                         <ui:Label name="ConfigLabelMusic" class="settings-value" text="100%" />
                     </ui:VisualElement>
                     <ui:VisualElement class="settings-row">
-                        <ui:Label class="settings-label" text="Efectos" />
+                        <ui:Label class="settings-label" text="{loc:ui.manager.efectos}" />
                         <ui:VisualElement name="ConfigSliderSFX" class="custom-slider">
                             <ui:VisualElement class="custom-slider-track" />
                             <ui:VisualElement name="ConfigFillSFX" class="custom-slider-fill" />
@@ -194,53 +194,53 @@
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement class="settings-section">
-                    <ui:Label class="settings-section-title" text="GRÁFICOS" />
+                    <ui:Label class="settings-section-title" text="{loc:ui.manager.graficos}" />
                     <ui:VisualElement class="settings-quality-row">
-                        <ui:Label class="settings-label" text="Calidad" />
+                        <ui:Label class="settings-label" text="{loc:ui.manager.calidad}" />
                         <ui:VisualElement class="settings-quality-options">
-                            <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="Baja" />
-                            <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="Media" />
-                            <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="Alta" />
-                            <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="Ultra" />
+                            <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="{loc:ui.manager.config_btn_quality_low}" />
+                            <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="{loc:ui.manager.config_btn_quality_medium}" />
+                            <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="{loc:ui.manager.config_btn_quality_high}" />
+                            <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="{loc:ui.manager.config_btn_quality_ultra}" />
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement class="settings-section">
-                    <ui:Label class="settings-section-title" text="JUEGO" />
-                    <ui:Button name="ConfigBtnMainMenu" class="settings-btn settings-btn--secondary" text="VOLVER AL MENÚ PRINCIPAL" />
-                    <ui:Button name="ConfigBtnExit" class="settings-btn settings-btn--danger" text="SALIR DEL JUEGO" />
+                    <ui:Label class="settings-section-title" text="{loc:ui.manager.juego}" />
+                    <ui:Button name="ConfigBtnMainMenu" class="settings-btn settings-btn--secondary" text="{loc:ui.manager.config_btn_main_menu}" />
+                    <ui:Button name="ConfigBtnExit" class="settings-btn settings-btn--danger" text="{loc:ui.manager.config_btn_exit}" />
                 </ui:VisualElement>
             </ui:VisualElement>
-            <ui:Button name="ConfigBtnCerrar" class="modal-close" text="CERRAR" />
+            <ui:Button name="ConfigBtnCerrar" class="modal-close" text="{loc:ui.manager.config_btn_cerrar}" />
         </ui:VisualElement>
     </ui:VisualElement>
 
     <ui:VisualElement name="ConfigMainMenuConfirmOverlay" class="modal-overlay">
         <ui:VisualElement name="ConfigMainMenuConfirmBox" class="modal-box">
-            <ui:Label class="modal-title" text="VOLVER AL MENÚ PRINCIPAL" />
+            <ui:Label class="modal-title" text="{loc:ui.manager.volver_al_menu_principal}" />
             <ui:VisualElement class="modal-body">
-                <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres volver al menú principal?" />
-                <ui:Label class="modal-paragraph" text="Se perderá el progreso no guardado de la partida actual. Asegúrate de haber guardado antes de continuar." />
+                <ui:Label class="modal-paragraph modal-paragraph--highlight" text="{loc:ui.manager.estas_seguro_de_que_quieres_volver_al_me_6f548452}" />
+                <ui:Label class="modal-paragraph" text="{loc:ui.manager.se_perdera_el_progreso_no_guardado_de_la_b10b7334}" />
             </ui:VisualElement>
             <ui:VisualElement class="modal-actions">
-                <ui:Button name="ConfigBtnMainMenuNo" class="modal-btn modal-btn--secondary" text="NO, QUEDARME" />
+                <ui:Button name="ConfigBtnMainMenuNo" class="modal-btn modal-btn--secondary" text="{loc:ui.manager.config_btn_main_menu_no}" />
                 <ui:VisualElement class="modal-spacer" />
-                <ui:Button name="ConfigBtnMainMenuYes" class="modal-btn modal-btn--danger" text="SÍ, VOLVER" />
+                <ui:Button name="ConfigBtnMainMenuYes" class="modal-btn modal-btn--danger" text="{loc:ui.manager.config_btn_main_menu_yes}" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
 
     <ui:VisualElement name="ConfigExitConfirmOverlay" class="modal-overlay">
         <ui:VisualElement name="ConfigExitConfirmBox" class="modal-box">
-            <ui:Label class="modal-title" text="SALIR DEL JUEGO" />
+            <ui:Label class="modal-title" text="{loc:ui.manager.salir_del_juego}" />
             <ui:VisualElement class="modal-body">
-                <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres salir del juego?" />
-                <ui:Label class="modal-paragraph" text="Tu progreso se guarda automáticamente durante la partida. Al volver a cargarla continuarás desde el último estado guardado." />
+                <ui:Label class="modal-paragraph modal-paragraph--highlight" text="{loc:ui.manager.estas_seguro_de_que_quieres_salir_del_ju_c65dd5f1}" />
+                <ui:Label class="modal-paragraph" text="{loc:ui.manager.tu_progreso_se_guarda_automaticamente_du_10fb1edb}" />
             </ui:VisualElement>
             <ui:VisualElement class="modal-actions">
-                <ui:Button name="ConfigBtnExitNo" class="modal-btn modal-btn--secondary" text="NO" />
+                <ui:Button name="ConfigBtnExitNo" class="modal-btn modal-btn--secondary" text="{loc:ui.manager.config_btn_exit_no}" />
                 <ui:VisualElement class="modal-spacer" />
-                <ui:Button name="ConfigBtnExitYes" class="modal-btn modal-btn--danger" text="SÍ, SALIR" />
+                <ui:Button name="ConfigBtnExitYes" class="modal-btn modal-btn--danger" text="{loc:ui.manager.config_btn_exit_yes}" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

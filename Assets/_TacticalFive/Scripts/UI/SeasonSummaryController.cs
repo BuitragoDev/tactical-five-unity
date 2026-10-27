@@ -164,8 +164,8 @@ public class SeasonSummaryController : UIScreenController
     {
         SetLogo64(_headerTeamLogo, _myTeam.logo);
         _headerTeamName.text = _myTeam.name.ToUpper();
-        _headerManagerName.text = $"Manager: {_manager.name}";
-        _headerSeason.text = $"Temporada {_season.year_start}-{_season.year_end}";
+        _headerManagerName.text = LocalizationService.T("ui.common.manager", _manager.name);
+        _headerSeason.text = LocalizationService.T("ui.common.season", _season.year_start, _season.year_end);
         if (!string.IsNullOrEmpty(_season.current_date))
         {
             if (DateTime.TryParse(_season.current_date, out var dt))
@@ -367,7 +367,7 @@ public class SeasonSummaryController : UIScreenController
         }
 
         _statAttendanceValue.text = totalAttendance.ToString("#,##0", _dotCulture);
-        _statAttendanceSub.text = "Temporada regular + Playoffs";
+        _statAttendanceSub.text = LocalizationService.T("ui.code.season_summary_controller.temporada_regular_playoffs");
 
         // Occupancy
         float occupancy = totalCapacity > 0 ? (float)totalAttendance / totalCapacity * 100f : 0;
@@ -400,9 +400,9 @@ public class SeasonSummaryController : UIScreenController
         }
         else
         {
-            _statAttendanceSub.text = "+0.0% vs. temporada pasada";
+            _statAttendanceSub.text = LocalizationService.T("ui.code.season_summary_controller.0_0_vs_temporada_pasada");
             _statAttendanceSub.style.color = new Color(0.31f, 0.71f, 0.39f);
-            _statOccupancySub.text = "+0.0% vs. temporada pasada";
+            _statOccupancySub.text = LocalizationService.T("ui.code.season_summary_controller.0_0_vs_temporada_pasada");
             _statOccupancySub.style.color = new Color(0.31f, 0.71f, 0.39f);
         }
 

@@ -203,6 +203,15 @@
 - **Integración:** `DashboardController.CalculateAttendance` aplica el multiplicador del entorno; el pre-lote suma el bonus de recuperación solo al equipo del usuario; `CityService.Advance` corre dentro de la transacción del día. Los avisos usan `MessageData` (`NewsType.PROYECTO_CIUDAD`/`EVENTO_CIUDAD`).
 - **Invariante:** no dupliques estas reglas en controllers ni añadas ingresos/gastos de ciudad fuera de `teams.budget`. Los tests `CityCatalogTests` y `CityUiTests` cubren catálogo y carga UI.
 
+## S21. Localización (F7-06)
+
+- **Files:** `LocalizationService.cs` (runtime de tablas, tokens y formato), `Resources/Localization/es.json` (tabla base), `Tools/localization_extract.py` (extractor/validador), `LocalizationTests.cs`.
+- **Formato:** tabla JSON `{"language":"es","entries":[{"key","value"}]}`. El idioma activo se lee de `PlayerPrefs` (`TF_Language`, español por defecto); si falta una entrada en el idioma actual se usa la tabla española y, si tampoco existe, se devuelve la clave.
+- **UXML:** todo texto visible usa `text="{loc:clave}"`; también se resuelven `placeholder`/`placeholder-text` y `tooltip`. `UIScreenController.OnEnable` llama a `LocalizationService.Apply(_root)` después de `Refresh` para cubrir header/sidebar y textos fijados por los controllers.
+- **C#:** `LocalizationService.T("clave")` para literales estáticos y `T("clave", args)` para plantillas (`Manager: {0}`, `Temporada {0}-{1}`). El extractor migra `text = "..."` y `new Label("...")`; no se deben añadir literales visibles nuevos.
+- **Añadir idioma:** crear `Resources/Localization/{code}.json` con las mismas claves y llamar a `SetLanguage(code)` desde el control de ajustes que se implemente. No hace falta tocar controllers.
+- **Invariante:** `LocalizationTests` falla si hay un `text="..."`/`new Label("...")` estático sin clave o un token sin entrada. El extractor `--check` es la validación de mantenimiento.
+
 ---
 
 ## Open questions

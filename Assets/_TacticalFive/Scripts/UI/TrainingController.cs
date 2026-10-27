@@ -184,7 +184,7 @@ using System.Linq;
             _headerTeamLogo.style.backgroundImage = new StyleBackground(sprite);
 
         _headerTeamName.text = _myTeam.name.ToUpper();
-        _headerManagerName.text = $"Manager: {_manager.name}";
+        _headerManagerName.text = LocalizationService.T("ui.common.manager", _manager.name);
         _headerBudget.text = $"${_myTeam.budget / 1_000_000}M";
         _headerBudget.style.color = _myTeam.budget < 0
             ? new StyleColor(new Color32(192, 57, 43, 255))
@@ -219,11 +219,11 @@ using System.Linq;
 
         if (_season != null)
         {
-            _headerSeason.text = $"Temporada {_season.year_start}-{_season.year_end}";
+            _headerSeason.text = LocalizationService.T("ui.common.season", _season.year_start, _season.year_end);
             _headerDate.text = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
         }
 
-        _btnAction.text = "MENÚ PRINCIPAL";
+        _btnAction.text = LocalizationService.T("ui.code.training_controller.menu_principal");
     }
 
     void BuildPlayerList()
@@ -346,7 +346,7 @@ using System.Linq;
             badgeContainer.AddToClassList("training-card-badge--none");
             var badgeLbl = new Label();
             badgeLbl.AddToClassList("training-card-badge-label");
-            badgeLbl.text = "SIN ENTRENAMIENTO";
+            badgeLbl.text = LocalizationService.T("ui.code.training_controller.sin_entrenamiento");
             badgeContainer.Add(badgeLbl);
         }
 
@@ -414,12 +414,12 @@ using System.Linq;
 
             var lbl = new Label();
             lbl.AddToClassList("training-no-staff-label");
-            lbl.text = "No hay Asistente contratado.\nVe a Empleados para contratar uno.";
+            lbl.text = LocalizationService.T("ui.code.training_controller.no_hay_asistente_contratado_ve_a_emplead_f5baa785");
             _noAsistente.Add(lbl);
 
             var hireBtn = new Button();
             hireBtn.AddToClassList("training-btn-hire");
-            hireBtn.text = "IR A EMPLEADOS";
+            hireBtn.text = LocalizationService.T("ui.code.training_controller.ir_a_empleados");
             hireBtn.RegisterCallback<ClickEvent>(_ =>
             {
                 PlayClick();
@@ -496,9 +496,9 @@ using System.Linq;
                 btn.AddToClassList("training-attr-btn--disabled");
 
             if (isActiveAttr)
-                btn.text = "ENTRENANDO";
+                btn.text = LocalizationService.T("ui.code.training_controller.entrenando");
             else
-                btn.text = "ENTRENAR";
+                btn.text = LocalizationService.T("ui.code.training_controller.entrenar");
 
             if (!isActiveAttr && !disabled)
             {

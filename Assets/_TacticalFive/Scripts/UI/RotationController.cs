@@ -557,14 +557,14 @@ public class RotationController : UIScreenController
         sw1.AddToClassList("pos-legend-swatch--primary");
         var l1 = new Label();
         l1.AddToClassList("pos-legend-label");
-        l1.text = "Principal";
+        l1.text = LocalizationService.T("ui.code.rotation_controller.principal");
 
         var sw2 = new VisualElement();
         sw2.AddToClassList("pos-legend-swatch");
         sw2.AddToClassList("pos-legend-swatch--secondary");
         var l2 = new Label();
         l2.AddToClassList("pos-legend-label");
-        l2.text = "Secundaria";
+        l2.text = LocalizationService.T("ui.code.rotation_controller.secundaria");
 
         legend.Add(sw1);
         legend.Add(l1);

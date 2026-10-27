@@ -314,7 +314,7 @@ using System.Linq;
                 btn.AddToClassList("price-btn--selected");
                 if (campaignClosed)
                 {
-                    btn.text = "CERRADO";
+                    btn.text = LocalizationService.T("ui.code.finances_controller.cerrado");
                 }
             }
         }
@@ -579,19 +579,19 @@ using System.Linq;
         var headerRow = new VisualElement();
         headerRow.AddToClassList("cap-proj-header-row");
 
-        var headerLabel = new Label("AÑO");
+        var headerLabel = new Label(LocalizationService.T("ui.code.finances_controller.ano"));
         headerLabel.AddToClassList("cap-proj-header-label");
 
-        var headerCap = new Label("CAP");
+        var headerCap = new Label(LocalizationService.T("ui.code.finances_controller.cap"));
         headerCap.AddToClassList("cap-proj-header-cell");
 
-        var headerSalary = new Label("COMPROMETIDO");
+        var headerSalary = new Label(LocalizationService.T("ui.code.finances_controller.comprometido"));
         headerSalary.AddToClassList("cap-proj-header-cell");
 
-        var headerSpace = new Label("ESPACIO");
+        var headerSpace = new Label(LocalizationService.T("ui.code.finances_controller.espacio"));
         headerSpace.AddToClassList("cap-proj-header-cell");
 
-        var headerOptions = new Label("OPCIONES");
+        var headerOptions = new Label(LocalizationService.T("ui.code.finances_controller.opciones"));
         headerOptions.AddToClassList("cap-proj-header-cell");
 
         headerRow.Add(headerLabel);
@@ -673,7 +673,7 @@ using System.Linq;
             .ToList();
         if (expiring.Count == 0)
         {
-            _capExpiringLabel.text = "Ningún jugador expira este año";
+            _capExpiringLabel.text = LocalizationService.T("ui.code.finances_controller.ningun_jugador_expira_este_ano");
         }
         else
         {
@@ -722,7 +722,7 @@ using System.Linq;
                 {
                     DatabaseManager.Instance.RenounceCapHold(_myTeam.id, playerId);
                     Refresh();
-                }) { text = "RENUNCIAR" };
+                }) { text = LocalizationService.T("ui.code.finances_controller.renunciar") };
                 renounce.tooltip = "Elimina el cap hold y convierte al jugador en agente libre sin restricciones.";
                 renounce.style.marginLeft = 8;
                 renounce.style.color = new Color(1f, 0.55f, 0.45f);

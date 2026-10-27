@@ -29,8 +29,9 @@
 | `Docs/THIRD_PARTY_ASSETS.md` | Inventario de origen, licencias y atribuciones; pendientes de verificar | Añades o distribuyes assets/dependencias |
 | `Docs/ARCHITECTURE.md` | Módulos, singletons, ciclo de vida, dependencias (Mermaid) | Tareas que cruzan sistemas |
 | `Docs/GAMEPLAY.md` | **Todas las mecánicas con fórmulas exactas** | Tocas simulación, economía, contratos, moral, draft |
-| `Docs/SYSTEMS.md` | 18 sistemas: responsabilidad, archivos, métodos clave, riesgos | Necesitas una API de `DatabaseManager` o un sistema completo |
+| `Docs/SYSTEMS.md` | 21 sistemas: responsabilidad, archivos, métodos clave, riesgos | Necesitas una API de `DatabaseManager` o un sistema completo |
 | `Docs/UI_TOOLKIT.md` | Tema/UXML/USS, patrón de controller, inventario de pantallas y árbol de navegación | Trabajas en UI |
+| `Docs/LOCALIZATION.md` | Tabla `es.json`, tokens `{loc:clave}`, `LocalizationService.T`, extractor y convenciones | Añades/cambias texto de UI o preparas otro idioma |
 | `Docs/CUSTOM_SCROLLBAR.md` | **Barra de scroll propia** (viewport + content + track/thumb) — el `ScrollView` de Unity no es fiable con el tema actual | Necesitas una lista larga con scroll arrastrable |
 | `Docs/SCENES.md` | La escena única, sus 44 GameObjects | Tocas la escena / añades pantalla |
 | `Docs/EVENTS.md` | Todos los canales de comunicación (static, DB messages, PlayerPrefs, callbacks) | Añades un evento/mensaje nuevo |
@@ -95,6 +96,7 @@
 - **Fechas:** strings `"yyyy-MM-dd"`. **Moneda:** `$"{value:N0}"` / `$"{value:N0} $"`.
 - **Recursos runtime:** bajo carpetas `Resources/`; logos vía `Resources.LoadAll<Sprite>("Teams/Logos/{size}x{size}")` → `Dictionary<string,Sprite>`.
 - **Modales:** overlay+box, `DisplayStyle.Flex/None`, botones de cierre registrados.
+- **Textos UI (F7-06):** UXML usa `text="{loc:clave}"` (también `placeholder`/`placeholder-text`); C# usa `LocalizationService.T("clave")` o `T("clave", args)` para plantillas. La tabla española vive en `Assets/_TacticalFive/Resources/Localization/es.json`; `python3 Tools/localization_extract.py` la regenera/valida y `LocalizationTests` impide literales estáticos o tokens sin entrada. Detalle: `Docs/LOCALIZATION.md`.
 - **Feedback al jugador:** siempre `DatabaseManager.AddMessage(new MessageData { sender_type, ... })` (`sender_type`: 0=system, 1=player, 2=news).
 - **Singletons:** `public static X Instance { get; private set; }` + guard en `Awake` + `DontDestroyOnLoad` propio.
 - **Estilo:** indentación ~4 espacios; separadores `// ── NOMBRE ─────────────`.

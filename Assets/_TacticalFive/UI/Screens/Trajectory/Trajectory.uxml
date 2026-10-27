@@ -41,38 +41,38 @@
                                             <ui:VisualElement name="TrajectoryRingsIcon" class="trajectory-honor-icon" />
                                             <ui:Label name="TrajectoryRingsCount" class="trajectory-honor-count" text="0" />
                                         </ui:VisualElement>
-                                        <ui:Label class="trajectory-honor-label" text="CAMPEONATOS" />
+                                        <ui:Label class="trajectory-honor-label" text="{loc:ui.trajectory.campeonatos}" />
                                     </ui:VisualElement>
                                     <ui:VisualElement class="trajectory-honor-item">
                                         <ui:VisualElement class="trajectory-honor-row">
                                             <ui:VisualElement name="TrajectoryFinalsIcon" class="trajectory-honor-icon" />
                                             <ui:Label name="TrajectoryFinalsCount" class="trajectory-honor-count" text="0" />
                                         </ui:VisualElement>
-                                        <ui:Label class="trajectory-honor-label" text="FINALES" />
+                                        <ui:Label class="trajectory-honor-label" text="{loc:ui.trajectory.finales}" />
                                     </ui:VisualElement>
                                     <ui:VisualElement class="trajectory-honor-item">
                                         <ui:VisualElement class="trajectory-honor-row">
                                             <ui:VisualElement name="TrajectoryMvpSeasonIcon" class="trajectory-honor-icon" />
                                             <ui:Label name="TrajectoryMvpSeasonCount" class="trajectory-honor-count" text="0" />
                                         </ui:VisualElement>
-                                        <ui:Label class="trajectory-honor-label" text="MVP" />
+                                        <ui:Label class="trajectory-honor-label" text="{loc:ui.trajectory.mvp}" />
                                     </ui:VisualElement>
                                     <ui:VisualElement class="trajectory-honor-item">
                                         <ui:VisualElement class="trajectory-honor-row">
                                             <ui:VisualElement name="TrajectoryMvpFinalsIcon" class="trajectory-honor-icon" />
                                             <ui:Label name="TrajectoryMvpFinalsCount" class="trajectory-honor-count" text="0" />
                                         </ui:VisualElement>
-                                        <ui:Label class="trajectory-honor-label" text="MVP FINALS" />
+                                        <ui:Label class="trajectory-honor-label" text="{loc:ui.trajectory.mvp_finals}" />
                                     </ui:VisualElement>
                                 </ui:VisualElement>
 
                                 <ui:VisualElement name="TrajectoryOvrBlock" class="trajectory-ovr-block">
                                     <ui:Label name="TrajectoryOvr" class="trajectory-ovr-val" text="" />
-                                    <ui:Label class="trajectory-ovr-label" text="MED" />
+                                    <ui:Label class="trajectory-ovr-label" text="{loc:ui.trajectory.med}" />
                                 </ui:VisualElement>
                             </ui:VisualElement>
 
-                            <ui:Button name="BtnGoToProfile" class="trajectory-goto-btn" text="IR A PERFIL DEL JUGADOR" />
+                            <ui:Button name="BtnGoToProfile" class="trajectory-goto-btn" text="{loc:ui.trajectory.btn_go_to_profile}" />
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
@@ -83,7 +83,7 @@
                     <ui:VisualElement class="trajectory-panel-cell">
                         <ui:VisualElement name="TrajectoryMilestones" class="trajectory-panel" style="display: none;">
                             <ui:VisualElement class="trajectory-panel-header">
-                                <ui:Label class="trajectory-panel-title" text="HITOS DE CARRERA" />
+                                <ui:Label class="trajectory-panel-title" text="{loc:ui.trajectory.hitos_de_carrera}" />
                             </ui:VisualElement>
                             <ui:VisualElement class="trajectory-panel-body">
                                 <ui:VisualElement class="trajectory-panel-scroll-row">
@@ -101,7 +101,7 @@
                     <ui:VisualElement class="trajectory-panel-cell">
                         <ui:VisualElement name="TrajectoryAwards" class="trajectory-panel" style="display: none;">
                             <ui:VisualElement class="trajectory-panel-header">
-                                <ui:Label class="trajectory-panel-title" text="LOGROS" />
+                                <ui:Label class="trajectory-panel-title" text="{loc:ui.trajectory.logros}" />
                             </ui:VisualElement>
                             <ui:VisualElement class="trajectory-panel-body">
                                 <ui:VisualElement class="trajectory-panel-scroll-row">
@@ -121,24 +121,24 @@
                 <!-- ══ Panel: ESTADÍSTICAS POR TEMPORADA ══ -->
                 <ui:VisualElement name="TrajectoryStatsSection" class="trajectory-panel">
                     <ui:VisualElement class="trajectory-panel-header">
-                        <ui:Label class="trajectory-panel-title" text="ESTADÍSTICAS POR TEMPORADA" />
+                        <ui:Label class="trajectory-panel-title" text="{loc:ui.trajectory.estadisticas_por_temporada}" />
                     </ui:VisualElement>
                     <ui:VisualElement class="trajectory-panel-body">
                         <ui:Label name="TrajectoryLeagueCompare" class="trajectory-league-compare" text="" />
                         <ui:VisualElement class="trajectory-table">
                             <ui:VisualElement class="trajectory-table-header">
-                                <ui:Label class="th-season" text="TEMPORADA" />
-                                <ui:Label class="th-team" text="EQUIPO" />
-                                <ui:Label class="th-gp" text="PJ" />
-                                <ui:Label class="th-mp" text="MIN" />
-                                <ui:Label class="th-pts" text="PTS" />
-                                <ui:Label class="th-reb" text="REB" />
-                                <ui:Label class="th-ast" text="AST" />
-                                <ui:Label class="th-stl" text="ROB" />
-                                <ui:Label class="th-blk" text="TAP" />
-                                <ui:Label class="th-ts" text="TS%" />
-                                <ui:Label class="th-efi" text="EFI/48" />
-                                <ui:Label class="th-val" text="VAL" />
+                                <ui:Label class="th-season" text="{loc:ui.trajectory.temporada}" />
+                                <ui:Label class="th-team" text="{loc:ui.trajectory.equipo}" />
+                                <ui:Label class="th-gp" text="{loc:ui.trajectory.pj}" />
+                                <ui:Label class="th-mp" text="{loc:ui.trajectory.min}" />
+                                <ui:Label class="th-pts" text="{loc:ui.trajectory.pts}" />
+                                <ui:Label class="th-reb" text="{loc:ui.trajectory.reb}" />
+                                <ui:Label class="th-ast" text="{loc:ui.trajectory.ast}" />
+                                <ui:Label class="th-stl" text="{loc:ui.trajectory.rob}" />
+                                <ui:Label class="th-blk" text="{loc:ui.trajectory.tap}" />
+                                <ui:Label class="th-ts" text="{loc:ui.trajectory.ts}" />
+                                <ui:Label class="th-efi" text="{loc:ui.trajectory.efi_48}" />
+                                <ui:Label class="th-val" text="{loc:ui.trajectory.val}" />
                             </ui:VisualElement>
                             <ui:VisualElement class="trajectory-table-body-scroll">
                                 <ui:VisualElement class="trajectory-scroll-row">
@@ -159,7 +159,7 @@
                 <!-- Estado vacío -->
                 <ui:VisualElement name="TrajectoryEmpty" class="trajectory-empty">
                     <ui:Label class="trajectory-empty-text"
-                        text="Este jugador no ha disputado ningún partido todavía." />
+                        text="{loc:ui.trajectory.este_jugador_no_ha_disputado_ningun_part_ea764d61}" />
                 </ui:VisualElement>
 
             </ui:VisualElement>
@@ -171,12 +171,12 @@
     <!-- ══ MODAL CONFIGURACIÓN ══ -->
     <ui:VisualElement name="ConfigModalOverlay" class="modal-overlay">
         <ui:VisualElement name="ConfigModalBox" class="modal-box">
-            <ui:Label class="modal-title" text="CONFIGURACIÓN" />
+            <ui:Label class="modal-title" text="{loc:ui.trajectory.configuracion}" />
             <ui:VisualElement class="modal-body">
                 <ui:VisualElement class="settings-section">
-                    <ui:Label class="settings-section-title" text="AUDIO" />
+                    <ui:Label class="settings-section-title" text="{loc:ui.trajectory.audio}" />
                     <ui:VisualElement class="settings-row">
-                        <ui:Label class="settings-label" text="Volumen General" />
+                        <ui:Label class="settings-label" text="{loc:ui.trajectory.volumen_general}" />
                         <ui:VisualElement name="ConfigSliderMaster" class="custom-slider">
                             <ui:VisualElement class="custom-slider-track" />
                             <ui:VisualElement name="ConfigFillMaster" class="custom-slider-fill" />
@@ -185,7 +185,7 @@
                         <ui:Label name="ConfigLabelMaster" class="settings-value" text="100%" />
                     </ui:VisualElement>
                     <ui:VisualElement class="settings-row">
-                        <ui:Label class="settings-label" text="Música" />
+                        <ui:Label class="settings-label" text="{loc:ui.trajectory.musica}" />
                         <ui:VisualElement name="ConfigSliderMusic" class="custom-slider">
                             <ui:VisualElement class="custom-slider-track" />
                             <ui:VisualElement name="ConfigFillMusic" class="custom-slider-fill" />
@@ -194,7 +194,7 @@
                         <ui:Label name="ConfigLabelMusic" class="settings-value" text="100%" />
                     </ui:VisualElement>
                     <ui:VisualElement class="settings-row">
-                        <ui:Label class="settings-label" text="Efectos" />
+                        <ui:Label class="settings-label" text="{loc:ui.trajectory.efectos}" />
                         <ui:VisualElement name="ConfigSliderSFX" class="custom-slider">
                             <ui:VisualElement class="custom-slider-track" />
                             <ui:VisualElement name="ConfigFillSFX" class="custom-slider-fill" />
@@ -204,39 +204,39 @@
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement class="settings-section">
-                    <ui:Label class="settings-section-title" text="GRÁFICOS" />
+                    <ui:Label class="settings-section-title" text="{loc:ui.trajectory.graficos}" />
                     <ui:VisualElement class="settings-quality-row">
-                        <ui:Label class="settings-label" text="Calidad" />
+                        <ui:Label class="settings-label" text="{loc:ui.trajectory.calidad}" />
                         <ui:VisualElement class="settings-quality-options">
-                            <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="Baja" />
-                            <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="Media" />
-                            <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="Alta" />
-                            <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="Ultra" />
+                            <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="{loc:ui.trajectory.config_btn_quality_low}" />
+                            <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="{loc:ui.trajectory.config_btn_quality_medium}" />
+                            <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="{loc:ui.trajectory.config_btn_quality_high}" />
+                            <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="{loc:ui.trajectory.config_btn_quality_ultra}" />
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement class="settings-section">
-                    <ui:Label class="settings-section-title" text="JUEGO" />
-                    <ui:Button name="ConfigBtnMainMenu" class="settings-btn settings-btn--secondary" text="VOLVER AL MENÚ PRINCIPAL" />
-                    <ui:Button name="ConfigBtnExit" class="settings-btn settings-btn--danger" text="SALIR DEL JUEGO" />
+                    <ui:Label class="settings-section-title" text="{loc:ui.trajectory.juego}" />
+                    <ui:Button name="ConfigBtnMainMenu" class="settings-btn settings-btn--secondary" text="{loc:ui.trajectory.config_btn_main_menu}" />
+                    <ui:Button name="ConfigBtnExit" class="settings-btn settings-btn--danger" text="{loc:ui.trajectory.config_btn_exit}" />
                 </ui:VisualElement>
             </ui:VisualElement>
-            <ui:Button name="ConfigBtnCerrar" class="modal-close" text="CERRAR" />
+            <ui:Button name="ConfigBtnCerrar" class="modal-close" text="{loc:ui.trajectory.config_btn_cerrar}" />
         </ui:VisualElement>
     </ui:VisualElement>
 
     <!-- ══ MODAL CONFIRMAR VOLVER AL MENÚ PRINCIPAL ══ -->
     <ui:VisualElement name="ConfigMainMenuConfirmOverlay" class="modal-overlay">
         <ui:VisualElement name="ConfigMainMenuConfirmBox" class="modal-box">
-            <ui:Label class="modal-title" text="VOLVER AL MENÚ PRINCIPAL" />
+            <ui:Label class="modal-title" text="{loc:ui.trajectory.volver_al_menu_principal}" />
             <ui:VisualElement class="modal-body">
-                <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres volver al menú principal?" />
-                <ui:Label class="modal-paragraph" text="Se perderá el progreso no guardado de la partida actual. Asegúrate de haber guardado antes de continuar." />
+                <ui:Label class="modal-paragraph modal-paragraph--highlight" text="{loc:ui.trajectory.estas_seguro_de_que_quieres_volver_al_me_6f548452}" />
+                <ui:Label class="modal-paragraph" text="{loc:ui.trajectory.se_perdera_el_progreso_no_guardado_de_la_b10b7334}" />
             </ui:VisualElement>
             <ui:VisualElement class="modal-actions">
-                <ui:Button name="ConfigBtnMainMenuNo" class="modal-btn modal-btn--secondary" text="NO, QUEDARME" />
+                <ui:Button name="ConfigBtnMainMenuNo" class="modal-btn modal-btn--secondary" text="{loc:ui.trajectory.config_btn_main_menu_no}" />
                 <ui:VisualElement class="modal-spacer" />
-                <ui:Button name="ConfigBtnMainMenuYes" class="modal-btn modal-btn--danger" text="SÍ, VOLVER" />
+                <ui:Button name="ConfigBtnMainMenuYes" class="modal-btn modal-btn--danger" text="{loc:ui.trajectory.config_btn_main_menu_yes}" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
@@ -244,15 +244,15 @@
     <!-- ══ MODAL CONFIRMAR SALIR DEL JUEGO ══ -->
     <ui:VisualElement name="ConfigExitConfirmOverlay" class="modal-overlay">
         <ui:VisualElement name="ConfigExitConfirmBox" class="modal-box">
-            <ui:Label class="modal-title" text="SALIR DEL JUEGO" />
+            <ui:Label class="modal-title" text="{loc:ui.trajectory.salir_del_juego}" />
             <ui:VisualElement class="modal-body">
-                <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres salir del juego?" />
-                <ui:Label class="modal-paragraph" text="Tu progreso se guarda automáticamente durante la partida. Al volver a cargarla continuarás desde el último estado guardado." />
+                <ui:Label class="modal-paragraph modal-paragraph--highlight" text="{loc:ui.trajectory.estas_seguro_de_que_quieres_salir_del_ju_c65dd5f1}" />
+                <ui:Label class="modal-paragraph" text="{loc:ui.trajectory.tu_progreso_se_guarda_automaticamente_du_10fb1edb}" />
             </ui:VisualElement>
             <ui:VisualElement class="modal-actions">
-                <ui:Button name="ConfigBtnExitNo" class="modal-btn modal-btn--secondary" text="NO" />
+                <ui:Button name="ConfigBtnExitNo" class="modal-btn modal-btn--secondary" text="{loc:ui.trajectory.config_btn_exit_no}" />
                 <ui:VisualElement class="modal-spacer" />
-                <ui:Button name="ConfigBtnExitYes" class="modal-btn modal-btn--danger" text="SÍ, SALIR" />
+                <ui:Button name="ConfigBtnExitYes" class="modal-btn modal-btn--danger" text="{loc:ui.trajectory.config_btn_exit_yes}" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

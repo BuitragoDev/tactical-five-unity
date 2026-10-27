@@ -327,7 +327,7 @@ using System.Threading.Tasks;
 
         var textBox = new VisualElement();
         textBox.style.flexDirection = FlexDirection.Column;
-        var titleLbl = new Label("🏆 LOGRO DESBLOQUEADO");
+        var titleLbl = new Label(LocalizationService.T("ui.code.dashboard_controller.logro_desbloqueado"));
         titleLbl.style.color = gold;
         titleLbl.style.fontSize = 15;
         titleLbl.style.unityFontStyleAndWeight = FontStyle.Bold;
@@ -615,7 +615,7 @@ using System.Threading.Tasks;
         SetTeamLogo(_headerTeamLogo, _myTeam.logo, "64x64");
 
         _headerTeamName.text = _myTeam.name.ToUpper();
-        _headerManagerName.text = $"Manager: {_manager.name}";
+        _headerManagerName.text = LocalizationService.T("ui.common.manager", _manager.name);
         _headerBudget.text = $"${_myTeam.budget / 1_000_000}M";
         _headerBudget.style.color = _myTeam.budget < 0
             ? new StyleColor(new Color32(192, 57, 43, 255))
@@ -654,7 +654,7 @@ using System.Threading.Tasks;
 
         if (_season != null)
         {
-            _headerSeason.text = $"Temporada {_season.year_start}-{_season.year_end}";
+            _headerSeason.text = LocalizationService.T("ui.common.season", _season.year_start, _season.year_end);
             _headerDate.text = GetCurrentDateString();
         }
     }
@@ -2548,7 +2548,7 @@ using System.Threading.Tasks;
         var header = new VisualElement();
         header.AddToClassList("fired-modal-header");
         header.AddToClassList("fired-modal-header--blue");
-        var title = new Label("SIMULACIÓN COMPLETADA");
+        var title = new Label(LocalizationService.T("ui.code.dashboard_controller.simulacion_completada"));
         title.AddToClassList("fired-modal-title");
         title.style.color = new StyleColor(new Color32(42, 95, 201, 255));
         header.Add(title);
@@ -2586,7 +2586,7 @@ using System.Threading.Tasks;
         winNum.AddToClassList("fastsim-modal-stat-num");
         winNum.AddToClassList("fastsim-modal-stat-num--win");
         winCol.Add(winNum);
-        var winLabel = new Label("GANADOS");
+        var winLabel = new Label(LocalizationService.T("ui.code.dashboard_controller.ganados"));
         winLabel.AddToClassList("fastsim-modal-stat-label");
         winCol.Add(winLabel);
         statsRow.Add(winCol);
@@ -2601,7 +2601,7 @@ using System.Threading.Tasks;
         lossNum.AddToClassList("fastsim-modal-stat-num");
         lossNum.AddToClassList("fastsim-modal-stat-num--loss");
         lossCol.Add(lossNum);
-        var lossLabel = new Label("PERDIDOS");
+        var lossLabel = new Label(LocalizationService.T("ui.code.dashboard_controller.perdidos"));
         lossLabel.AddToClassList("fastsim-modal-stat-label");
         lossCol.Add(lossLabel);
         statsRow.Add(lossCol);
@@ -2623,7 +2623,7 @@ using System.Threading.Tasks;
         var actions = new VisualElement();
         actions.AddToClassList("fired-modal-actions");
         var btn = new Button();
-        btn.text = "CERRAR";
+        btn.text = LocalizationService.T("ui.code.dashboard_controller.cerrar");
         btn.AddToClassList("btn-modal-confirm");
         btn.AddToClassList("btn-modal-confirm--blue");
         btn.RegisterCallback<ClickEvent>(_ =>
@@ -3341,7 +3341,7 @@ using System.Threading.Tasks;
         var header = new VisualElement();
         header.AddToClassList("fired-modal-header");
         header.AddToClassList("fired-modal-header--warning");
-        var title = new Label("EL AGENTE PIDE MÁS");
+        var title = new Label(LocalizationService.T("ui.code.dashboard_controller.el_agente_pide_mas"));
         title.AddToClassList("fired-modal-title");
         header.Add(title);
         box.Add(header);
@@ -3359,13 +3359,13 @@ using System.Threading.Tasks;
         actions.style.flexDirection = FlexDirection.Row;
         actions.style.marginTop = 18;
 
-        var accept = new Button { text = "ACEPTAR" };
+        var accept = new Button { text = LocalizationService.T("ui.code.dashboard_controller.aceptar") };
         accept.AddToClassList("btn-modal-confirm");
         accept.RegisterCallback<ClickEvent>(_ => { PlayClick(); AcceptAgentCounter(player, counterSalary, years, isRenewal); });
         CursorManager.Instance?.RegisterHandCursor(accept);
         actions.Add(accept);
 
-        var reject = new Button { text = "RETIRARSE" };
+        var reject = new Button { text = LocalizationService.T("ui.code.dashboard_controller.retirarse") };
         reject.AddToClassList("btn-modal-confirm");
         reject.AddToClassList("btn-modal-confirm--danger");
         reject.RegisterCallback<ClickEvent>(_ =>
@@ -3579,7 +3579,7 @@ using System.Threading.Tasks;
             actions.AddToClassList("fired-modal-actions");
 
             var goToQuintetoBtn = new Button();
-            goToQuintetoBtn.text = "IR A QUINTETO";
+            goToQuintetoBtn.text = LocalizationService.T("ui.code.dashboard_controller.ir_a_quinteto");
             goToQuintetoBtn.AddToClassList("btn-modal-confirm");
             goToQuintetoBtn.AddToClassList("btn-modal-confirm--gold");
             goToQuintetoBtn.RegisterCallback<ClickEvent>(_ =>
@@ -3593,7 +3593,7 @@ using System.Threading.Tasks;
             actions.Add(goToQuintetoBtn);
 
             var continueBtn = new Button();
-            continueBtn.text = "SEGUIR SIMULANDO";
+            continueBtn.text = LocalizationService.T("ui.code.dashboard_controller.seguir_simulando");
             continueBtn.AddToClassList("btn-modal-cancel");
             continueBtn.RegisterCallback<ClickEvent>(_ =>
             {
@@ -3619,7 +3619,7 @@ using System.Threading.Tasks;
             actions.AddToClassList("fired-modal-actions");
 
             var btn = new Button();
-            btn.text = "CERRAR";
+            btn.text = LocalizationService.T("ui.code.dashboard_controller.cerrar");
             btn.AddToClassList("btn-modal-cancel");
             btn.RegisterCallback<ClickEvent>(_ =>
             {
@@ -3655,7 +3655,7 @@ using System.Threading.Tasks;
         var header = new VisualElement();
         header.AddToClassList("fired-modal-header");
         header.AddToClassList("fired-modal-header--warning");
-        var title = new Label("AVISO FINANCIERO");
+        var title = new Label(LocalizationService.T("ui.code.dashboard_controller.aviso_financiero"));
         title.AddToClassList("fired-modal-title");
         title.style.color = new StyleColor(new Color32(212, 160, 23, 255));
         header.Add(title);
@@ -3713,7 +3713,7 @@ using System.Threading.Tasks;
 
         var header = new VisualElement();
         header.AddToClassList("fired-modal-header");
-        var title = new Label("DESPIDO");
+        var title = new Label(LocalizationService.T("ui.code.dashboard_controller.despido"));
         title.AddToClassList("fired-modal-title");
         header.Add(title);
         box.Add(header);
@@ -3731,7 +3731,7 @@ using System.Threading.Tasks;
         var actions = new VisualElement();
         actions.AddToClassList("fired-modal-actions");
         var btn = new Button();
-        btn.text = "IR AL MENU PRINCIPAL";
+        btn.text = LocalizationService.T("ui.code.dashboard_controller.ir_al_menu_principal");
         btn.AddToClassList("btn-modal-confirm");
         btn.AddToClassList("btn-modal-confirm--danger");
         btn.RegisterCallback<ClickEvent>(_ =>
@@ -3792,7 +3792,7 @@ using System.Threading.Tasks;
         var header = new VisualElement();
         header.AddToClassList("fired-modal-header");
         header.AddToClassList("fired-modal-header--warning");
-        var title = new Label("ROTACIÓN INCOMPLETA");
+        var title = new Label(LocalizationService.T("ui.code.dashboard_controller.rotacion_incompleta"));
         title.AddToClassList("fired-modal-title");
         header.Add(title);
         box.Add(header);
@@ -3814,7 +3814,7 @@ using System.Threading.Tasks;
         actions.AddToClassList("fired-modal-actions");
 
         var goBtn = new Button();
-        goBtn.text = "IR A ROTACIÓN";
+        goBtn.text = LocalizationService.T("ui.code.dashboard_controller.ir_a_rotacion");
         goBtn.AddToClassList("btn-modal-confirm");
         goBtn.AddToClassList("btn-modal-confirm--gold");
         goBtn.RegisterCallback<ClickEvent>(_ =>
@@ -3827,7 +3827,7 @@ using System.Threading.Tasks;
         actions.Add(goBtn);
 
         var autoBtn = new Button();
-        autoBtn.text = "ASIGNAR AUTOMÁTICAMENTE";
+        autoBtn.text = LocalizationService.T("ui.code.dashboard_controller.asignar_automaticamente");
         autoBtn.AddToClassList("btn-modal-confirm");
         autoBtn.RegisterCallback<ClickEvent>(_ =>
         {
@@ -3925,7 +3925,7 @@ using System.Threading.Tasks;
         var header = new VisualElement();
         header.AddToClassList("fired-modal-header");
 
-        var title = new Label("QUINTETO INCOMPLETO");
+        var title = new Label(LocalizationService.T("ui.code.dashboard_controller.quinteto_incompleto"));
         title.AddToClassList("fired-modal-title");
         header.Add(title);
         box.Add(header);
@@ -3965,7 +3965,7 @@ using System.Threading.Tasks;
             nameLbl.AddToClassList("injury-modal-text-lg");
             info.Add(nameLbl);
 
-            var metaLbl = new Label("Quinteto titular — slot vacío");
+            var metaLbl = new Label(LocalizationService.T("ui.code.dashboard_controller.quinteto_titular_slot_vacio"));
             metaLbl.AddToClassList("trade-modal-player-meta");
             metaLbl.AddToClassList("injury-modal-text-lg");
             info.Add(metaLbl);
@@ -3974,7 +3974,7 @@ using System.Threading.Tasks;
             var badge = new VisualElement();
             badge.AddToClassList("empty-modal-badge");
 
-            var badgeText = new Label("SIN ASIGNAR");
+            var badgeText = new Label(LocalizationService.T("ui.code.dashboard_controller.sin_asignar"));
             badgeText.AddToClassList("empty-modal-badge-text");
             badge.Add(badgeText);
 
@@ -3992,7 +3992,7 @@ using System.Threading.Tasks;
         actions.AddToClassList("fired-modal-actions");
 
         var manualBtn = new Button();
-        manualBtn.text = "REVISAR MANUALMENTE";
+        manualBtn.text = LocalizationService.T("ui.code.dashboard_controller.revisar_manualmente");
         manualBtn.AddToClassList("btn-modal-confirm");
         manualBtn.AddToClassList("btn-modal-confirm--gold");
         manualBtn.RegisterCallback<ClickEvent>(_ =>
@@ -4005,7 +4005,7 @@ using System.Threading.Tasks;
         actions.Add(manualBtn);
 
         var autoBtn = new Button();
-        autoBtn.text = "AUTO-RELLENAR";
+        autoBtn.text = LocalizationService.T("ui.code.dashboard_controller.auto_rellenar");
         autoBtn.AddToClassList("btn-modal-cancel");
         autoBtn.RegisterCallback<ClickEvent>(_ =>
         {
@@ -4047,7 +4047,7 @@ using System.Threading.Tasks;
         var header = new VisualElement();
         header.AddToClassList("fired-modal-header");
 
-        var title = new Label("JUGADORES LESIONADOS");
+        var title = new Label(LocalizationService.T("ui.code.dashboard_controller.jugadores_lesionados"));
         title.AddToClassList("fired-modal-title");
         header.Add(title);
         box.Add(header);
@@ -4131,7 +4131,7 @@ using System.Threading.Tasks;
                 ovrLbl.style.color = new StyleColor(new Color32(192, 57, 43, 255));
             ovrCol.Add(ovrLbl);
 
-            var ovrSub = new Label("MED");
+            var ovrSub = new Label(LocalizationService.T("ui.code.dashboard_controller.med"));
             ovrSub.AddToClassList("trade-modal-player-ovr-label");
             ovrCol.Add(ovrSub);
 
@@ -4204,7 +4204,7 @@ using System.Threading.Tasks;
         actions.AddToClassList("fired-modal-actions");
 
         var manualBtn = new Button();
-        manualBtn.text = "CAMBIAR MANUALMENTE";
+        manualBtn.text = LocalizationService.T("ui.code.dashboard_controller.cambiar_manualmente");
         manualBtn.AddToClassList("btn-modal-confirm");
         manualBtn.AddToClassList("btn-modal-confirm--gold");
         manualBtn.RegisterCallback<ClickEvent>(_ =>
@@ -4217,7 +4217,7 @@ using System.Threading.Tasks;
         actions.Add(manualBtn);
 
         var autoBtn = new Button();
-        autoBtn.text = "REEMPLAZAR AUTOMÁTICAMENTE";
+        autoBtn.text = LocalizationService.T("ui.code.dashboard_controller.reemplazar_automaticamente");
         autoBtn.AddToClassList("btn-modal-cancel");
         autoBtn.RegisterCallback<ClickEvent>(_ =>
         {
@@ -4256,7 +4256,7 @@ using System.Threading.Tasks;
 
         var header = new VisualElement();
         header.AddToClassList("fired-modal-header");
-        var title = new Label("GESTIÓN DE DESCANSO");
+        var title = new Label(LocalizationService.T("ui.code.dashboard_controller.gestion_de_descanso"));
         title.AddToClassList("fired-modal-title");
         header.Add(title);
         box.Add(header);
@@ -4266,7 +4266,7 @@ using System.Threading.Tasks;
 
         if (isB2B)
         {
-            var b2bLabel = new Label("Back‑to‑back: tu equipo jugó ayer. Considera descansar algún jugador.");
+            var b2bLabel = new Label(LocalizationService.T("ui.code.dashboard_controller.back_to_back_tu_equipo_jugo_ayer_conside_3b473c2e"));
             b2bLabel.AddToClassList("fired-modal-text");
             b2bLabel.style.unityTextAlign = TextAnchor.MiddleLeft;
             body.Add(b2bLabel);
@@ -4274,7 +4274,7 @@ using System.Threading.Tasks;
 
         if (tiredPlayers.Count == 0 && isB2B)
         {
-            var infoLabel = new Label("Ningún jugador está por debajo del umbral de cansancio, pero el descanso proactivo puede prevenir lesiones.");
+            var infoLabel = new Label(LocalizationService.T("ui.code.dashboard_controller.ningun_jugador_esta_por_debajo_del_umbra_65b9be70"));
             infoLabel.AddToClassList("fired-modal-text");
             infoLabel.style.unityTextAlign = TextAnchor.MiddleLeft;
             body.Add(infoLabel);
@@ -4282,7 +4282,7 @@ using System.Threading.Tasks;
 
         if (tiredPlayers.Count > 0)
         {
-            var text = new Label("Los siguientes jugadores están cansados y tienen mayor riesgo de lesión:");
+            var text = new Label(LocalizationService.T("ui.code.dashboard_controller.los_siguientes_jugadores_estan_cansados_4d304b95"));
             text.AddToClassList("fired-modal-text");
             text.style.unityTextAlign = TextAnchor.MiddleLeft;
             body.Add(text);
@@ -4311,7 +4311,7 @@ using System.Threading.Tasks;
         if (tiredPlayers.Count > 0)
         {
             var restBtn = new Button();
-            restBtn.text = "DESCANSAR CANSADOS";
+            restBtn.text = LocalizationService.T("ui.code.dashboard_controller.descansar_cansados");
             restBtn.AddToClassList("btn-modal-confirm");
             restBtn.RegisterCallback<ClickEvent>(_ =>
             {
@@ -4330,7 +4330,7 @@ using System.Threading.Tasks;
         }
 
         var manualBtn = new Button();
-        manualBtn.text = "IR AL QUINTETO";
+        manualBtn.text = LocalizationService.T("ui.code.dashboard_controller.ir_al_quinteto");
         manualBtn.AddToClassList("btn-modal-confirm");
         manualBtn.AddToClassList("btn-modal-confirm--gold");
         manualBtn.RegisterCallback<ClickEvent>(_ =>
@@ -4343,7 +4343,7 @@ using System.Threading.Tasks;
         actions.Add(manualBtn);
 
         var continueBtn = new Button();
-        continueBtn.text = "CONTINUAR SIN CAMBIOS";
+        continueBtn.text = LocalizationService.T("ui.code.dashboard_controller.continuar_sin_cambios");
         continueBtn.AddToClassList("btn-modal-cancel");
         continueBtn.RegisterCallback<ClickEvent>(_ =>
         {
@@ -4394,7 +4394,7 @@ using System.Threading.Tasks;
         header.AddToClassList("fired-modal-header");
         header.AddToClassList("fired-modal-header--green");
 
-        var title = new Label("JUGADOR(ES) RECUPERADO(S)");
+        var title = new Label(LocalizationService.T("ui.code.dashboard_controller.jugador_es_recuperado_s"));
         title.AddToClassList("fired-modal-title");
         title.style.color = new StyleColor(new Color32(39, 174, 96, 255));
         header.Add(title);
@@ -4441,7 +4441,7 @@ using System.Threading.Tasks;
             var badge = new VisualElement();
             badge.AddToClassList("recovery-modal-badge");
 
-            var badgeText = new Label("RECUPERADO — DISPONIBLE");
+            var badgeText = new Label(LocalizationService.T("ui.code.dashboard_controller.recuperado_disponible"));
             badgeText.AddToClassList("recovery-modal-badge-text");
             badge.Add(badgeText);
 
@@ -4463,7 +4463,7 @@ using System.Threading.Tasks;
                 ovrLbl.style.color = new StyleColor(new Color32(192, 57, 43, 255));
             ovrCol.Add(ovrLbl);
 
-            var ovrSub = new Label("MED");
+            var ovrSub = new Label(LocalizationService.T("ui.code.dashboard_controller.med"));
             ovrSub.AddToClassList("trade-modal-player-ovr-label");
             ovrCol.Add(ovrSub);
 
@@ -4479,7 +4479,7 @@ using System.Threading.Tasks;
         actions.AddToClassList("fired-modal-actions");
 
         var goBtn = new Button();
-        goBtn.text = "IR A QUINTETO";
+        goBtn.text = LocalizationService.T("ui.code.dashboard_controller.ir_a_quinteto");
         goBtn.AddToClassList("btn-modal-confirm");
         goBtn.RegisterCallback<ClickEvent>(_ =>
         {
@@ -4498,7 +4498,7 @@ using System.Threading.Tasks;
         actions.Add(goBtn);
 
         var closeBtn = new Button();
-        closeBtn.text = "REHACER CONVOCATORIA";
+        closeBtn.text = LocalizationService.T("ui.code.dashboard_controller.rehacer_convocatoria");
         closeBtn.AddToClassList("btn-modal-cancel");
         closeBtn.RegisterCallback<ClickEvent>(_ =>
         {
@@ -4555,7 +4555,7 @@ using System.Threading.Tasks;
         var header = new VisualElement();
         header.AddToClassList("fired-modal-header");
         header.AddToClassList("fired-modal-header--green");
-        var title = new Label("PLANTILLA COMPLETA TRAS RECUPERACI\u00d3N");
+        var title = new Label(LocalizationService.T("ui.code.dashboard_controller.plantilla_completa_tras_recuperacion"));
         title.AddToClassList("fired-modal-title");
         title.style.color = new StyleColor(new Color32(39, 174, 96, 255));
         header.Add(title);
@@ -4564,7 +4564,7 @@ using System.Threading.Tasks;
         var body = new VisualElement();
         body.AddToClassList("fired-modal-body");
 
-        var text = new Label("Un jugador de plaza estándar en la reserva de lesionados (IR) se ha recuperado. Tu plantilla supera el máximo de " + TradeHelper.MAX_STANDARD_ROSTER + " plazas estándar: debes liberar a alguien (buyout).");
+        var text = new Label(LocalizationService.T("ui.dashboard.ir_release_warning", TradeHelper.MAX_STANDARD_ROSTER));
         text.AddToClassList("fired-modal-text");
         body.Add(text);
 
@@ -4584,7 +4584,7 @@ using System.Threading.Tasks;
             row.Add(nameLbl);
 
             var releaseBtn = new Button();
-            releaseBtn.text = "LIBERAR";
+            releaseBtn.text = LocalizationService.T("ui.code.dashboard_controller.liberar");
             releaseBtn.AddToClassList("injured-modal-btn");
             releaseBtn.style.backgroundColor = new StyleColor(new Color32(192, 57, 43, 255));
             releaseBtn.RegisterCallback<ClickEvent>(_ =>
@@ -4605,7 +4605,7 @@ using System.Threading.Tasks;
         actions.AddToClassList("fired-modal-actions");
 
         var cancelBtn = new Button();
-        cancelBtn.text = "IR A PLANTILLA";
+        cancelBtn.text = LocalizationService.T("ui.code.dashboard_controller.ir_a_plantilla");
         cancelBtn.AddToClassList("btn-modal-confirm");
         cancelBtn.RegisterCallback<ClickEvent>(_ =>
         {
@@ -4712,7 +4712,7 @@ using System.Threading.Tasks;
         var header = new VisualElement();
         header.AddToClassList("fired-modal-header");
         header.AddToClassList("fired-modal-header--warning");
-        var title = new Label("CIERRE DE MERCADO");
+        var title = new Label(LocalizationService.T("ui.code.dashboard_controller.cierre_de_mercado"));
         title.AddToClassList("fired-modal-title");
         title.style.color = new StyleColor(new Color32(212, 160, 23, 255));
         header.Add(title);
@@ -4720,7 +4720,7 @@ using System.Threading.Tasks;
 
         var body = new VisualElement();
         body.AddToClassList("fired-modal-body");
-        var text = new Label("El período de traspasos finaliza el 8 de febrero. Aún estás a tiempo de realizar operaciones.");
+        var text = new Label(LocalizationService.T("ui.code.dashboard_controller.el_periodo_de_traspasos_finaliza_el_8_de_8b2850d7"));
         text.AddToClassList("fired-modal-text");
         text.style.marginTop = 15;
         text.style.marginBottom = 15;
@@ -4731,7 +4731,7 @@ using System.Threading.Tasks;
         actions.AddToClassList("fired-modal-actions");
 
         var marketBtn = new Button();
-        marketBtn.text = "IR AL MERCADO";
+        marketBtn.text = LocalizationService.T("ui.code.dashboard_controller.ir_al_mercado");
         marketBtn.AddToClassList("btn-modal-confirm");
         marketBtn.AddToClassList("btn-modal-confirm--gold");
         marketBtn.RegisterCallback<ClickEvent>(_ =>
@@ -4779,7 +4779,7 @@ using System.Threading.Tasks;
         var header = new VisualElement();
         header.AddToClassList("fired-modal-header");
         header.AddToClassList("fired-modal-header--warning");
-        var title = new Label("CIERRE DE MERCADO");
+        var title = new Label(LocalizationService.T("ui.code.dashboard_controller.cierre_de_mercado"));
         title.AddToClassList("fired-modal-title");
         title.style.color = new StyleColor(new Color32(212, 160, 23, 255));
         header.Add(title);
@@ -4799,7 +4799,7 @@ using System.Threading.Tasks;
 
         if (pendingTrades.Count == 0 && pendingSATIds.Count == 0 && maturedOffers.Count == 0)
         {
-            var emptyLbl = new Label("No tienes operaciones pendientes.\nÚltima oportunidad para realizar traspasos antes del cierre.");
+            var emptyLbl = new Label(LocalizationService.T("ui.code.dashboard_controller.no_tienes_operaciones_pendientes_ultima_b8e2ca87"));
             emptyLbl.AddToClassList("fired-modal-text");
             emptyLbl.style.marginTop = 15;
             emptyLbl.style.marginBottom = 15;
@@ -4859,7 +4859,7 @@ using System.Threading.Tasks;
                 var badge = new VisualElement();
                 badge.AddToClassList("deadline-modal-badge");
                 badge.AddToClassList("deadline-modal-badge--trade");
-                var badgeText = new Label("TRASPASO");
+                var badgeText = new Label(LocalizationService.T("ui.code.dashboard_controller.traspaso"));
                 badgeText.AddToClassList("deadline-modal-badge-text");
                 badge.Add(badgeText);
                 card.Add(badge);
@@ -4920,7 +4920,7 @@ using System.Threading.Tasks;
         {
             body.Add(opList);
 
-            var hint = new Label("Última oportunidad para realizar traspasos antes del cierre.");
+            var hint = new Label(LocalizationService.T("ui.code.dashboard_controller.ultima_oportunidad_para_realizar_traspas_73671f1d"));
             hint.AddToClassList("deadline-modal-hint");
             body.Add(hint);
         }
@@ -4932,7 +4932,7 @@ using System.Threading.Tasks;
         actions.AddToClassList("fired-modal-actions");
 
         var marketBtn = new Button();
-        marketBtn.text = "IR AL MERCADO";
+        marketBtn.text = LocalizationService.T("ui.code.dashboard_controller.ir_al_mercado");
         marketBtn.AddToClassList("btn-modal-confirm");
         marketBtn.AddToClassList("btn-modal-confirm--gold");
         marketBtn.RegisterCallback<ClickEvent>(_ =>
@@ -4980,7 +4980,7 @@ using System.Threading.Tasks;
         var header = new VisualElement();
         header.AddToClassList("fired-modal-header");
         header.AddToClassList("fired-modal-header--warning");
-        var title = new Label("FECHA LÍMITE DE RENOVACIONES");
+        var title = new Label(LocalizationService.T("ui.code.dashboard_controller.fecha_limite_de_renovaciones"));
         title.AddToClassList("fired-modal-title");
         title.style.color = new StyleColor(new Color32(212, 160, 23, 255));
         header.Add(title);
@@ -4989,11 +4989,11 @@ using System.Threading.Tasks;
         var body = new VisualElement();
         body.AddToClassList("fired-modal-body");
 
-        var text = new Label("Hoy 12 de febrero es el último día para renovar contratos de tus jugadores. Las ofertas enviadas hoy tendrán respuesta en 7 días.");
+        var text = new Label(LocalizationService.T("ui.code.dashboard_controller.hoy_12_de_febrero_es_el_ultimo_dia_para_75d7b3e8"));
         text.AddToClassList("fired-modal-text");
         body.Add(text);
 
-        var hint = new Label("Si no renuevas a tiempo, tus jugadores pasarán a ser agentes libres al finalizar la temporada.");
+        var hint = new Label(LocalizationService.T("ui.code.dashboard_controller.si_no_renuevas_a_tiempo_tus_jugadores_pa_36e0d825"));
         hint.AddToClassList("fired-modal-text");
         hint.style.marginTop = 10;
         body.Add(hint);
@@ -5004,7 +5004,7 @@ using System.Threading.Tasks;
         actions.AddToClassList("fired-modal-actions");
 
         var rosterBtn = new Button();
-        rosterBtn.text = "IR A JUGADORES";
+        rosterBtn.text = LocalizationService.T("ui.code.dashboard_controller.ir_a_jugadores");
         rosterBtn.AddToClassList("btn-modal-confirm");
         rosterBtn.AddToClassList("btn-modal-confirm--gold");
         rosterBtn.RegisterCallback<ClickEvent>(_ =>
@@ -5131,7 +5131,7 @@ using System.Threading.Tasks;
 
         var header = new VisualElement();
         header.AddToClassList("fired-modal-header");
-        var title = new Label("DESPIDO");
+        var title = new Label(LocalizationService.T("ui.code.dashboard_controller.despido"));
         title.AddToClassList("fired-modal-title");
         header.Add(title);
         box.Add(header);
@@ -5149,7 +5149,7 @@ using System.Threading.Tasks;
         var actions = new VisualElement();
         actions.AddToClassList("fired-modal-actions");
         var btn = new Button();
-        btn.text = "IR AL MENU PRINCIPAL";
+        btn.text = LocalizationService.T("ui.code.dashboard_controller.ir_al_menu_principal");
         btn.AddToClassList("btn-modal-confirm");
         btn.AddToClassList("btn-modal-confirm--danger");
         btn.RegisterCallback<ClickEvent>(_ =>
@@ -5178,7 +5178,7 @@ using System.Threading.Tasks;
 
         var header = new VisualElement();
         header.AddToClassList("fired-modal-header");
-        var title = new Label("DESPIDO");
+        var title = new Label(LocalizationService.T("ui.code.dashboard_controller.despido"));
         title.AddToClassList("fired-modal-title");
         header.Add(title);
         box.Add(header);
@@ -5198,7 +5198,7 @@ using System.Threading.Tasks;
         var actions = new VisualElement();
         actions.AddToClassList("fired-modal-actions");
         var btn = new Button();
-        btn.text = "IR AL MENU PRINCIPAL";
+        btn.text = LocalizationService.T("ui.code.dashboard_controller.ir_al_menu_principal");
         btn.AddToClassList("btn-modal-confirm");
         btn.AddToClassList("btn-modal-confirm--danger");
         btn.RegisterCallback<ClickEvent>(_ =>
@@ -7321,7 +7321,7 @@ using System.Threading.Tasks;
         header.AddToClassList("fired-modal-header");
         header.AddToClassList("fired-modal-header--warning");
 
-        var title = new Label("PROPUESTA DE INTERCAMBIO");
+        var title = new Label(LocalizationService.T("ui.code.dashboard_controller.propuesta_de_intercambio"));
         title.AddToClassList("fired-modal-title");
         title.style.color = new StyleColor(new Color32(212, 160, 23, 255));
         header.Add(title);
@@ -7367,7 +7367,7 @@ using System.Threading.Tasks;
         actions.AddToClassList("fired-modal-actions");
 
         var rejectBtn = new Button();
-        rejectBtn.text = "RECHAZAR OFERTA";
+        rejectBtn.text = LocalizationService.T("ui.code.dashboard_controller.rechazar_oferta");
         rejectBtn.AddToClassList("btn-modal-confirm");
         rejectBtn.AddToClassList("btn-modal-confirm--danger");
         rejectBtn.RegisterCallback<ClickEvent>(_ =>
@@ -7386,7 +7386,7 @@ using System.Threading.Tasks;
         actions.Add(rejectBtn);
 
         var acceptBtn = new Button();
-        acceptBtn.text = "ACEPTAR INTERCAMBIO";
+        acceptBtn.text = LocalizationService.T("ui.code.dashboard_controller.aceptar_intercambio");
         acceptBtn.AddToClassList("btn-modal-confirm");
         acceptBtn.RegisterCallback<ClickEvent>(_ =>
         {
@@ -7643,7 +7643,7 @@ using System.Threading.Tasks;
         nameLbl.AddToClassList("trade-modal-team-name");
         teamInfo.Add(nameLbl);
 
-        var actionLbl = new Label("Envía");
+        var actionLbl = new Label(LocalizationService.T("ui.code.dashboard_controller.envia"));
         actionLbl.AddToClassList("trade-modal-team-action");
         teamInfo.Add(actionLbl);
 
@@ -7714,7 +7714,7 @@ using System.Threading.Tasks;
             var capItem = new VisualElement();
             capItem.AddToClassList("trade-modal-salary-item");
 
-            var capLabel = new Label("CAP ROOM RESULTANTE");
+            var capLabel = new Label(LocalizationService.T("ui.code.dashboard_controller.cap_room_resultante"));
             capLabel.AddToClassList("trade-modal-salary-label");
             capItem.Add(capLabel);
 
@@ -7737,7 +7737,7 @@ using System.Threading.Tasks;
             var capItem = new VisualElement();
             capItem.AddToClassList("trade-modal-salary-item");
 
-            var capLabel = new Label("CAP ROOM RESULTANTE");
+            var capLabel = new Label(LocalizationService.T("ui.code.dashboard_controller.cap_room_resultante"));
             capLabel.AddToClassList("trade-modal-salary-label");
             capItem.Add(capLabel);
 
@@ -7803,7 +7803,7 @@ using System.Threading.Tasks;
             ovrLbl.style.color = new StyleColor(new Color32(192, 57, 43, 255));
         ovrCol.Add(ovrLbl);
 
-        var ovrSub = new Label("MED");
+        var ovrSub = new Label(LocalizationService.T("ui.code.dashboard_controller.med"));
         ovrSub.AddToClassList("trade-modal-player-ovr-label");
         ovrCol.Add(ovrSub);
 
@@ -7817,7 +7817,7 @@ using System.Threading.Tasks;
         var section = new VisualElement();
         section.AddToClassList("trade-modal-analysis");
 
-        var titleLbl = new Label("ANÁLISIS DE LA OPERACIÓN");
+        var titleLbl = new Label(LocalizationService.T("ui.code.dashboard_controller.analisis_de_la_operacion"));
         titleLbl.AddToClassList("trade-modal-analysis-title");
         section.Add(titleLbl);
 
@@ -7828,7 +7828,7 @@ using System.Threading.Tasks;
         var impactCard = new VisualElement();
         impactCard.AddToClassList("trade-modal-analysis-card");
 
-        var impactLabel = new Label("IMPACTO DE EQUIPO");
+        var impactLabel = new Label(LocalizationService.T("ui.code.dashboard_controller.impacto_de_equipo"));
         impactLabel.AddToClassList("trade-modal-analysis-label");
         impactCard.Add(impactLabel);
 
@@ -7867,7 +7867,7 @@ using System.Threading.Tasks;
         var chemCard = new VisualElement();
         chemCard.AddToClassList("trade-modal-analysis-card");
 
-        var chemLabel = new Label("QUÍMICA DEL EQUIPO");
+        var chemLabel = new Label(LocalizationService.T("ui.code.dashboard_controller.quimica_del_equipo"));
         chemLabel.AddToClassList("trade-modal-analysis-label");
         chemCard.Add(chemLabel);
 
@@ -7902,7 +7902,7 @@ using System.Threading.Tasks;
         var flexCard = new VisualElement();
         flexCard.AddToClassList("trade-modal-analysis-card");
 
-        var flexLabel = new Label("FLEXIBILIDAD FUTURA");
+        var flexLabel = new Label(LocalizationService.T("ui.code.dashboard_controller.flexibilidad_futura"));
         flexLabel.AddToClassList("trade-modal-analysis-label");
         flexCard.Add(flexLabel);
 
@@ -9304,7 +9304,7 @@ using System.Threading.Tasks;
         var all = DatabaseManager.Instance.GetRecentMessages(_manager.id, 20);
         if (all == null || all.Count == 0)
         {
-            var lbl = new Label("NO HAY NOTICIAS");
+            var lbl = new Label(LocalizationService.T("ui.code.dashboard_controller.no_hay_noticias"));
             lbl.AddToClassList("no-games-text");
             _messagesBody.Add(lbl);
             return;

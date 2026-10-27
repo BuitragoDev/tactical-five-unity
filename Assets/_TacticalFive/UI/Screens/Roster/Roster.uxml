@@ -18,7 +18,7 @@
             <ui:VisualElement class="roster-screen-header panel--gold">
                 <ui:VisualElement class="roster-screen-header-row">
                     <ui:VisualElement name="RosterScreenIcon" class="roster-screen-icon" />
-                    <ui:Label text="JUGADORES DE LA PLANTILLA" class="roster-screen-title" />
+                    <ui:Label text="{loc:ui.roster.jugadores_de_la_plantilla}" class="roster-screen-title" />
                 </ui:VisualElement>
                 <ui:Label name="RosterSubtitle" text="" class="roster-screen-subtitle" />
             </ui:VisualElement>
@@ -46,19 +46,19 @@
                         <ui:VisualElement class="roster-stats-grid">
                             <ui:VisualElement class="roster-stat-item">
                                 <ui:Label name="SummaryPlayers" class="roster-stat-value" text="0" />
-                                <ui:Label class="roster-stat-label" text="JUGADORES" />
+                                <ui:Label class="roster-stat-label" text="{loc:ui.roster.jugadores}" />
                             </ui:VisualElement>
                             <ui:VisualElement class="roster-stat-item">
                                 <ui:Label name="SummaryOverall" class="roster-stat-value roster-stat-value--gold" text="0" />
-                                <ui:Label class="roster-stat-label" text="MEDIA" />
+                                <ui:Label class="roster-stat-label" text="{loc:ui.roster.media}" />
                             </ui:VisualElement>
                             <ui:VisualElement class="roster-stat-item">
                                 <ui:Label name="SummaryBudget" class="roster-stat-value roster-stat-value--gold" text="" />
-                                <ui:Label class="roster-stat-label" text="MASA SALARIAL" />
+                                <ui:Label class="roster-stat-label" text="{loc:ui.roster.masa_salarial}" />
                             </ui:VisualElement>
                             <ui:VisualElement class="roster-stat-item">
-                                <ui:Label name="SummaryTwoWay" class="roster-stat-value" text="Two-way: 0/2" />
-                                <ui:Label class="roster-stat-label" text="CONTRATOS TWO-WAY" />
+                                <ui:Label name="SummaryTwoWay" class="roster-stat-value" text="{loc:ui.roster.summary_two_way}" />
+                                <ui:Label class="roster-stat-label" text="{loc:ui.roster.contratos_two_way}" />
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
@@ -69,7 +69,7 @@
                         <!-- Placeholder -->
                         <ui:VisualElement name="DetailEmpty" class="detail-empty">
                             <ui:Label class="detail-empty-text"
-                                      text="SELECCIONA UN JUGADOR" />
+                                      text="{loc:ui.roster.selecciona_un_jugador}" />
                         </ui:VisualElement>
 
                         <!-- Panel detalle (oculto hasta selección) -->
@@ -88,19 +88,19 @@
                                     </ui:VisualElement>
                                     <ui:VisualElement class="detail-ovr-block">
                                         <ui:Label name="DetailOvr"      class="detail-ovr-val"   text="" />
-                                        <ui:Label class="detail-ovr-label" text="MED" />
+                                        <ui:Label class="detail-ovr-label" text="{loc:ui.roster.med}" />
                                     </ui:VisualElement>
                                 </ui:VisualElement>
 
                                 <!-- Botones link -->
                                 <ui:VisualElement class="detail-links-row">
-                                    <ui:Button name="DetailLinkTrajectory" class="detail-link-btn" text="VER TRAYECTORIA" />
-                                    <ui:Button name="DetailLinkProfile" class="detail-link-btn" text="VER PERFIL DEL JUGADOR" />
+                                    <ui:Button name="DetailLinkTrajectory" class="detail-link-btn" text="{loc:ui.roster.detail_link_trajectory}" />
+                                    <ui:Button name="DetailLinkProfile" class="detail-link-btn" text="{loc:ui.roster.detail_link_profile}" />
                                 </ui:VisualElement>
 
                                 <!-- Salud -->
                                 <ui:VisualElement class="detail-health">
-                                    <ui:Label name="DetailHealth" class="detail-health-ok" text="✓ DISPONIBLE" />
+                                    <ui:Label name="DetailHealth" class="detail-health-ok" text="{loc:ui.roster.detail_health}" />
                                 </ui:VisualElement>
 
                                 <!-- Atributos -->
@@ -110,47 +110,47 @@
                                 <ui:VisualElement name="DetailSeasonStats" class="detail-season-stats">
                                     <ui:VisualElement class="season-stat-card">
                                         <ui:Label name="StatPts"   class="season-stat-val"   text="0.0" />
-                                        <ui:Label class="season-stat-label" text="PTS" />
+                                        <ui:Label class="season-stat-label" text="{loc:ui.roster.pts}" />
                                     </ui:VisualElement>
                                     <ui:VisualElement class="season-stat-card">
                                         <ui:Label name="StatReb"   class="season-stat-val"   text="0.0" />
-                                        <ui:Label class="season-stat-label" text="REB" />
+                                        <ui:Label class="season-stat-label" text="{loc:ui.roster.reb}" />
                                     </ui:VisualElement>
                                     <ui:VisualElement class="season-stat-card">
                                         <ui:Label name="StatAst"   class="season-stat-val"   text="0.0" />
-                                        <ui:Label class="season-stat-label" text="AST" />
+                                        <ui:Label class="season-stat-label" text="{loc:ui.roster.ast}" />
                                     </ui:VisualElement>
                                     <ui:VisualElement class="season-stat-card">
                                         <ui:Label name="StatStl"   class="season-stat-val"   text="0.0" />
-                                        <ui:Label class="season-stat-label" text="ROB" />
+                                        <ui:Label class="season-stat-label" text="{loc:ui.roster.rob}" />
                                     </ui:VisualElement>
                                     <ui:VisualElement class="season-stat-card">
                                         <ui:Label name="StatBlk"   class="season-stat-val"   text="0.0" />
-                                        <ui:Label class="season-stat-label" text="TAP" />
+                                        <ui:Label class="season-stat-label" text="{loc:ui.roster.tap}" />
                                     </ui:VisualElement>
                                 </ui:VisualElement>
 
                                 <!-- Stats G-League -->
                                 <ui:VisualElement name="GLeagueStats" class="detail-gleague" style="display: none;">
-                                    <ui:Label class="detail-gleague-label" text="G-LEAGUE" />
+                                    <ui:Label class="detail-gleague-label" text="{loc:ui.roster.g_league}" />
                                     <ui:Label name="GLeagueStatsText" class="detail-gleague-text" text="" />
                                 </ui:VisualElement>
 
                                 <!-- Footer contrato / rol / potencial -->
                                 <ui:VisualElement class="detail-footer">
                                     <ui:VisualElement class="flex-col">
-                                        <ui:Label class="detail-contract-label" text="CONTRATO" />
+                                        <ui:Label class="detail-contract-label" text="{loc:ui.roster.contrato}" />
                                         <ui:Label name="DetailContract" class="detail-contract-value" text="" />
                                     </ui:VisualElement>
                                     <ui:VisualElement class="flex-col" style="align-items: center;">
-                                        <ui:Label class="detail-role-label" text="ROL" />
+                                        <ui:Label class="detail-role-label" text="{loc:ui.roster.rol}" />
                                         <ui:VisualElement style="flex-direction: row; align-items: center;">
                                             <ui:VisualElement name="DetailRoleIcon" class="detail-role-icon" />
                                             <ui:Label name="DetailRoleName" class="detail-role-name" text="" />
                                         </ui:VisualElement>
                                     </ui:VisualElement>
                                     <ui:VisualElement class="flex-col" style="align-items: flex-end;">
-                                        <ui:Label class="detail-potential-label" text="POTENCIAL" />
+                                        <ui:Label class="detail-potential-label" text="{loc:ui.roster.potencial}" />
                                         <ui:Label name="DetailPotential" class="detail-potential-value" text="" />
                                     </ui:VisualElement>
                                 </ui:VisualElement>
@@ -158,9 +158,9 @@
                                 <!-- Botones de acción -->
                                 <ui:VisualElement class="detail-button-row">
                                     <ui:Button name="BtnBuyout" class="btn-buyout"
-                                               text="RESCINDIR CONTRATO" />
+                                               text="{loc:ui.roster.btn_buyout}" />
                                     <ui:Button name="BtnRenew" class="btn-renew"
-                                               text="RENOVAR CONTRATO" />
+                                               text="{loc:ui.roster.btn_renew}" />
                                 </ui:VisualElement>
 
                             </ui:VisualElement>
@@ -181,14 +181,14 @@
                     <ui:VisualElement class="renew-modal-heading">
                         <ui:VisualElement name="RenewIcon" class="renew-modal-icon"/>
                         <ui:VisualElement>
-                            <ui:Label name="RenewTitle" class="renew-modal-title" text="RENOVAR CONTRATO" />
+                            <ui:Label name="RenewTitle" class="renew-modal-title" text="{loc:ui.roster.renew_title}" />
                             <ui:Label name="RenewText1" class="renew-modal-subtitle" text="" />
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement class="renew-modal-body">
                     <ui:VisualElement name="RenewFormRowSalary" class="renew-form-row">
-                        <ui:Label class="renew-form-label" text="SALARIO ($)" />
+                        <ui:Label class="renew-form-label" text="{loc:ui.roster.salario}" />
                         <ui:VisualElement class="renew-spinner-row">
                             <ui:Label name="RenewSalaryDec" class="btn-spin" text="&#9664;" />
                             <ui:Label name="RenewSalaryValue" class="renew-spin-label" text="" />
@@ -196,7 +196,7 @@
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement name="RenewFormRowYears" class="renew-form-row">
-                        <ui:Label class="renew-form-label" text="DURACIÓN (años)" />
+                        <ui:Label class="renew-form-label" text="{loc:ui.roster.duracion_anos}" />
                         <ui:VisualElement class="renew-spinner-row">
                             <ui:Label name="RenewYearsDec" class="btn-spin" text="&#9664;" />
                             <ui:Label name="RenewYearsValue" class="renew-spin-label" text="" />
@@ -204,25 +204,25 @@
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement name="RenewFormRowOptions" class="renew-form-row renew-options-row">
-                        <ui:Label class="renew-form-label" text="OPCIONES" />
+                        <ui:Label class="renew-form-label" text="{loc:ui.roster.opciones}" />
                         <ui:VisualElement class="renew-options-toggles">
-                            <ui:Button name="RenewTeamOption" class="renew-toggle-btn" text="TO (Team Option)" />
-                            <ui:Button name="RenewPlayerOption" class="renew-toggle-btn" text="PO (Player Option)" />
+                            <ui:Button name="RenewTeamOption" class="renew-toggle-btn" text="{loc:ui.roster.renew_team_option}" />
+                            <ui:Button name="RenewPlayerOption" class="renew-toggle-btn" text="{loc:ui.roster.renew_player_option}" />
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement name="RenewFormRowTwoWay" class="renew-form-row renew-options-row" style="display: none;">
-                        <ui:Label class="renew-form-label" text="CONTRATO" />
+                        <ui:Label class="renew-form-label" text="{loc:ui.roster.contrato}" />
                         <ui:VisualElement class="renew-options-toggles">
-                            <ui:Button name="RenewTwoWayToggle" class="renew-toggle-btn" text="TWO-WAY" />
+                            <ui:Button name="RenewTwoWayToggle" class="renew-toggle-btn" text="{loc:ui.roster.renew_two_way_toggle}" />
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:Label name="RenewText2" class="renew-modal-text" text="" />
                     <ui:Label name="RenewWarningText" class="renew-modal-text renew-modal-text--warning" style="display: none;" text="" />
                     <ui:Label name="RenewMaxInfo" class="renew-modal-text renew-modal-text--info" style="display: none;" text="" />
-                    <ui:Label name="RenewPendingText" class="renew-modal-text renew-modal-text--pending" style="display: none;" text="OFERTA ENVIADA. Recibirás la respuesta en tu Dashboard en 7 días." />
+                    <ui:Label name="RenewPendingText" class="renew-modal-text renew-modal-text--pending" style="display: none;" text="{loc:ui.roster.renew_pending_text}" />
                     <ui:VisualElement class="renew-modal-actions">
-                        <ui:Button name="BtnRenewCancel" class="btn-modal-cancel" text="CERRAR" />
-                        <ui:Button name="BtnRenewConfirm" class="btn-modal-confirm" text="ENVIAR OFERTA" />
+                        <ui:Button name="BtnRenewCancel" class="btn-modal-cancel" text="{loc:ui.roster.btn_renew_cancel}" />
+                        <ui:Button name="BtnRenewConfirm" class="btn-modal-confirm" text="{loc:ui.roster.btn_renew_confirm}" />
                     </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
@@ -235,14 +235,14 @@
                     <ui:VisualElement class="renew-modal-heading">
                         <ui:VisualElement name="RenewCooldownIcon" class="renew-modal-icon"/>
                         <ui:VisualElement>
-                            <ui:Label name="RenewCooldownTitle" class="renew-modal-title" text="RENOVACIÓN NO DISPONIBLE" />
+                            <ui:Label name="RenewCooldownTitle" class="renew-modal-title" text="{loc:ui.roster.renew_cooldown_title}" />
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement class="renew-modal-body">
                     <ui:Label name="RenewCooldownText" class="renew-modal-text" text="" />
                     <ui:VisualElement class="renew-modal-actions">
-                        <ui:Button name="BtnRenewCooldownOk" class="btn-modal-cancel" text="CERRAR" />
+                        <ui:Button name="BtnRenewCooldownOk" class="btn-modal-cancel" text="{loc:ui.roster.btn_renew_cooldown_ok}" />
                     </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
@@ -255,14 +255,14 @@
                     <ui:VisualElement class="renew-modal-heading">
                         <ui:VisualElement name="RenewBlockIcon" class="renew-modal-icon"/>
                         <ui:VisualElement>
-                            <ui:Label name="RenewBlockTitle" class="renew-modal-title" text="RENOVACIÓN NO DISPONIBLE" />
+                            <ui:Label name="RenewBlockTitle" class="renew-modal-title" text="{loc:ui.roster.renew_block_title}" />
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement class="renew-modal-body">
                     <ui:Label name="RenewBlockText" class="renew-modal-text" text="" />
                     <ui:VisualElement class="renew-modal-actions">
-                        <ui:Button name="BtnRenewBlockOk" class="btn-modal-cancel" text="CERRAR" />
+                        <ui:Button name="BtnRenewBlockOk" class="btn-modal-cancel" text="{loc:ui.roster.btn_renew_block_ok}" />
                     </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
@@ -282,16 +282,16 @@
         <ui:VisualElement name="BuyoutOverlay" class="dismiss-modal-overlay">
           <ui:VisualElement name="BuyoutBox" class="dismiss-modal-box">
             <ui:VisualElement class="dismiss-modal-header">
-              <ui:Label class="dismiss-modal-title" text="RESCISIÓN DE CONTRATO" />
+              <ui:Label class="dismiss-modal-title" text="{loc:ui.roster.rescision_de_contrato}" />
             </ui:VisualElement>
             <ui:VisualElement class="dismiss-modal-body">
               <ui:Label name="BuyoutText1" class="dismiss-modal-text" text="" />
               <ui:Label name="BuyoutText2" class="dismiss-modal-text" text="" />
               <ui:Label name="BuyoutInfo" class="dismiss-modal-text dismiss-modal-text--warning"
-                        text="El jugador quedará libre. El salario restante se reparte en pagos anuales progresivos durante el doble de años pendientes." />
+                        text="{loc:ui.roster.buyout_info}" />
               <ui:VisualElement class="dismiss-modal-buttons">
-                <ui:Button name="BtnBuyoutCancel" class="btn-modal-cancel" text="CANCELAR" />
-                <ui:Button name="BtnBuyoutStretch" class="btn-modal-confirm btn-modal-confirm--danger" text="CONFIRMAR RESCISIÓN" />
+                <ui:Button name="BtnBuyoutCancel" class="btn-modal-cancel" text="{loc:ui.roster.btn_buyout_cancel}" />
+                <ui:Button name="BtnBuyoutStretch" class="btn-modal-confirm btn-modal-confirm--danger" text="{loc:ui.roster.btn_buyout_stretch}" />
               </ui:VisualElement>
             </ui:VisualElement>
           </ui:VisualElement>
@@ -300,12 +300,12 @@
         <!-- ══ MODAL CONFIGURACIÓN ══ -->
         <ui:VisualElement name="ConfigModalOverlay" class="modal-overlay">
             <ui:VisualElement name="ConfigModalBox" class="modal-box">
-                <ui:Label class="modal-title" text="CONFIGURACIÓN" />
+                <ui:Label class="modal-title" text="{loc:ui.roster.configuracion}" />
                 <ui:VisualElement class="modal-body">
                     <ui:VisualElement class="settings-section">
-                        <ui:Label class="settings-section-title" text="AUDIO" />
+                        <ui:Label class="settings-section-title" text="{loc:ui.roster.audio}" />
                         <ui:VisualElement class="settings-row">
-                            <ui:Label class="settings-label" text="Volumen General" />
+                            <ui:Label class="settings-label" text="{loc:ui.roster.volumen_general}" />
                             <ui:VisualElement name="ConfigSliderMaster" class="custom-slider">
                                 <ui:VisualElement class="custom-slider-track" />
                                 <ui:VisualElement name="ConfigFillMaster" class="custom-slider-fill" />
@@ -314,7 +314,7 @@
                             <ui:Label name="ConfigLabelMaster" class="settings-value" text="100%" />
                         </ui:VisualElement>
                         <ui:VisualElement class="settings-row">
-                            <ui:Label class="settings-label" text="Música" />
+                            <ui:Label class="settings-label" text="{loc:ui.roster.musica}" />
                             <ui:VisualElement name="ConfigSliderMusic" class="custom-slider">
                                 <ui:VisualElement class="custom-slider-track" />
                                 <ui:VisualElement name="ConfigFillMusic" class="custom-slider-fill" />
@@ -323,7 +323,7 @@
                             <ui:Label name="ConfigLabelMusic" class="settings-value" text="100%" />
                         </ui:VisualElement>
                         <ui:VisualElement class="settings-row">
-                            <ui:Label class="settings-label" text="Efectos" />
+                            <ui:Label class="settings-label" text="{loc:ui.roster.efectos}" />
                             <ui:VisualElement name="ConfigSliderSFX" class="custom-slider">
                                 <ui:VisualElement class="custom-slider-track" />
                                 <ui:VisualElement name="ConfigFillSFX" class="custom-slider-fill" />
@@ -333,39 +333,39 @@
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement class="settings-section">
-                        <ui:Label class="settings-section-title" text="GRÁFICOS" />
+                        <ui:Label class="settings-section-title" text="{loc:ui.roster.graficos}" />
                         <ui:VisualElement class="settings-quality-row">
-                            <ui:Label class="settings-label" text="Calidad" />
+                            <ui:Label class="settings-label" text="{loc:ui.roster.calidad}" />
                             <ui:VisualElement class="settings-quality-options">
-                                <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="Baja" />
-                                <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="Media" />
-                                <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="Alta" />
-                                <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="Ultra" />
+                                <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="{loc:ui.roster.config_btn_quality_low}" />
+                                <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="{loc:ui.roster.config_btn_quality_medium}" />
+                                <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="{loc:ui.roster.config_btn_quality_high}" />
+                                <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="{loc:ui.roster.config_btn_quality_ultra}" />
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement class="settings-section">
-                        <ui:Label class="settings-section-title" text="JUEGO" />
-                        <ui:Button name="ConfigBtnMainMenu" class="settings-btn settings-btn--secondary" text="VOLVER AL MENÚ PRINCIPAL" />
-                        <ui:Button name="ConfigBtnExit" class="settings-btn settings-btn--danger" text="SALIR DEL JUEGO" />
+                        <ui:Label class="settings-section-title" text="{loc:ui.roster.juego}" />
+                        <ui:Button name="ConfigBtnMainMenu" class="settings-btn settings-btn--secondary" text="{loc:ui.roster.config_btn_main_menu}" />
+                        <ui:Button name="ConfigBtnExit" class="settings-btn settings-btn--danger" text="{loc:ui.roster.config_btn_exit}" />
                     </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:Button name="ConfigBtnCerrar" class="modal-close" text="CERRAR" />
+                <ui:Button name="ConfigBtnCerrar" class="modal-close" text="{loc:ui.roster.config_btn_cerrar}" />
             </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- ══ MODAL CONFIRMAR VOLVER AL MENÚ PRINCIPAL ══ -->
         <ui:VisualElement name="ConfigMainMenuConfirmOverlay" class="modal-overlay">
             <ui:VisualElement name="ConfigMainMenuConfirmBox" class="modal-box">
-                <ui:Label class="modal-title" text="VOLVER AL MENÚ PRINCIPAL" />
+                <ui:Label class="modal-title" text="{loc:ui.roster.volver_al_menu_principal}" />
                 <ui:VisualElement class="modal-body">
-                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres volver al menú principal?" />
-                    <ui:Label class="modal-paragraph" text="Se perderá el progreso no guardado de la partida actual. Asegúrate de haber guardado antes de continuar." />
+                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="{loc:ui.roster.estas_seguro_de_que_quieres_volver_al_me_6f548452}" />
+                    <ui:Label class="modal-paragraph" text="{loc:ui.roster.se_perdera_el_progreso_no_guardado_de_la_b10b7334}" />
                 </ui:VisualElement>
                 <ui:VisualElement class="modal-actions">
-                    <ui:Button name="ConfigBtnMainMenuNo" class="modal-btn modal-btn--secondary" text="NO, QUEDARME" />
+                    <ui:Button name="ConfigBtnMainMenuNo" class="modal-btn modal-btn--secondary" text="{loc:ui.roster.config_btn_main_menu_no}" />
                     <ui:VisualElement class="modal-spacer" />
-                    <ui:Button name="ConfigBtnMainMenuYes" class="modal-btn modal-btn--danger" text="SÍ, VOLVER" />
+                    <ui:Button name="ConfigBtnMainMenuYes" class="modal-btn modal-btn--danger" text="{loc:ui.roster.config_btn_main_menu_yes}" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
@@ -373,15 +373,15 @@
         <!-- ══ MODAL CONFIRMAR SALIR DEL JUEGO ══ -->
         <ui:VisualElement name="ConfigExitConfirmOverlay" class="modal-overlay">
             <ui:VisualElement name="ConfigExitConfirmBox" class="modal-box">
-                <ui:Label class="modal-title" text="SALIR DEL JUEGO" />
+                <ui:Label class="modal-title" text="{loc:ui.roster.salir_del_juego}" />
                 <ui:VisualElement class="modal-body">
-                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres salir del juego?" />
-                    <ui:Label class="modal-paragraph" text="Tu progreso se guarda automáticamente durante la partida. Al volver a cargarla continuarás desde el último estado guardado." />
+                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="{loc:ui.roster.estas_seguro_de_que_quieres_salir_del_ju_c65dd5f1}" />
+                    <ui:Label class="modal-paragraph" text="{loc:ui.roster.tu_progreso_se_guarda_automaticamente_du_10fb1edb}" />
                 </ui:VisualElement>
                 <ui:VisualElement class="modal-actions">
-                    <ui:Button name="ConfigBtnExitNo" class="modal-btn modal-btn--secondary" text="NO" />
+                    <ui:Button name="ConfigBtnExitNo" class="modal-btn modal-btn--secondary" text="{loc:ui.roster.config_btn_exit_no}" />
                     <ui:VisualElement class="modal-spacer" />
-                    <ui:Button name="ConfigBtnExitYes" class="modal-btn modal-btn--danger" text="SÍ, SALIR" />
+                    <ui:Button name="ConfigBtnExitYes" class="modal-btn modal-btn--danger" text="{loc:ui.roster.config_btn_exit_yes}" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>

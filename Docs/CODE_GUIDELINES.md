@@ -13,6 +13,7 @@
 - **Database access:** never open your own `SQLiteConnection`; use `DatabaseManager.Instance`. Heavy batches go through `RunInBackground`/`RunInBackgroundAsync` (ambient connection — do not touch `_db` directly off-thread).
 - **Randomness:** `UnityEngine.Random` (static) for UI/offline sims; `System.Random` for background/threaded work (thread-static `_aiRng` in `DashboardController`, `DatabaseManager.Rng`). Never share `UnityEngine.Random` across threads.
 - **Resources:** all runtime-loaded content under `Resources/` folders. Load via `Resources.Load<T>` / `Resources.LoadAll<T>`.
+- **Texto de UI (F7-06):** los UXML usan `text="{loc:clave}"` (también `placeholder`/`placeholder-text`) y el C# usa `LocalizationService.T("clave")` o `T("clave", args)` para plantillas. No añadas literales visibles nuevos en UXML/controllers; la tabla vive en `Resources/Localization/es.json` y se regenera/valida con `python3 Tools/localization_extract.py`. `LocalizationTests` falla si reaparece un literal estático o falta una entrada. Detalle: [`Docs/LOCALIZATION.md`](LOCALIZATION.md).
 
 ## 2. Patterns to follow
 

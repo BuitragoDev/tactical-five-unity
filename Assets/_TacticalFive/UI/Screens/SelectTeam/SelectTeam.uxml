@@ -2,24 +2,24 @@
     <Style src="project://database/Assets/_TacticalFive/UI/Screens/SelectTeam/SelectTeam.uss?fileID=7433441132597879392&amp;guid=82b29e8b19665c60bb46d66235574a55&amp;type=3#SelectTeam"/>
     <ui:VisualElement name="SelectTeamRoot" class="select-team-root">
         <ui:VisualElement name="Header" class="header">
-            <ui:Button name="BtnBack" text="VOLVER" class="btn-back"/>
+            <ui:Button name="BtnBack" text="{loc:ui.select_team.btn_back}" class="btn-back"/>
             <ui:VisualElement class="header-title">
-                <ui:Label text="LIGA" class="header-title-white"/>
-                <ui:Label name="HeaderMode" text="MANAGER" class="header-title-gold"/>
-                <ui:Label text="· SELECCIONAR EQUIPO" class="header-title-white"/>
+                <ui:Label text="{loc:ui.select_team.liga}" class="header-title-white"/>
+                <ui:Label name="HeaderMode" text="{loc:ui.select_team.header_mode}" class="header-title-gold"/>
+                <ui:Label text="{loc:ui.select_team.seleccionar_equipo}" class="header-title-white"/>
             </ui:VisualElement>
-            <ui:Button name="BtnContinue" text="CONTINUAR" class="btn-continue"/>
+            <ui:Button name="BtnContinue" text="{loc:ui.select_team.btn_continue}" class="btn-continue"/>
         </ui:VisualElement>
         <ui:VisualElement class="manager-bar">
-            <ui:Label text="NOMBRE DEL MANAGER" class="manager-label"/>
+            <ui:Label text="{loc:ui.select_team.nombre_del_manager}" class="manager-label"/>
             <ui:TextField name="ManagerNameInput" max-length="30" class="manager-input"/>
         </ui:VisualElement>
         <ui:VisualElement class="content-area">
             <ui:VisualElement class="left-panel">
                 <ui:VisualElement class="tabs-bar">
-                    <ui:Button name="TabAll" text="TODOS (30)" class="tab-btn tab-btn--active"/>
-                    <ui:Button name="TabEast" text="ESTE" class="tab-btn"/>
-                    <ui:Button name="TabWest" text="OESTE" class="tab-btn"/>
+                    <ui:Button name="TabAll" text="{loc:ui.select_team.tab_all}" class="tab-btn tab-btn--active"/>
+                    <ui:Button name="TabEast" text="{loc:ui.select_team.tab_east}" class="tab-btn"/>
+                    <ui:Button name="TabWest" text="{loc:ui.select_team.tab_west}" class="tab-btn"/>
                 </ui:VisualElement>
                 <ui:VisualElement class="grid-scroll-row">
                     <ui:VisualElement name="GridViewport" class="grid-viewport">
@@ -32,7 +32,7 @@
             </ui:VisualElement>
             <ui:VisualElement name="RightPanel" class="right-panel">
                 <ui:VisualElement name="DetailPlaceholder" class="detail-placeholder">
-                    <ui:Label text="SELECCIONA UN EQUIPO" class="placeholder-text"/>
+                    <ui:Label text="{loc:ui.select_team.selecciona_un_equipo}" class="placeholder-text"/>
                 </ui:VisualElement>
                 <ui:VisualElement name="DetailScrollRow" class="right-scroll-row">
                   <ui:VisualElement name="DetailViewport" class="right-viewport">
@@ -44,47 +44,47 @@
                             </ui:VisualElement>
                         </ui:VisualElement>
                         <ui:VisualElement class="detail-row">
-                            <ui:Label text="Ciudad" class="detail-row-label"/>
+                            <ui:Label text="{loc:ui.select_team.ciudad}" class="detail-row-label"/>
                             <ui:Label name="DetailCity" text="" class="detail-row-value"/>
                         </ui:VisualElement>
                         <ui:VisualElement class="detail-row">
-                            <ui:Label text="Conferencia" class="detail-row-label"/>
+                            <ui:Label text="{loc:ui.select_team.conferencia}" class="detail-row-label"/>
                             <ui:Label name="DetailConferenceVal" text="" class="detail-row-value"/>
                         </ui:VisualElement>
                         <ui:VisualElement class="detail-row">
-                            <ui:Label text="División" class="detail-row-label"/>
+                            <ui:Label text="{loc:ui.select_team.division}" class="detail-row-label"/>
                             <ui:Label name="DetailDivision" text="" class="detail-row-value"/>
                         </ui:VisualElement>
                         <ui:VisualElement class="detail-row">
-                            <ui:Label text="Propietario" class="detail-row-label"/>
+                            <ui:Label text="{loc:ui.select_team.propietario}" class="detail-row-label"/>
                             <ui:Label name="DetailOwner" text="" class="detail-row-value"/>
                         </ui:VisualElement>
                         <ui:VisualElement class="detail-row">
-                            <ui:Label text="Pabellón" class="detail-row-label"/>
+                            <ui:Label text="{loc:ui.select_team.pabellon}" class="detail-row-label"/>
                             <ui:Label name="DetailArena" text="" class="detail-row-value"/>
                         </ui:VisualElement>
                         <ui:VisualElement class="detail-row">
-                            <ui:Label text="Aforo" class="detail-row-label"/>
+                            <ui:Label text="{loc:ui.select_team.aforo}" class="detail-row-label"/>
                             <ui:Label name="DetailCapacity" text="" class="detail-row-value"/>
                         </ui:VisualElement>
                         <ui:VisualElement class="detail-row">
-                            <ui:Label text="Reputación" class="detail-row-label"/>
+                            <ui:Label text="{loc:ui.select_team.reputacion}" class="detail-row-label"/>
                             <ui:VisualElement name="DetailReputation" class="stars-wrap"/>
                         </ui:VisualElement>
                         <ui:VisualElement class="detail-row">
-                            <ui:Label text="Instalaciones" class="detail-row-label"/>
+                            <ui:Label text="{loc:ui.select_team.instalaciones}" class="detail-row-label"/>
                             <ui:VisualElement name="DetailFacilities" class="stars-wrap"/>
                         </ui:VisualElement>
                         <ui:VisualElement class="detail-row">
-                            <ui:Label text="Objetivo temporada" class="detail-row-label"/>
+                            <ui:Label text="{loc:ui.select_team.objetivo_temporada}" class="detail-row-label"/>
                             <ui:Label name="DetailObjective" text="" class="detail-row-value"/>
                         </ui:VisualElement>
                         <ui:VisualElement class="detail-row">
-                            <ui:Label text="Presupuesto" class="detail-row-label"/>
+                            <ui:Label text="{loc:ui.select_team.presupuesto}" class="detail-row-label"/>
                             <ui:Label name="DetailBudget" text="" class="detail-row-value"/>
                         </ui:VisualElement>
                         <ui:VisualElement class="detail-row">
-                            <ui:Label text="Margen salarial" class="detail-row-label"/>
+                            <ui:Label text="{loc:ui.select_team.margen_salarial}" class="detail-row-label"/>
                             <ui:Label name="DetailSalaryMargin" text="" class="detail-row-value"/>
                         </ui:VisualElement>
                         <ui:VisualElement class="stats-row">
@@ -92,22 +92,22 @@
                                 <ui:VisualElement class="stat-circle-ring">
                                     <ui:Label name="DetailAttack" text="--" class="stat-circle-value"/>
                                 </ui:VisualElement>
-                                <ui:Label text="ATAQUE" class="stat-circle-label"/>
+                                <ui:Label text="{loc:ui.select_team.ataque}" class="stat-circle-label"/>
                             </ui:VisualElement>
                             <ui:VisualElement class="stat-circle">
                                 <ui:VisualElement class="stat-circle-ring stat-circle-ring--defense">
                                     <ui:Label name="DetailDefense" text="--" class="stat-circle-value"/>
                                 </ui:VisualElement>
-                                <ui:Label text="DEFENSA" class="stat-circle-label"/>
+                                <ui:Label text="{loc:ui.select_team.defensa}" class="stat-circle-label"/>
                             </ui:VisualElement>
                             <ui:VisualElement class="stat-circle">
                                 <ui:VisualElement class="stat-circle-ring stat-circle-ring--overall">
                                     <ui:Label name="DetailOverall" text="--" class="stat-circle-value"/>
                                 </ui:VisualElement>
-                                <ui:Label text="MEDIA" class="stat-circle-label"/>
+                                <ui:Label text="{loc:ui.select_team.media}" class="stat-circle-label"/>
                             </ui:VisualElement>
                         </ui:VisualElement>
-                        <ui:Button name="BtnShowSquad" text="VER PLANTILLA" class="btn-squad"/>
+                        <ui:Button name="BtnShowSquad" text="{loc:ui.select_team.btn_show_squad}" class="btn-squad"/>
                                         </ui:VisualElement>
                   </ui:VisualElement>
                   <ui:VisualElement name="DetailScrollTrack" class="right-scrollbar">
@@ -127,7 +127,7 @@
                         <ui:VisualElement class="stat-circle-ring stat-circle-ring--overall">
                             <ui:Label name="SquadModalAvg" text="--" class="stat-circle-value"/>
                         </ui:VisualElement>
-                        <ui:Label text="MEDIA" class="stat-circle-label"/>
+                        <ui:Label text="{loc:ui.select_team.media}" class="stat-circle-label"/>
                     </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
@@ -143,7 +143,7 @@
                 </ui:VisualElement>
             </ui:VisualElement>
             <ui:VisualElement class="modal-footer">
-                <ui:Button name="BtnCloseSquad" text="CERRAR" class="modal-close"/>
+                <ui:Button name="BtnCloseSquad" text="{loc:ui.select_team.btn_close_squad}" class="modal-close"/>
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

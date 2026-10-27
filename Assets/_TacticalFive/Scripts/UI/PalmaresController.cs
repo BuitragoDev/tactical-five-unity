@@ -216,7 +216,7 @@ public class PalmaresController : UIScreenController
             _root.Q<VisualElement>("HeaderTeamLogo").style.backgroundImage = new StyleBackground(sprite);
 
         _root.Q<Label>("HeaderTeamName").text = _myTeam.name.ToUpper();
-        _root.Q<Label>("HeaderManagerName").text = $"Manager: {_manager.name}";
+        _root.Q<Label>("HeaderManagerName").text = LocalizationService.T("ui.common.manager", _manager.name);
         var budgetLabel = _root.Q<Label>("HeaderBudget");
         budgetLabel.text = $"${_myTeam.budget / 1_000_000}M";
         budgetLabel.style.color = _myTeam.budget < 0
@@ -250,11 +250,11 @@ public class PalmaresController : UIScreenController
 
         if (_season != null)
         {
-            _root.Q<Label>("HeaderSeason").text = $"Temporada {_season.year_start}-{_season.year_end}";
+            _root.Q<Label>("HeaderSeason").text = LocalizationService.T("ui.common.season", _season.year_start, _season.year_end);
             _root.Q<Label>("HeaderDate").text = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
         }
 
-        _btnAction.text = "MENÚ PRINCIPAL";
+        _btnAction.text = LocalizationService.T("ui.code.palmares_controller.menu_principal");
     }
 
     // ══ DATA ══════════════════════════════════════════════
@@ -297,7 +297,7 @@ public class PalmaresController : UIScreenController
 
         if (sorted.Count == 0)
         {
-            var emptyLbl = new Label { text = "Aún no hay campeonatos registrados" };
+            var emptyLbl = new Label { text = LocalizationService.T("ui.code.palmares_controller.aun_no_hay_campeonatos_registrados") };
             emptyLbl.AddToClassList("no-data-cell");
             _titlesRankingBody.Add(emptyLbl);
             return;
@@ -391,7 +391,7 @@ public class PalmaresController : UIScreenController
 
         if (sorted.Count == 0)
         {
-            var emptyLbl = new Label { text = "Aún no hay MVPs registrados" };
+            var emptyLbl = new Label { text = LocalizationService.T("ui.code.palmares_controller.aun_no_hay_mvps_registrados") };
             emptyLbl.AddToClassList("no-data-cell");
             _mvpRankingBody.Add(emptyLbl);
             return;
@@ -494,7 +494,7 @@ public class PalmaresController : UIScreenController
 
         if (sorted.Count == 0)
         {
-            var emptyLbl = new Label { text = "Aún no hay quintetos registrados" };
+            var emptyLbl = new Label { text = LocalizationService.T("ui.code.palmares_controller.aun_no_hay_quintetos_registrados") };
             emptyLbl.AddToClassList("no-data-cell");
             _quintetAppearancesBody.Add(emptyLbl);
             return;
@@ -575,7 +575,7 @@ public class PalmaresController : UIScreenController
 
         if (_allStarAppearancesData.Count == 0)
         {
-            var emptyLbl = new Label { text = "Aún no hay All-Stars registrados" };
+            var emptyLbl = new Label { text = LocalizationService.T("ui.code.palmares_controller.aun_no_hay_all_stars_registrados") };
             emptyLbl.AddToClassList("no-data-cell");
             _allStarAppearancesBody.Add(emptyLbl);
             return;
@@ -690,7 +690,7 @@ public class PalmaresController : UIScreenController
 
         if (_hoFData.Count == 0)
         {
-            var emptyLbl = new Label { text = "Todavía no hay miembros en el Salón de la Fama" };
+            var emptyLbl = new Label { text = LocalizationService.T("ui.code.palmares_controller.todavia_no_hay_miembros_en_el_salon_de_l_8ecdbf02") };
             emptyLbl.AddToClassList("no-data-cell");
             _hoFBody.Add(emptyLbl);
             return;

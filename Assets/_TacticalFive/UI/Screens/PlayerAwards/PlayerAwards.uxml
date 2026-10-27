@@ -14,7 +14,7 @@
             <ui:VisualElement class="pa-header-right">
                 <ui:Label name="HeaderSeason" class="pa-header-season" text=""/>
                 <ui:Label name="HeaderDate" class="pa-header-date" text=""/>
-                <ui:Button name="BtnGoQuintos" class="pa-btn-quintos" text="VER QUINTETOS"/>
+                <ui:Button name="BtnGoQuintos" class="pa-btn-quintos" text="{loc:ui.player_awards.btn_go_quintos}"/>
             </ui:VisualElement>
         </ui:VisualElement>
 
@@ -23,10 +23,10 @@
             <ui:VisualElement class="pa-screen-overlay"/>
             <ui:VisualElement class="pa-screen-title-group">
                 <ui:VisualElement class="pa-screen-title-row">
-                    <ui:Label text="PREMIOS INDIVIDUALES" class="pa-screen-title"/>
+                    <ui:Label text="{loc:ui.player_awards.premios_individuales}" class="pa-screen-title"/>
                     <ui:Label name="SeasonTag" text="" class="pa-season-badge"/>
                 </ui:VisualElement>
-                <ui:Label text="MEJORES JUGADORES DE LA TEMPORADA" class="pa-screen-subtitle"/>
+                <ui:Label text="{loc:ui.player_awards.mejores_jugadores_de_la_temporada}" class="pa-screen-subtitle"/>
             </ui:VisualElement>
         </ui:VisualElement>
 
@@ -38,7 +38,7 @@
                 <ui:VisualElement class="pa-player-card pa-player-card--gold">
                     <ui:VisualElement class="pa-card-badge-row">
                         <ui:VisualElement name="MvpBadgeIcon" class="pa-badge-icon"/>
-                        <ui:Label text="MVP DE LA TEMPORADA" class="pa-badge-text"/>
+                        <ui:Label text="{loc:ui.player_awards.mvp_de_la_temporada}" class="pa-badge-text"/>
                     </ui:VisualElement>
                     <ui:VisualElement class="pa-photo-area">
                         <ui:VisualElement name="MvpPhoto" class="pa-player-photo"/>
@@ -49,15 +49,15 @@
                     <ui:VisualElement class="pa-stats-row">
                         <ui:VisualElement class="pa-stat-box">
                             <ui:Label name="MvpPts" text="--" class="pa-stat-val"/>
-                            <ui:Label text="PTS" class="pa-stat-lbl"/>
+                            <ui:Label text="{loc:ui.player_awards.pts}" class="pa-stat-lbl"/>
                         </ui:VisualElement>
                         <ui:VisualElement class="pa-stat-box">
                             <ui:Label name="MvpReb" text="--" class="pa-stat-val"/>
-                            <ui:Label text="REB" class="pa-stat-lbl"/>
+                            <ui:Label text="{loc:ui.player_awards.reb}" class="pa-stat-lbl"/>
                         </ui:VisualElement>
                         <ui:VisualElement class="pa-stat-box">
                             <ui:Label name="MvpAst" text="--" class="pa-stat-val"/>
-                            <ui:Label text="AST" class="pa-stat-lbl"/>
+                            <ui:Label text="{loc:ui.player_awards.ast}" class="pa-stat-lbl"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
@@ -66,7 +66,7 @@
                 <ui:VisualElement class="pa-player-card">
                     <ui:VisualElement class="pa-card-badge-row">
                         <ui:VisualElement name="DpoyBadgeIcon" class="pa-badge-icon"/>
-                        <ui:Label text="MEJOR DEFENSOR" class="pa-badge-text"/>
+                        <ui:Label text="{loc:ui.player_awards.mejor_defensor}" class="pa-badge-text"/>
                     </ui:VisualElement>
                     <ui:VisualElement class="pa-photo-area">
                         <ui:VisualElement name="DpoyPhoto" class="pa-player-photo"/>
@@ -77,11 +77,11 @@
                     <ui:VisualElement class="pa-stats-row">
                         <ui:VisualElement class="pa-stat-box">
                             <ui:Label name="DpoyPts" text="--" class="pa-stat-val"/>
-                            <ui:Label text="ROB" class="pa-stat-lbl"/>
+                            <ui:Label text="{loc:ui.player_awards.rob}" class="pa-stat-lbl"/>
                         </ui:VisualElement>
                         <ui:VisualElement class="pa-stat-box">
                             <ui:Label name="DpoyReb" text="--" class="pa-stat-val"/>
-                            <ui:Label text="TAP" class="pa-stat-lbl"/>
+                            <ui:Label text="{loc:ui.player_awards.tap}" class="pa-stat-lbl"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
@@ -90,7 +90,7 @@
                 <ui:VisualElement class="pa-player-card">
                     <ui:VisualElement class="pa-card-badge-row">
                         <ui:VisualElement name="RookieBadgeIcon" class="pa-badge-icon"/>
-                        <ui:Label text="MEJOR NOVATO" class="pa-badge-text"/>
+                        <ui:Label text="{loc:ui.player_awards.mejor_novato}" class="pa-badge-text"/>
                     </ui:VisualElement>
                     <ui:VisualElement class="pa-photo-area">
                         <ui:VisualElement name="RookiePhoto" class="pa-player-photo"/>
@@ -101,15 +101,15 @@
                     <ui:VisualElement class="pa-stats-row">
                         <ui:VisualElement class="pa-stat-box">
                             <ui:Label name="RookiePts" text="--" class="pa-stat-val"/>
-                            <ui:Label text="PTS" class="pa-stat-lbl"/>
+                            <ui:Label text="{loc:ui.player_awards.pts}" class="pa-stat-lbl"/>
                         </ui:VisualElement>
                         <ui:VisualElement class="pa-stat-box">
                             <ui:Label name="RookieReb" text="--" class="pa-stat-val"/>
-                            <ui:Label text="REB" class="pa-stat-lbl"/>
+                            <ui:Label text="{loc:ui.player_awards.reb}" class="pa-stat-lbl"/>
                         </ui:VisualElement>
                         <ui:VisualElement class="pa-stat-box">
                             <ui:Label name="RookieAst" text="--" class="pa-stat-val"/>
-                            <ui:Label text="AST" class="pa-stat-lbl"/>
+                            <ui:Label text="{loc:ui.player_awards.ast}" class="pa-stat-lbl"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
@@ -118,7 +118,7 @@
                 <ui:VisualElement class="pa-player-card">
                     <ui:VisualElement class="pa-card-badge-row">
                         <ui:VisualElement name="SixthBadgeIcon" class="pa-badge-icon"/>
-                        <ui:Label text="MEJOR SEXTO HOMBRE" class="pa-badge-text"/>
+                        <ui:Label text="{loc:ui.player_awards.mejor_sexto_hombre}" class="pa-badge-text"/>
                     </ui:VisualElement>
                     <ui:VisualElement class="pa-photo-area">
                         <ui:VisualElement name="SixthPhoto" class="pa-player-photo"/>
@@ -129,15 +129,15 @@
                     <ui:VisualElement class="pa-stats-row">
                         <ui:VisualElement class="pa-stat-box">
                             <ui:Label name="SixthPts" text="--" class="pa-stat-val"/>
-                            <ui:Label text="PTS" class="pa-stat-lbl"/>
+                            <ui:Label text="{loc:ui.player_awards.pts}" class="pa-stat-lbl"/>
                         </ui:VisualElement>
                         <ui:VisualElement class="pa-stat-box">
                             <ui:Label name="SixthReb" text="--" class="pa-stat-val"/>
-                            <ui:Label text="REB" class="pa-stat-lbl"/>
+                            <ui:Label text="{loc:ui.player_awards.reb}" class="pa-stat-lbl"/>
                         </ui:VisualElement>
                         <ui:VisualElement class="pa-stat-box">
                             <ui:Label name="SixthAst" text="--" class="pa-stat-val"/>
-                            <ui:Label text="AST" class="pa-stat-lbl"/>
+                            <ui:Label text="{loc:ui.player_awards.ast}" class="pa-stat-lbl"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
@@ -146,7 +146,7 @@
                 <ui:VisualElement class="pa-player-card">
                     <ui:VisualElement class="pa-card-badge-row">
                         <ui:VisualElement name="MipBadgeIcon" class="pa-badge-icon"/>
-                        <ui:Label text="JUGADOR MÁS MEJORADO" class="pa-badge-text"/>
+                        <ui:Label text="{loc:ui.player_awards.jugador_mas_mejorado}" class="pa-badge-text"/>
                     </ui:VisualElement>
                     <ui:VisualElement class="pa-photo-area">
                         <ui:VisualElement name="MipPhoto" class="pa-player-photo"/>
@@ -157,15 +157,15 @@
                     <ui:VisualElement class="pa-stats-row">
                         <ui:VisualElement class="pa-stat-box">
                             <ui:Label name="MipPts" text="--" class="pa-stat-val"/>
-                            <ui:Label text="PTS" class="pa-stat-lbl"/>
+                            <ui:Label text="{loc:ui.player_awards.pts}" class="pa-stat-lbl"/>
                         </ui:VisualElement>
                         <ui:VisualElement class="pa-stat-box">
                             <ui:Label name="MipReb" text="--" class="pa-stat-val"/>
-                            <ui:Label text="REB" class="pa-stat-lbl"/>
+                            <ui:Label text="{loc:ui.player_awards.reb}" class="pa-stat-lbl"/>
                         </ui:VisualElement>
                         <ui:VisualElement class="pa-stat-box">
                             <ui:Label name="MipAst" text="--" class="pa-stat-val"/>
-                            <ui:Label text="AST" class="pa-stat-lbl"/>
+                            <ui:Label text="{loc:ui.player_awards.ast}" class="pa-stat-lbl"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
@@ -179,14 +179,14 @@
                 <ui:VisualElement class="pa-team-card">
                     <ui:VisualElement class="pa-card-badge-row">
                         <ui:VisualElement name="CoachBadgeIcon" class="pa-badge-icon"/>
-                        <ui:Label text="ENTRENADOR DEL AÑO" class="pa-badge-text"/>
+                        <ui:Label text="{loc:ui.player_awards.entrenador_del_ano}" class="pa-badge-text"/>
                     </ui:VisualElement>
                     <ui:VisualElement class="pa-team-card-body">
                         <ui:VisualElement name="CoachPhoto" class="pa-big-team-logo"/>
                         <ui:Label name="CoachName" text="" class="pa-player-name"/>
                         <ui:Label name="CoachTeam" text="" class="pa-player-team"/>
                         <ui:Label name="CoachRecord" text="" class="pa-record-val"/>
-                        <ui:Label name="CoachRecordLabel" text="RÉCORD" class="pa-record-lbl"/>
+                        <ui:Label name="CoachRecordLabel" text="{loc:ui.player_awards.coach_record_label}" class="pa-record-lbl"/>
                     </ui:VisualElement>
                 </ui:VisualElement>
 
@@ -194,13 +194,13 @@
                 <ui:VisualElement class="pa-team-card">
                     <ui:VisualElement class="pa-card-badge-row">
                         <ui:VisualElement name="BestBadgeIcon" class="pa-badge-icon"/>
-                        <ui:Label text="MEJOR EQUIPO" class="pa-badge-text"/>
+                        <ui:Label text="{loc:ui.player_awards.mejor_equipo}" class="pa-badge-text"/>
                     </ui:VisualElement>
                     <ui:VisualElement class="pa-team-card-body">
                         <ui:VisualElement name="BestTeamLogo" class="pa-big-team-logo"/>
                         <ui:Label name="BestTeamName" text="" class="pa-player-name"/>
                         <ui:Label name="BestTeamRecord" text="" class="pa-record-val"/>
-                        <ui:Label text="TEMPORADA REGULAR" class="pa-record-lbl"/>
+                        <ui:Label text="{loc:ui.player_awards.temporada_regular}" class="pa-record-lbl"/>
                     </ui:VisualElement>
                 </ui:VisualElement>
 
@@ -208,13 +208,13 @@
                 <ui:VisualElement class="pa-team-card">
                     <ui:VisualElement class="pa-card-badge-row">
                         <ui:VisualElement name="WorstBadgeIcon" class="pa-badge-icon"/>
-                        <ui:Label text="PEOR EQUIPO" class="pa-badge-text"/>
+                        <ui:Label text="{loc:ui.player_awards.peor_equipo}" class="pa-badge-text"/>
                     </ui:VisualElement>
                     <ui:VisualElement class="pa-team-card-body">
                         <ui:VisualElement name="WorstTeamLogo" class="pa-big-team-logo"/>
                         <ui:Label name="WorstTeamName" text="" class="pa-player-name"/>
                         <ui:Label name="WorstTeamRecord" text="" class="pa-record-val"/>
-                        <ui:Label text="TEMPORADA REGULAR" class="pa-record-lbl"/>
+                        <ui:Label text="{loc:ui.player_awards.temporada_regular}" class="pa-record-lbl"/>
                     </ui:VisualElement>
                 </ui:VisualElement>
 

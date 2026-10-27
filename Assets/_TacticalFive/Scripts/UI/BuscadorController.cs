@@ -313,7 +313,7 @@ public class BuscadorController : UIScreenController
             empty.AddToClassList("stats-empty");
             var emptyLbl = new Label();
             emptyLbl.AddToClassList("stats-empty-label");
-            emptyLbl.text = "NO HAY JUGADORES CON LOS FILTROS SELECCIONADOS";
+            emptyLbl.text = LocalizationService.T("ui.code.buscador_controller.no_hay_jugadores_con_los_filtros_selecci_2ed3bdc9");
             empty.Add(emptyLbl);
             _tableBody.Add(empty);
             return;

@@ -111,8 +111,8 @@ public class QuintosController : UIScreenController
             _headerTeamLogo.style.backgroundImage = new StyleBackground(sprite);
 
         _headerTeamName.text = _myTeam.name.ToUpper();
-        _headerManagerName.text = $"Manager: {_manager.name}";
-        _headerSeason.text = $"Temporada {_season.year_start}-{_season.year_end}";
+        _headerManagerName.text = LocalizationService.T("ui.common.manager", _manager.name);
+        _headerSeason.text = LocalizationService.T("ui.common.season", _season.year_start, _season.year_end);
         if (!string.IsNullOrEmpty(_season.current_date))
         {
             if (DateTime.TryParse(_season.current_date, out var dt))

@@ -17,7 +17,7 @@
             <ui:VisualElement class="screen-header panel--gold">
                 <ui:VisualElement class="screen-header-row">
                     <ui:VisualElement name="LoansScreenIcon" class="screen-icon" />
-                    <ui:Label class="screen-title" text="GESTIÓN DE PRÉSTAMOS BANCARIOS" />
+                    <ui:Label class="screen-title" text="{loc:ui.loans.gestion_de_prestamos_bancarios}" />
                 </ui:VisualElement>
             </ui:VisualElement>
 
@@ -26,13 +26,13 @@
 
                 <!-- FINANCIAL STAFF -->
                 <ui:VisualElement name="FinanceStaffSection" class="fin-staff-section">
-                    <ui:Label class="section-title" text="DIRECTOR FINANCIERO" />
+                    <ui:Label class="section-title" text="{loc:ui.loans.director_financiero}" />
                     <ui:VisualElement name="FinStaffBody" class="fin-staff-body" />
                 </ui:VisualElement>
 
                 <!-- LOAN SLOTS -->
                 <ui:VisualElement name="LoansSection" class="loans-section">
-                    <ui:Label class="section-title" text="PRÉSTAMOS ACTIVOS" />
+                    <ui:Label class="section-title" text="{loc:ui.loans.prestamos_activos}" />
                     <ui:VisualElement name="LoansContainer" class="loans-container" />
 
                 </ui:VisualElement>
@@ -46,12 +46,12 @@
         <!-- ══ MODAL CONFIGURACIÓN ══ -->
         <ui:VisualElement name="ConfigModalOverlay" class="modal-overlay">
             <ui:VisualElement name="ConfigModalBox" class="modal-box">
-                <ui:Label class="modal-title" text="CONFIGURACIÓN" />
+                <ui:Label class="modal-title" text="{loc:ui.loans.configuracion}" />
                 <ui:VisualElement class="modal-body">
                     <ui:VisualElement class="settings-section">
-                        <ui:Label class="settings-section-title" text="AUDIO" />
+                        <ui:Label class="settings-section-title" text="{loc:ui.loans.audio}" />
                         <ui:VisualElement class="settings-row">
-                            <ui:Label class="settings-label" text="Volumen General" />
+                            <ui:Label class="settings-label" text="{loc:ui.loans.volumen_general}" />
                             <ui:VisualElement name="ConfigSliderMaster" class="custom-slider">
                                 <ui:VisualElement class="custom-slider-track" />
                                 <ui:VisualElement name="ConfigFillMaster" class="custom-slider-fill" />
@@ -60,7 +60,7 @@
                             <ui:Label name="ConfigLabelMaster" class="settings-value" text="100%" />
                         </ui:VisualElement>
                         <ui:VisualElement class="settings-row">
-                            <ui:Label class="settings-label" text="Música" />
+                            <ui:Label class="settings-label" text="{loc:ui.loans.musica}" />
                             <ui:VisualElement name="ConfigSliderMusic" class="custom-slider">
                                 <ui:VisualElement class="custom-slider-track" />
                                 <ui:VisualElement name="ConfigFillMusic" class="custom-slider-fill" />
@@ -69,7 +69,7 @@
                             <ui:Label name="ConfigLabelMusic" class="settings-value" text="100%" />
                         </ui:VisualElement>
                         <ui:VisualElement class="settings-row">
-                            <ui:Label class="settings-label" text="Efectos" />
+                            <ui:Label class="settings-label" text="{loc:ui.loans.efectos}" />
                             <ui:VisualElement name="ConfigSliderSFX" class="custom-slider">
                                 <ui:VisualElement class="custom-slider-track" />
                                 <ui:VisualElement name="ConfigFillSFX" class="custom-slider-fill" />
@@ -79,39 +79,39 @@
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement class="settings-section">
-                        <ui:Label class="settings-section-title" text="GRÁFICOS" />
+                        <ui:Label class="settings-section-title" text="{loc:ui.loans.graficos}" />
                         <ui:VisualElement class="settings-quality-row">
-                            <ui:Label class="settings-label" text="Calidad" />
+                            <ui:Label class="settings-label" text="{loc:ui.loans.calidad}" />
                             <ui:VisualElement class="settings-quality-options">
-                                <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="Baja" />
-                                <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="Media" />
-                                <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="Alta" />
-                                <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="Ultra" />
+                                <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="{loc:ui.loans.config_btn_quality_low}" />
+                                <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="{loc:ui.loans.config_btn_quality_medium}" />
+                                <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="{loc:ui.loans.config_btn_quality_high}" />
+                                <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="{loc:ui.loans.config_btn_quality_ultra}" />
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement class="settings-section">
-                        <ui:Label class="settings-section-title" text="JUEGO" />
-                        <ui:Button name="ConfigBtnMainMenu" class="settings-btn settings-btn--secondary" text="VOLVER AL MENÚ PRINCIPAL" />
-                        <ui:Button name="ConfigBtnExit" class="settings-btn settings-btn--danger" text="SALIR DEL JUEGO" />
+                        <ui:Label class="settings-section-title" text="{loc:ui.loans.juego}" />
+                        <ui:Button name="ConfigBtnMainMenu" class="settings-btn settings-btn--secondary" text="{loc:ui.loans.config_btn_main_menu}" />
+                        <ui:Button name="ConfigBtnExit" class="settings-btn settings-btn--danger" text="{loc:ui.loans.config_btn_exit}" />
                     </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:Button name="ConfigBtnCerrar" class="modal-close" text="CERRAR" />
+                <ui:Button name="ConfigBtnCerrar" class="modal-close" text="{loc:ui.loans.config_btn_cerrar}" />
             </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- ══ MODAL CONFIRMAR VOLVER AL MENÚ PRINCIPAL ══ -->
         <ui:VisualElement name="ConfigMainMenuConfirmOverlay" class="modal-overlay">
             <ui:VisualElement name="ConfigMainMenuConfirmBox" class="modal-box">
-                <ui:Label class="modal-title" text="VOLVER AL MENÚ PRINCIPAL" />
+                <ui:Label class="modal-title" text="{loc:ui.loans.volver_al_menu_principal}" />
                 <ui:VisualElement class="modal-body">
-                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres volver al menú principal?" />
-                    <ui:Label class="modal-paragraph" text="Se perderá el progreso no guardado de la partida actual. Asegúrate de haber guardado antes de continuar." />
+                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="{loc:ui.loans.estas_seguro_de_que_quieres_volver_al_me_6f548452}" />
+                    <ui:Label class="modal-paragraph" text="{loc:ui.loans.se_perdera_el_progreso_no_guardado_de_la_b10b7334}" />
                 </ui:VisualElement>
                 <ui:VisualElement class="modal-actions">
-                    <ui:Button name="ConfigBtnMainMenuNo" class="modal-btn modal-btn--secondary" text="NO, QUEDARME" />
+                    <ui:Button name="ConfigBtnMainMenuNo" class="modal-btn modal-btn--secondary" text="{loc:ui.loans.config_btn_main_menu_no}" />
                     <ui:VisualElement class="modal-spacer" />
-                    <ui:Button name="ConfigBtnMainMenuYes" class="modal-btn modal-btn--danger" text="SÍ, VOLVER" />
+                    <ui:Button name="ConfigBtnMainMenuYes" class="modal-btn modal-btn--danger" text="{loc:ui.loans.config_btn_main_menu_yes}" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
@@ -119,15 +119,15 @@
         <!-- ══ MODAL CONFIRMAR SALIR DEL JUEGO ══ -->
         <ui:VisualElement name="ConfigExitConfirmOverlay" class="modal-overlay">
             <ui:VisualElement name="ConfigExitConfirmBox" class="modal-box">
-                <ui:Label class="modal-title" text="SALIR DEL JUEGO" />
+                <ui:Label class="modal-title" text="{loc:ui.loans.salir_del_juego}" />
                 <ui:VisualElement class="modal-body">
-                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres salir del juego?" />
-                    <ui:Label class="modal-paragraph" text="Tu progreso se guarda automáticamente durante la partida. Al volver a cargarla continuarás desde el último estado guardado." />
+                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="{loc:ui.loans.estas_seguro_de_que_quieres_salir_del_ju_c65dd5f1}" />
+                    <ui:Label class="modal-paragraph" text="{loc:ui.loans.tu_progreso_se_guarda_automaticamente_du_10fb1edb}" />
                 </ui:VisualElement>
                 <ui:VisualElement class="modal-actions">
-                    <ui:Button name="ConfigBtnExitNo" class="modal-btn modal-btn--secondary" text="NO" />
+                    <ui:Button name="ConfigBtnExitNo" class="modal-btn modal-btn--secondary" text="{loc:ui.loans.config_btn_exit_no}" />
                     <ui:VisualElement class="modal-spacer" />
-                    <ui:Button name="ConfigBtnExitYes" class="modal-btn modal-btn--danger" text="SÍ, SALIR" />
+                    <ui:Button name="ConfigBtnExitYes" class="modal-btn modal-btn--danger" text="{loc:ui.loans.config_btn_exit_yes}" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>

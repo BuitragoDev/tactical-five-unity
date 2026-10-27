@@ -17,7 +17,7 @@
             <ui:VisualElement class="screen-header panel--gold">
                 <ui:VisualElement class="screen-header-row">
                     <ui:VisualElement name="FinancesScreenIcon" class="screen-icon" />
-                    <ui:Label class="screen-title" text="GESTIÓN FINANCIERA" />
+                    <ui:Label class="screen-title" text="{loc:ui.finances.gestion_financiera}" />
                 </ui:VisualElement>
             </ui:VisualElement>
 
@@ -27,46 +27,46 @@
                 <!-- 4 Summary Boxes -->
                 <ui:VisualElement class="finances-summary">
                     <ui:VisualElement class="finance-summary-box">
-                        <ui:Label class="finance-summary-label" text="PRESUPUESTO" />
+                        <ui:Label class="finance-summary-label" text="{loc:ui.finances.presupuesto}" />
                         <ui:Label name="SummaryBudget" class="finance-summary-value" text="" />
                     </ui:VisualElement>
                     <ui:VisualElement class="finance-summary-box">
-                        <ui:Label class="finance-summary-label" text="NÓMINA ANUAL" />
+                        <ui:Label class="finance-summary-label" text="{loc:ui.finances.nomina_anual}" />
                         <ui:Label name="SummaryAnnualPayroll" class="finance-summary-value" text="" />
                     </ui:VisualElement>
                     <ui:VisualElement class="finance-summary-box">
-                        <ui:Label class="finance-summary-label" text="NÓMINA MENSUAL" />
+                        <ui:Label class="finance-summary-label" text="{loc:ui.finances.nomina_mensual}" />
                         <ui:Label name="SummaryMonthlyPayroll" class="finance-summary-value" text="" />
                     </ui:VisualElement>
                     <ui:VisualElement class="finance-summary-box">
-                        <ui:Label class="finance-summary-label" text="BALANCE NETO" />
+                        <ui:Label class="finance-summary-label" text="{loc:ui.finances.balance_neto}" />
                         <ui:Label name="SummaryNetBalance" class="finance-summary-value" text="" />
                     </ui:VisualElement>
                 </ui:VisualElement>
 
                 <!-- Tabs -->
                 <ui:VisualElement class="finances-tabs">
-                    <ui:Button name="TabTickets"      class="finances-tab finances-tab--active" text="🎫  TAQUILLA" />
-                    <ui:Button name="TabIncome"       class="finances-tab" text="💰  INGRESOS" />
-                    <ui:Button name="TabExpenses"     class="finances-tab" text="💸  GASTOS" />
-                    <ui:Button name="TabCap"          class="finances-tab" text="💼  CAP SHEET" />
-                    <ui:Button name="TabChart"        class="finances-tab" text="📊  GRÁFICO" />
+                    <ui:Button name="TabTickets"      class="finances-tab finances-tab--active" text="{loc:ui.finances.tab_tickets}" />
+                    <ui:Button name="TabIncome"       class="finances-tab" text="{loc:ui.finances.tab_income}" />
+                    <ui:Button name="TabExpenses"     class="finances-tab" text="{loc:ui.finances.tab_expenses}" />
+                    <ui:Button name="TabCap"          class="finances-tab" text="{loc:ui.finances.tab_cap}" />
+                    <ui:Button name="TabChart"        class="finances-tab" text="{loc:ui.finances.tab_chart}" />
                 </ui:VisualElement>
 
                 <!-- Tab Content: TAQUILLA -->
                 <ui:VisualElement name="PanelTickets" class="finances-panel">
                     <ui:VisualElement class="finances-panel-header">
-                        <ui:Label class="finances-panel-title" text="CONFIGURACIÓN DE TAQUILLA" />
+                        <ui:Label class="finances-panel-title" text="{loc:ui.finances.configuracion_de_taquilla}" />
                     </ui:VisualElement>
                     <ui:VisualElement class="tickets-config">
                         <!-- Precio Entrada -->
                         <ui:VisualElement class="ticket-config-col">
-                            <ui:Label class="ticket-config-label" text="PRECIO ENTRADA INDIVIDUAL" />
+                            <ui:Label class="ticket-config-label" text="{loc:ui.finances.precio_entrada_individual}" />
                             <ui:VisualElement name="TicketPriceGrid" class="price-grid" />
                         </ui:VisualElement>
                         <!-- Precio Abono -->
                         <ui:VisualElement class="ticket-config-col">
-                            <ui:Label class="ticket-config-label" text="PRECIO ABONO TEMPORADA" />
+                            <ui:Label class="ticket-config-label" text="{loc:ui.finances.precio_abono_temporada}" />
                             <ui:VisualElement name="SubscriptionPriceGrid" class="price-grid" />
                         </ui:VisualElement>
                     </ui:VisualElement>
@@ -79,11 +79,11 @@
                 <!-- Tab Content: INGRESOS -->
                 <ui:VisualElement name="PanelIncome" class="finances-panel" style="display:none;">
                     <ui:VisualElement class="finances-panel-header">
-                        <ui:Label class="finances-panel-title" text="INGRESOS TOTALES" />
+                        <ui:Label class="finances-panel-title" text="{loc:ui.finances.ingresos_totales}" />
                     </ui:VisualElement>
                     <ui:VisualElement name="IncomeTable" class="finances-table" />
                     <ui:VisualElement class="finances-total-row">
-                        <ui:Label class="finances-total-label" text="TOTAL INGRESOS" />
+                        <ui:Label class="finances-total-label" text="{loc:ui.finances.total_ingresos}" />
                         <ui:Label name="TotalIncomeValue" class="finances-total-value finances-total-value--income" text="$0" />
                     </ui:VisualElement>
                 </ui:VisualElement>
@@ -91,11 +91,11 @@
                 <!-- Tab Content: GASTOS -->
                 <ui:VisualElement name="PanelExpenses" class="finances-panel" style="display:none;">
                     <ui:VisualElement class="finances-panel-header">
-                        <ui:Label class="finances-panel-title" text="GASTOS TOTALES" />
+                        <ui:Label class="finances-panel-title" text="{loc:ui.finances.gastos_totales}" />
                     </ui:VisualElement>
                     <ui:VisualElement name="ExpensesTable" class="finances-table" />
                     <ui:VisualElement class="finances-total-row">
-                        <ui:Label class="finances-total-label" text="TOTAL GASTOS" />
+                        <ui:Label class="finances-total-label" text="{loc:ui.finances.total_gastos}" />
                         <ui:Label name="TotalExpensesValue" class="finances-total-value finances-total-value--expense" text="$0" />
                     </ui:VisualElement>
                 </ui:VisualElement>
@@ -103,58 +103,58 @@
                 <!-- Tab Content: CAP SHEET -->
                 <ui:VisualElement name="PanelCap" class="finances-panel" style="display:none;">
                     <ui:VisualElement class="finances-panel-header">
-                        <ui:Label class="finances-panel-title" text="CAP SHEET — MASA SALARIAL" />
+                        <ui:Label class="finances-panel-title" text="{loc:ui.finances.cap_sheet_masa_salarial}" />
                     </ui:VisualElement>
                     <ui:VisualElement class="cap-summary">
                         <ui:VisualElement class="cap-summary-box">
-                            <ui:Label class="cap-summary-label" text="NÓMINA ACTUAL" />
+                            <ui:Label class="cap-summary-label" text="{loc:ui.finances.nomina_actual}" />
                             <ui:Label name="CapSheetSalaryLabel" class="cap-summary-value" text="" />
                         </ui:VisualElement>
                         <ui:VisualElement class="cap-summary-box">
-                            <ui:Label class="cap-summary-label" text="CAP" />
+                            <ui:Label class="cap-summary-label" text="{loc:ui.finances.cap}" />
                             <ui:Label name="CapSheetCapLabel" class="cap-summary-value" text="" />
                         </ui:VisualElement>
                         <ui:VisualElement class="cap-summary-box">
-                            <ui:Label class="cap-summary-label" text="ESPACIO" />
+                            <ui:Label class="cap-summary-label" text="{loc:ui.finances.espacio}" />
                             <ui:Label name="CapSheetSpaceLabel" class="cap-summary-value" text="" />
                         </ui:VisualElement>
                         <ui:VisualElement class="cap-summary-box">
-                            <ui:Label class="cap-summary-label" text="1º APRON" />
+                            <ui:Label class="cap-summary-label" text="{loc:ui.finances.1o_apron}" />
                             <ui:Label name="CapSheetApronLabel" class="cap-summary-value" text="" />
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement class="cap-section">
-                        <ui:Label class="cap-section-title" text="PROYECCIÓN A 5 AÑOS" />
+                        <ui:Label class="cap-section-title" text="{loc:ui.finances.proyeccion_a_5_anos}" />
                         <ui:VisualElement name="CapProjectionTable" class="cap-projection-table" />
                     </ui:VisualElement>
                     <ui:VisualElement class="cap-section">
-                        <ui:Label class="cap-section-title" text="JUGADORES QUE EXPIRAN" />
+                        <ui:Label class="cap-section-title" text="{loc:ui.finances.jugadores_que_expiran}" />
                         <ui:Label name="CapExpiringLabel" class="cap-expiring-label" text="" />
                         <ui:VisualElement name="CapHoldsContainer" class="cap-holds-container" />
                     </ui:VisualElement>
                     <ui:VisualElement class="cap-section">
-                        <ui:Label class="cap-section-title" text="EXCEPCIONES DISPONIBLES" />
+                        <ui:Label class="cap-section-title" text="{loc:ui.finances.excepciones_disponibles}" />
                         <ui:VisualElement name="CapExceptionsRow" class="cap-exceptions-row">
                             <ui:VisualElement class="cap-exception-box">
-                                <ui:Label class="cap-exception-name" text="NT-MLE" />
+                                <ui:Label class="cap-exception-name" text="{loc:ui.finances.nt_mle}" />
                                 <ui:Label name="CapExceptionNtMle" class="cap-exception-value" text="" />
                             </ui:VisualElement>
                             <ui:VisualElement class="cap-exception-box">
-                                <ui:Label class="cap-exception-name" text="T-MLE" />
+                                <ui:Label class="cap-exception-name" text="{loc:ui.finances.t_mle}" />
                                 <ui:Label name="CapExceptionTMle" class="cap-exception-value" text="" />
                             </ui:VisualElement>
                             <ui:VisualElement class="cap-exception-box">
-                                <ui:Label class="cap-exception-name" text="SALARIO MÍNIMO" />
+                                <ui:Label class="cap-exception-name" text="{loc:ui.finances.salario_minimo}" />
                                 <ui:Label name="CapExceptionMin" class="cap-exception-value" text="" />
                             </ui:VisualElement>
                             <ui:VisualElement class="cap-exception-box">
-                                <ui:Label class="cap-exception-name" text="LUXURY / 2º APRON" />
+                                <ui:Label class="cap-exception-name" text="{loc:ui.finances.luxury_2o_apron}" />
                                 <ui:Label name="CapExceptionApron" class="cap-exception-value" text="" />
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement class="cap-section" name="CapScenarioSection" style="display:none;">
-                        <ui:Label class="cap-section-title" text="ESCENARIO HIPOTÉTICO" />
+                        <ui:Label class="cap-section-title" text="{loc:ui.finances.escenario_hipotetico}" />
                         <ui:VisualElement name="CapScenarioList" class="cap-scenario-list" />
                     </ui:VisualElement>
                 </ui:VisualElement>
@@ -162,7 +162,7 @@
                 <!-- Tab Content: GRÁFICO -->
                 <ui:VisualElement name="PanelChart" class="finances-panel" style="display:none;">
                     <ui:VisualElement class="finances-panel-header">
-                        <ui:Label class="finances-panel-title" text="BALANCE MENSUAL" />
+                        <ui:Label class="finances-panel-title" text="{loc:ui.finances.balance_mensual}" />
                     </ui:VisualElement>
                     <ui:VisualElement name="ChartContainer" class="chart-container">
                         <ui:VisualElement name="ChartBars" class="chart-bars" />
@@ -171,11 +171,11 @@
                     <ui:VisualElement class="chart-legend">
                         <ui:VisualElement class="chart-legend-item">
                             <ui:VisualElement class="chart-legend-dot chart-legend-dot--income" />
-                            <ui:Label class="chart-legend-text" text="Superávit" />
+                            <ui:Label class="chart-legend-text" text="{loc:ui.finances.superavit}" />
                         </ui:VisualElement>
                         <ui:VisualElement class="chart-legend-item">
                             <ui:VisualElement class="chart-legend-dot chart-legend-dot--expense" />
-                            <ui:Label class="chart-legend-text" text="Déficit" />
+                            <ui:Label class="chart-legend-text" text="{loc:ui.finances.deficit}" />
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
@@ -189,12 +189,12 @@
         <!-- ══ MODAL CONFIGURACIÓN ══ -->
         <ui:VisualElement name="ConfigModalOverlay" class="modal-overlay">
             <ui:VisualElement name="ConfigModalBox" class="modal-box">
-                <ui:Label class="modal-title" text="CONFIGURACIÓN" />
+                <ui:Label class="modal-title" text="{loc:ui.finances.configuracion}" />
                 <ui:VisualElement class="modal-body">
                     <ui:VisualElement class="settings-section">
-                        <ui:Label class="settings-section-title" text="AUDIO" />
+                        <ui:Label class="settings-section-title" text="{loc:ui.finances.audio}" />
                         <ui:VisualElement class="settings-row">
-                            <ui:Label class="settings-label" text="Volumen General" />
+                            <ui:Label class="settings-label" text="{loc:ui.finances.volumen_general}" />
                             <ui:VisualElement name="ConfigSliderMaster" class="custom-slider">
                                 <ui:VisualElement class="custom-slider-track" />
                                 <ui:VisualElement name="ConfigFillMaster" class="custom-slider-fill" />
@@ -203,7 +203,7 @@
                             <ui:Label name="ConfigLabelMaster" class="settings-value" text="100%" />
                         </ui:VisualElement>
                         <ui:VisualElement class="settings-row">
-                            <ui:Label class="settings-label" text="Música" />
+                            <ui:Label class="settings-label" text="{loc:ui.finances.musica}" />
                             <ui:VisualElement name="ConfigSliderMusic" class="custom-slider">
                                 <ui:VisualElement class="custom-slider-track" />
                                 <ui:VisualElement name="ConfigFillMusic" class="custom-slider-fill" />
@@ -212,7 +212,7 @@
                             <ui:Label name="ConfigLabelMusic" class="settings-value" text="100%" />
                         </ui:VisualElement>
                         <ui:VisualElement class="settings-row">
-                            <ui:Label class="settings-label" text="Efectos" />
+                            <ui:Label class="settings-label" text="{loc:ui.finances.efectos}" />
                             <ui:VisualElement name="ConfigSliderSFX" class="custom-slider">
                                 <ui:VisualElement class="custom-slider-track" />
                                 <ui:VisualElement name="ConfigFillSFX" class="custom-slider-fill" />
@@ -222,39 +222,39 @@
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement class="settings-section">
-                        <ui:Label class="settings-section-title" text="GRÁFICOS" />
+                        <ui:Label class="settings-section-title" text="{loc:ui.finances.graficos}" />
                         <ui:VisualElement class="settings-quality-row">
-                            <ui:Label class="settings-label" text="Calidad" />
+                            <ui:Label class="settings-label" text="{loc:ui.finances.calidad}" />
                             <ui:VisualElement class="settings-quality-options">
-                                <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="Baja" />
-                                <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="Media" />
-                                <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="Alta" />
-                                <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="Ultra" />
+                                <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="{loc:ui.finances.config_btn_quality_low}" />
+                                <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="{loc:ui.finances.config_btn_quality_medium}" />
+                                <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="{loc:ui.finances.config_btn_quality_high}" />
+                                <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="{loc:ui.finances.config_btn_quality_ultra}" />
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement class="settings-section">
-                        <ui:Label class="settings-section-title" text="JUEGO" />
-                        <ui:Button name="ConfigBtnMainMenu" class="settings-btn settings-btn--secondary" text="VOLVER AL MENÚ PRINCIPAL" />
-                        <ui:Button name="ConfigBtnExit" class="settings-btn settings-btn--danger" text="SALIR DEL JUEGO" />
+                        <ui:Label class="settings-section-title" text="{loc:ui.finances.juego}" />
+                        <ui:Button name="ConfigBtnMainMenu" class="settings-btn settings-btn--secondary" text="{loc:ui.finances.config_btn_main_menu}" />
+                        <ui:Button name="ConfigBtnExit" class="settings-btn settings-btn--danger" text="{loc:ui.finances.config_btn_exit}" />
                     </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:Button name="ConfigBtnCerrar" class="modal-close" text="CERRAR" />
+                <ui:Button name="ConfigBtnCerrar" class="modal-close" text="{loc:ui.finances.config_btn_cerrar}" />
             </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- ══ MODAL CONFIRMAR VOLVER AL MENÚ PRINCIPAL ══ -->
         <ui:VisualElement name="ConfigMainMenuConfirmOverlay" class="modal-overlay">
             <ui:VisualElement name="ConfigMainMenuConfirmBox" class="modal-box">
-                <ui:Label class="modal-title" text="VOLVER AL MENÚ PRINCIPAL" />
+                <ui:Label class="modal-title" text="{loc:ui.finances.volver_al_menu_principal}" />
                 <ui:VisualElement class="modal-body">
-                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres volver al menú principal?" />
-                    <ui:Label class="modal-paragraph" text="Se perderá el progreso no guardado de la partida actual. Asegúrate de haber guardado antes de continuar." />
+                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="{loc:ui.finances.estas_seguro_de_que_quieres_volver_al_me_6f548452}" />
+                    <ui:Label class="modal-paragraph" text="{loc:ui.finances.se_perdera_el_progreso_no_guardado_de_la_b10b7334}" />
                 </ui:VisualElement>
                 <ui:VisualElement class="modal-actions">
-                    <ui:Button name="ConfigBtnMainMenuNo" class="modal-btn modal-btn--secondary" text="NO, QUEDARME" />
+                    <ui:Button name="ConfigBtnMainMenuNo" class="modal-btn modal-btn--secondary" text="{loc:ui.finances.config_btn_main_menu_no}" />
                     <ui:VisualElement class="modal-spacer" />
-                    <ui:Button name="ConfigBtnMainMenuYes" class="modal-btn modal-btn--danger" text="SÍ, VOLVER" />
+                    <ui:Button name="ConfigBtnMainMenuYes" class="modal-btn modal-btn--danger" text="{loc:ui.finances.config_btn_main_menu_yes}" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
@@ -262,15 +262,15 @@
         <!-- ══ MODAL CONFIRMAR SALIR DEL JUEGO ══ -->
         <ui:VisualElement name="ConfigExitConfirmOverlay" class="modal-overlay">
             <ui:VisualElement name="ConfigExitConfirmBox" class="modal-box">
-                <ui:Label class="modal-title" text="SALIR DEL JUEGO" />
+                <ui:Label class="modal-title" text="{loc:ui.finances.salir_del_juego}" />
                 <ui:VisualElement class="modal-body">
-                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres salir del juego?" />
-                    <ui:Label class="modal-paragraph" text="Tu progreso se guarda automáticamente durante la partida. Al volver a cargarla continuarás desde el último estado guardado." />
+                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="{loc:ui.finances.estas_seguro_de_que_quieres_salir_del_ju_c65dd5f1}" />
+                    <ui:Label class="modal-paragraph" text="{loc:ui.finances.tu_progreso_se_guarda_automaticamente_du_10fb1edb}" />
                 </ui:VisualElement>
                 <ui:VisualElement class="modal-actions">
-                    <ui:Button name="ConfigBtnExitNo" class="modal-btn modal-btn--secondary" text="NO" />
+                    <ui:Button name="ConfigBtnExitNo" class="modal-btn modal-btn--secondary" text="{loc:ui.finances.config_btn_exit_no}" />
                     <ui:VisualElement class="modal-spacer" />
-                    <ui:Button name="ConfigBtnExitYes" class="modal-btn modal-btn--danger" text="SÍ, SALIR" />
+                    <ui:Button name="ConfigBtnExitYes" class="modal-btn modal-btn--danger" text="{loc:ui.finances.config_btn_exit_yes}" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>

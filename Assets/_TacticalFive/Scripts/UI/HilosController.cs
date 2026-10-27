@@ -46,7 +46,7 @@ public class HilosController : UIScreenController
         var storylines = DatabaseManager.Instance.GetStorylineHistory(_manager.id, _myTeam.id);
         if (storylines.Count == 0)
         {
-            var empty = new Label("Todavía no hay hilos: las rachas, el descontento y los momentos de forma aparecerán aquí.");
+            var empty = new Label(LocalizationService.T("ui.code.hilos_controller.todavia_no_hay_hilos_las_rachas_el_desco_4e6e8dcd"));
             empty.AddToClassList("historia-empty");
             _historiaBody.Add(empty);
             return;

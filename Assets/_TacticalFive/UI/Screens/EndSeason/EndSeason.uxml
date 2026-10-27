@@ -15,8 +15,8 @@
                     <ui:Label name="HeaderSeason" class="header-season-label" text=""/>
                 </ui:VisualElement>
                 <ui:Label name="HeaderDate" class="header-date-label" text=""/>
-                <ui:Button name="BtnLottery" class="btn-lottery" text="LOTERIA DRAFT"/>
-                <ui:Button name="BtnNextSeason" class="btn-action" text="FINALIZAR DRAFT"/>
+                <ui:Button name="BtnLottery" class="btn-lottery" text="{loc:ui.end_season.btn_lottery}"/>
+                <ui:Button name="BtnNextSeason" class="btn-action" text="{loc:ui.end_season.btn_next_season}"/>
             </ui:VisualElement>
         </ui:VisualElement>
 
@@ -24,9 +24,9 @@
         <ui:VisualElement name="ContentArea" class="content-area">
             <!-- PAGE TITLE (shown before draft starts) -->
             <ui:VisualElement name="PreDraftHeader" class="end-season-header">
-                <ui:Label text="Fin de Temporada" class="page-title"/>
+                <ui:Label text="{loc:ui.end_season.fin_de_temporada}" class="page-title"/>
                 <ui:Label name="SeasonTag" text="" class="season-tag"/>
-                <ui:Label name="PageSubtitle" text="CIERRE DE UNA ERA, COMIENZO DE UNA NUEVA." class="page-subtitle"/>
+                <ui:Label name="PageSubtitle" text="{loc:ui.end_season.page_subtitle}" class="page-subtitle"/>
             </ui:VisualElement>
 
             <!-- PRE-DRAFT: retiring + fame lists + draft card (hidden once draft starts) -->
@@ -37,7 +37,7 @@
                     <ui:VisualElement class="es-panel es-panel--retiring">
                         <ui:VisualElement class="es-panel-overlay"/>
                         <ui:VisualElement class="es-panel-content">
-                            <ui:Label text="JUGADORES RETIRADOS" class="es-panel-title"/>
+                            <ui:Label text="{loc:ui.end_season.jugadores_retirados}" class="es-panel-title"/>
                             <ui:VisualElement class="es-pre-pagination-row">
                                 <ui:Button name="BtnRetiringPrev" class="es-pre-page-btn">
                                     <ui:Label text="◀" class="draft-page-icon"/>
@@ -53,7 +53,7 @@
                     <ui:VisualElement name="FamePanel" class="es-panel es-panel--fame">
                         <ui:VisualElement class="es-panel-overlay"/>
                         <ui:VisualElement class="es-panel-content">
-                            <ui:Label text="SALÓN DE LA FAMA" class="es-panel-title"/>
+                            <ui:Label text="{loc:ui.end_season.salon_de_la_fama}" class="es-panel-title"/>
                             <ui:VisualElement class="es-pre-pagination-row">
                                 <ui:Button name="BtnFamePrev" class="es-pre-page-btn">
                                     <ui:Label text="◀" class="draft-page-icon"/>
@@ -72,26 +72,26 @@
                     <ui:VisualElement class="es-panel es-panel--draft">
                         <ui:VisualElement class="es-panel-overlay"/>
                         <ui:VisualElement class="es-panel-content es-draft-card-content">
-                            <ui:Label name="DraftYearTitle" class="es-draft-title" text="DRAFT"/>
+                            <ui:Label name="DraftYearTitle" class="es-draft-title" text="{loc:ui.end_season.draft_year_title}"/>
                             <ui:Label name="DraftYearLabel" class="es-draft-year" text="2025"/>
                             <ui:VisualElement class="es-draft-features">
                                 <ui:VisualElement class="es-draft-feature">
                                     <ui:VisualElement name="DraftIconTalents" class="es-draft-feature-icon-img"/>
-                                    <ui:Label text="NUEVOS TALENTOS" class="es-draft-feature-title"/>
-                                    <ui:Label text="75 PROSPECTOS DISPONIBLES" class="es-draft-feature-sub"/>
+                                    <ui:Label text="{loc:ui.end_season.nuevos_talentos}" class="es-draft-feature-title"/>
+                                    <ui:Label text="{loc:ui.end_season.75_prospectos_disponibles}" class="es-draft-feature-sub"/>
                                 </ui:VisualElement>
                                 <ui:VisualElement class="es-draft-feature">
                                     <ui:VisualElement name="DraftIconOpps" class="es-draft-feature-icon-img"/>
-                                    <ui:Label text="NUEVAS OPORTUNIDADES" class="es-draft-feature-title"/>
-                                    <ui:Label text="EL FUTURO DE TU FRANQUICIA" class="es-draft-feature-sub"/>
+                                    <ui:Label text="{loc:ui.end_season.nuevas_oportunidades}" class="es-draft-feature-title"/>
+                                    <ui:Label text="{loc:ui.end_season.el_futuro_de_tu_franquicia}" class="es-draft-feature-sub"/>
                                 </ui:VisualElement>
                                 <ui:VisualElement class="es-draft-feature">
                                     <ui:VisualElement name="DraftIconStories" class="es-draft-feature-icon-img"/>
-                                    <ui:Label text="GRANDES HISTORIAS" class="es-draft-feature-title"/>
-                                    <ui:Label text="NACEN AQUÍ" class="es-draft-feature-sub"/>
+                                    <ui:Label text="{loc:ui.end_season.grandes_historias}" class="es-draft-feature-title"/>
+                                    <ui:Label text="{loc:ui.end_season.nacen_aqui}" class="es-draft-feature-sub"/>
                                 </ui:VisualElement>
                             </ui:VisualElement>
-                            <ui:Button name="BtnDraft" class="btn-draft" text="EMPEZAR DRAFT 2027"/>
+                            <ui:Button name="BtnDraft" class="btn-draft" text="{loc:ui.end_season.btn_draft}"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
@@ -103,12 +103,12 @@
                 <ui:VisualElement class="draft-banner">
                     <ui:VisualElement class="draft-banner-overlay"/>
                     <ui:VisualElement class="draft-banner-left">
-                        <ui:Label class="draft-banner-title" text="DRAFT DE LA NBA"/>
-                        <ui:Label class="draft-banner-subtitle" text="Selecciona el próximo gran talento de la NBA"/>
+                        <ui:Label class="draft-banner-title" text="{loc:ui.end_season.draft_de_la_nba}"/>
+                        <ui:Label class="draft-banner-subtitle" text="{loc:ui.end_season.selecciona_el_proximo_gran_talento_de_la_d0548274}"/>
                     </ui:VisualElement>
                     <ui:VisualElement class="draft-banner-pick-box">
-                        <ui:Label name="DraftBannerRound" class="draft-banner-round" text="Ronda 1"/>
-                        <ui:Label name="DraftBannerPick" class="draft-banner-pick" text="Pick 1"/>
+                        <ui:Label name="DraftBannerRound" class="draft-banner-round" text="{loc:ui.end_season.draft_banner_round}"/>
+                        <ui:Label name="DraftBannerPick" class="draft-banner-pick" text="{loc:ui.end_season.draft_banner_pick}"/>
                     </ui:VisualElement>
                 </ui:VisualElement>
 
@@ -117,7 +117,7 @@
                     <!-- LEFT: Available Prospects -->
                     <ui:VisualElement class="draft-col-left">
                         <ui:VisualElement class="draft-col-header">
-                            <ui:Label text="JUGADORES DISPONIBLES" class="draft-col-title"/>
+                            <ui:Label text="{loc:ui.end_season.jugadores_disponibles}" class="draft-col-title"/>
                             <ui:Label name="ProspectCount" class="draft-col-count" text="60"/>
                         </ui:VisualElement>
                         <ui:VisualElement name="ProspectList" class="draft-list-body"/>
@@ -125,7 +125,7 @@
                             <ui:Button name="BtnProspectPrev" class="draft-page-btn">
                                 <ui:Label text="◀" class="draft-page-icon"/>
                             </ui:Button>
-                            <ui:Label name="ProspectPageLabel" class="draft-page-label" text="1 de 1"/>
+                            <ui:Label name="ProspectPageLabel" class="draft-page-label" text="{loc:ui.end_season.prospect_page_label}"/>
                             <ui:Button name="BtnProspectNext" class="draft-page-btn">
                                 <ui:Label text="▶" class="draft-page-icon"/>
                             </ui:Button>
@@ -146,7 +146,7 @@
                                     <ui:Label name="DraftCardPickPos" class="draft-card-pick-pos" text=""/>
                                 </ui:VisualElement>
                                 <ui:VisualElement class="draft-card-info">
-                                    <ui:Label name="DraftCardName" class="draft-card-name" text="Selecciona un prospecto"/>
+                                    <ui:Label name="DraftCardName" class="draft-card-name" text="{loc:ui.end_season.draft_card_name}"/>
                                     <ui:Label name="DraftCardCollege" class="draft-card-college" text=""/>
                                     <ui:Label name="DraftCardBio" class="draft-card-bio" text=""/>
                                 </ui:VisualElement>
@@ -159,35 +159,35 @@
                             <!-- Stat boxes -->
                             <ui:VisualElement class="draft-stat-boxes">
                                 <ui:VisualElement class="draft-stat-box">
-                                    <ui:Label class="draft-stat-label" text="TIRO"/>
+                                    <ui:Label class="draft-stat-label" text="{loc:ui.end_season.tiro}"/>
                                     <ui:Label name="DraftStatShooting" class="draft-stat-value" text="--"/>
                                 </ui:VisualElement>
                                 <ui:VisualElement class="draft-stat-box">
-                                    <ui:Label class="draft-stat-label" text="TRIPLE"/>
+                                    <ui:Label class="draft-stat-label" text="{loc:ui.end_season.triple}"/>
                                     <ui:Label name="DraftStat3pt" class="draft-stat-value" text="--"/>
                                 </ui:VisualElement>
                                 <ui:VisualElement class="draft-stat-box">
-                                    <ui:Label class="draft-stat-label" text="PASES"/>
+                                    <ui:Label class="draft-stat-label" text="{loc:ui.end_season.pases}"/>
                                     <ui:Label name="DraftStatPassing" class="draft-stat-value" text="--"/>
                                 </ui:VisualElement>
                                 <ui:VisualElement class="draft-stat-box">
-                                    <ui:Label class="draft-stat-label" text="BOTE"/>
+                                    <ui:Label class="draft-stat-label" text="{loc:ui.end_season.bote}"/>
                                     <ui:Label name="DraftStatDribbling" class="draft-stat-value" text="--"/>
                                 </ui:VisualElement>
                                 <ui:VisualElement class="draft-stat-box">
-                                    <ui:Label class="draft-stat-label" text="DEFENSA"/>
+                                    <ui:Label class="draft-stat-label" text="{loc:ui.end_season.defensa}"/>
                                     <ui:Label name="DraftStatDefense" class="draft-stat-value" text="--"/>
                                 </ui:VisualElement>
                                 <ui:VisualElement class="draft-stat-box">
-                                    <ui:Label class="draft-stat-label" text="REBOTES"/>
+                                    <ui:Label class="draft-stat-label" text="{loc:ui.end_season.rebotes}"/>
                                     <ui:Label name="DraftStatRebounding" class="draft-stat-value" text="--"/>
                                 </ui:VisualElement>
                                 <ui:VisualElement class="draft-stat-box">
-                                    <ui:Label class="draft-stat-label" text="ROBOS"/>
+                                    <ui:Label class="draft-stat-label" text="{loc:ui.end_season.robos}"/>
                                     <ui:Label name="DraftStatSteals" class="draft-stat-value" text="--"/>
                                 </ui:VisualElement>
                                 <ui:VisualElement class="draft-stat-box">
-                                    <ui:Label class="draft-stat-label" text="TAPONES"/>
+                                    <ui:Label class="draft-stat-label" text="{loc:ui.end_season.tapones}"/>
                                     <ui:Label name="DraftStatBlocks" class="draft-stat-value" text="--"/>
                                 </ui:VisualElement>
                             </ui:VisualElement>
@@ -197,38 +197,38 @@
 
                             <!-- Team Needs -->
                             <ui:VisualElement class="draft-team-needs">
-                                <ui:Label class="draft-needs-title" text="NECESIDADES DEL EQUIPO"/>
+                                <ui:Label class="draft-needs-title" text="{loc:ui.end_season.necesidades_del_equipo}"/>
                                 <ui:VisualElement name="DraftTeamLogo" class="draft-team-logo"/>
                                 <ui:VisualElement class="draft-needs-row">
                                     <ui:VisualElement class="draft-need">
                                         <ui:VisualElement name="DraftNeedPG" class="draft-need-badge">
                                             <ui:Label name="DraftNeedPGVal" class="draft-need-val" text="--"/>
                                         </ui:VisualElement>
-                                        <ui:Label class="draft-need-pos" text="B"/>
+                                        <ui:Label class="draft-need-pos" text="{loc:ui.end_season.b}"/>
                                     </ui:VisualElement>
                                     <ui:VisualElement class="draft-need">
                                         <ui:VisualElement name="DraftNeedSG" class="draft-need-badge">
                                             <ui:Label name="DraftNeedSGVal" class="draft-need-val" text="--"/>
                                         </ui:VisualElement>
-                                        <ui:Label class="draft-need-pos" text="E"/>
+                                        <ui:Label class="draft-need-pos" text="{loc:ui.end_season.e}"/>
                                     </ui:VisualElement>
                                     <ui:VisualElement class="draft-need">
                                         <ui:VisualElement name="DraftNeedSF" class="draft-need-badge">
                                             <ui:Label name="DraftNeedSFVal" class="draft-need-val" text="--"/>
                                         </ui:VisualElement>
-                                        <ui:Label class="draft-need-pos" text="AL"/>
+                                        <ui:Label class="draft-need-pos" text="{loc:ui.end_season.al}"/>
                                     </ui:VisualElement>
                                     <ui:VisualElement class="draft-need">
                                         <ui:VisualElement name="DraftNeedPF" class="draft-need-badge">
                                             <ui:Label name="DraftNeedPFVal" class="draft-need-val" text="--"/>
                                         </ui:VisualElement>
-                                        <ui:Label class="draft-need-pos" text="AP"/>
+                                        <ui:Label class="draft-need-pos" text="{loc:ui.end_season.ap}"/>
                                     </ui:VisualElement>
                                     <ui:VisualElement class="draft-need">
                                         <ui:VisualElement name="DraftNeedC" class="draft-need-badge">
                                             <ui:Label name="DraftNeedCVal" class="draft-need-val" text="--"/>
                                         </ui:VisualElement>
-                                        <ui:Label class="draft-need-pos" text="P"/>
+                                        <ui:Label class="draft-need-pos" text="{loc:ui.end_season.p}"/>
                                     </ui:VisualElement>
                                 </ui:VisualElement>
                             </ui:VisualElement>
@@ -236,22 +236,22 @@
 
                         <!-- Action Buttons -->
                         <ui:VisualElement class="draft-actions">
-                            <ui:Button name="BtnDraftPick" class="btn-draft-pick" text="SELECCIONAR JUGADOR"/>
-                            <ui:Button name="BtnAutoPick" class="btn-auto-pick" text="AUTO"/>
+                            <ui:Button name="BtnDraftPick" class="btn-draft-pick" text="{loc:ui.end_season.btn_draft_pick}"/>
+                            <ui:Button name="BtnAutoPick" class="btn-auto-pick" text="{loc:ui.end_season.btn_auto_pick}"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
 
                     <!-- RIGHT: Draft Log -->
                     <ui:VisualElement class="draft-col-right">
                         <ui:VisualElement class="draft-col-header">
-                            <ui:Label text="ORDEN DEL DRAFT" class="draft-col-title"/>
+                            <ui:Label text="{loc:ui.end_season.orden_del_draft}" class="draft-col-title"/>
                         </ui:VisualElement>
                         <ui:VisualElement name="DraftLog" class="draft-list-body"/>
                         <ui:VisualElement class="draft-pagination">
                             <ui:Button name="BtnLogPrev" class="draft-page-btn">
                                 <ui:Label text="◀" class="draft-page-icon"/>
                             </ui:Button>
-                            <ui:Label name="LogPageLabel" class="draft-page-label" text="1 de 1"/>
+                            <ui:Label name="LogPageLabel" class="draft-page-label" text="{loc:ui.end_season.log_page_label}"/>
                             <ui:Button name="BtnLogNext" class="draft-page-btn">
                                 <ui:Label text="▶" class="draft-page-icon"/>
                             </ui:Button>

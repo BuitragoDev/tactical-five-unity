@@ -608,7 +608,7 @@ public class EditorController : UIScreenController
         bannerContent.Add(bannerInfo);
 
         var btnChangeLogo = new Button();
-        btnChangeLogo.text = "CAMBIAR LOGO";
+        btnChangeLogo.text = LocalizationService.T("ui.code.editor_controller.cambiar_logo");
         btnChangeLogo.AddToClassList("editor-banner-btn");
         btnChangeLogo.clicked += () => { PlayClick(); ChangeLogo(t); };
         CursorManager.Instance?.RegisterHandCursor(btnChangeLogo);
@@ -683,7 +683,7 @@ public class EditorController : UIScreenController
         stadiumPanel.Add(statsRow);
 
         var btnChangeArena = new Button();
-        btnChangeArena.text = "CAMBIAR IMAGEN";
+        btnChangeArena.text = LocalizationService.T("ui.code.editor_controller.cambiar_imagen");
         btnChangeArena.AddToClassList("editor-stadium-btn");
         btnChangeArena.clicked += () => { PlayClick(); ChangeArena(t); };
         CursorManager.Instance?.RegisterHandCursor(btnChangeArena);
@@ -956,7 +956,7 @@ public class EditorController : UIScreenController
         // País: caja de solo lectura + botón CAMBIAR (modal con la lista de países).
         var natRow = new VisualElement();
         natRow.AddToClassList("editor-field-row");
-        var natLbl = new Label("País");
+        var natLbl = new Label(LocalizationService.T("ui.code.editor_controller.pais"));
         natLbl.AddToClassList("editor-field-label");
         natRow.Add(natLbl);
 
@@ -967,7 +967,7 @@ public class EditorController : UIScreenController
         natRow.Add(_playerNat);
 
         var natBtn = new Button();
-        natBtn.text = "CAMBIAR";
+        natBtn.text = LocalizationService.T("ui.code.editor_controller.cambiar");
         natBtn.AddToClassList("editor-field-btn");
         natBtn.clicked += () => { PlayClick(); OpenCountryModal(); };
         CursorManager.Instance?.RegisterHandCursor(natBtn);
@@ -1053,7 +1053,7 @@ public class EditorController : UIScreenController
         photoCol.Add(photo);
 
         var btnPhoto = new Button();
-        btnPhoto.text = "CAMBIAR IMAGEN";
+        btnPhoto.text = LocalizationService.T("ui.code.editor_controller.cambiar_imagen");
         btnPhoto.AddToClassList("editor-player-banner-photo-btn");
         btnPhoto.clicked += () => { PlayClick(); ChangePlayerPhoto(p); };
         CursorManager.Instance?.RegisterHandCursor(btnPhoto);
@@ -1302,7 +1302,7 @@ public class EditorController : UIScreenController
         box.AddToClassList("editor-country-box");
         _countryOverlay.Add(box);
 
-        var title = new Label("SELECCIONA UN PAÍS");
+        var title = new Label(LocalizationService.T("ui.code.editor_controller.selecciona_un_pais"));
         title.AddToClassList("editor-browser-title");
         box.Add(title);
 
@@ -1328,7 +1328,7 @@ public class EditorController : UIScreenController
         var actions = new VisualElement();
         actions.AddToClassList("editor-browser-actions");
         var cancel = new Button();
-        cancel.text = "CANCELAR";
+        cancel.text = LocalizationService.T("ui.code.editor_controller.cancelar");
         cancel.AddToClassList("editor-country-cancel");
         cancel.clicked += () => { PlayClick(); CloseCountryModal(); };
         CursorManager.Instance?.RegisterHandCursor(cancel);
@@ -1774,7 +1774,7 @@ public class EditorController : UIScreenController
         closeBtn.clicked += () => { PlayClick(); CloseToast(); };
         closeBtn.AddToClassList("editor-modal-btn");
         if (isError) closeBtn.AddToClassList("editor-modal-btn--danger");
-        closeBtn.text = "CERRAR";
+        closeBtn.text = LocalizationService.T("ui.code.editor_controller.cerrar");
         CursorManager.Instance?.RegisterHandCursor(closeBtn);
         actions.Add(closeBtn);
     }
@@ -1818,14 +1818,14 @@ public class EditorController : UIScreenController
         actions.AddToClassList("editor-modal-actions");
         box.Add(actions);
 
-        var cancelBtn = new Button { text = "CANCELAR" };
+        var cancelBtn = new Button { text = LocalizationService.T("ui.code.editor_controller.cancelar") };
         cancelBtn.clicked += () => { PlayClick(); CloseToast(); };
         cancelBtn.AddToClassList("editor-modal-btn");
         cancelBtn.AddToClassList("editor-modal-btn--secondary");
         CursorManager.Instance?.RegisterHandCursor(cancelBtn);
         actions.Add(cancelBtn);
 
-        var confirmBtn = new Button { text = "RESETEAR" };
+        var confirmBtn = new Button { text = LocalizationService.T("ui.code.editor_controller.resetear") };
         confirmBtn.clicked += () => { PlayClick(); CloseToast(); onConfirm(); };
         confirmBtn.AddToClassList("editor-modal-btn");
         confirmBtn.AddToClassList("editor-modal-btn--danger");
@@ -1870,7 +1870,7 @@ public class EditorController : UIScreenController
         var actions = new VisualElement();
         actions.AddToClassList("editor-browser-actions");
         var cancel = new Button();
-        cancel.text = "CANCELAR";
+        cancel.text = LocalizationService.T("ui.code.editor_controller.cancelar");
         cancel.AddToClassList("editor-browser-btn");
         cancel.AddToClassList("editor-browser-btn--cancel");
         cancel.clicked += () => { PlayClick(); CloseFileBrowser(); };
@@ -1902,7 +1902,7 @@ public class EditorController : UIScreenController
             }
             catch (System.Exception ex)
             {
-                pathBar.text = "No se puede abrir la carpeta: " + ex.Message;
+                pathBar.text = LocalizationService.T("ui.code.editor_controller.no_se_puede_abrir_la_carpeta") + ex.Message;
             }
         }
 

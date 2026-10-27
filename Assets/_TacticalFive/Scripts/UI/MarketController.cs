@@ -448,7 +448,7 @@ public class MarketController : UIScreenController
         _marketClosedOverlay.style.display = windowOpen ? DisplayStyle.None : DisplayStyle.Flex;
 
         SetNegotiateButton(false);
-        _root.Q<Label>("NegotiateBtnText").text = "SELECCIONA UN EQUIPO PARA NEGOCIAR";
+        _root.Q<Label>("NegotiateBtnText").text = LocalizationService.T("ui.code.market_controller.selecciona_un_equipo_para_negociar");
 
         if (!windowOpen) return;
 
@@ -484,7 +484,7 @@ public class MarketController : UIScreenController
             _root.Q<VisualElement>("HeaderTeamLogo").style.backgroundImage = new StyleBackground(sprite);
 
         _root.Q<Label>("HeaderTeamName").text = _myTeam.name.ToUpper();
-        _root.Q<Label>("HeaderManagerName").text = $"Manager: {_manager.name}";
+        _root.Q<Label>("HeaderManagerName").text = LocalizationService.T("ui.common.manager", _manager.name);
         var budgetLabel = _root.Q<Label>("HeaderBudget");
         budgetLabel.text = $"${_myTeam.budget / 1_000_000}M";
         budgetLabel.style.color = _myTeam.budget < 0
@@ -518,11 +518,11 @@ public class MarketController : UIScreenController
 
         if (_season != null)
         {
-            _root.Q<Label>("HeaderSeason").text = $"Temporada {_season.year_start}-{_season.year_end}";
+            _root.Q<Label>("HeaderSeason").text = LocalizationService.T("ui.common.season", _season.year_start, _season.year_end);
             _root.Q<Label>("HeaderDate").text = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
         }
 
-        _btnAction.text = "MENÚ PRINCIPAL";
+        _btnAction.text = LocalizationService.T("ui.code.market_controller.menu_principal");
 
         var countdownBar = _root.Q<VisualElement>("DeadlineCountdownBar");
         var countdownText = _root.Q<Label>("DeadlineCountdownText");
@@ -763,23 +763,23 @@ public class MarketController : UIScreenController
     void PopulateTradeTableHeader(VisualElement header)
     {
         header.Clear();
-        var name = new Label("JUGADOR");
+        var name = new Label(LocalizationService.T("ui.code.market_controller.jugador"));
         name.AddToClassList("market-table-header-label");
         name.AddToClassList("market-table-header-name");
         header.Add(name);
-        var pos = new Label("POS");
+        var pos = new Label(LocalizationService.T("ui.code.market_controller.pos"));
         pos.AddToClassList("market-table-header-label");
         pos.AddToClassList("market-table-header-pos");
         header.Add(pos);
-        var ovr = new Label("MED");
+        var ovr = new Label(LocalizationService.T("ui.code.market_controller.med"));
         ovr.AddToClassList("market-table-header-label");
         ovr.AddToClassList("market-table-header-ovr");
         header.Add(ovr);
-        var salary = new Label("SALARIO");
+        var salary = new Label(LocalizationService.T("ui.code.market_controller.salario"));
         salary.AddToClassList("market-table-header-label");
         salary.AddToClassList("market-table-header-salary");
         header.Add(salary);
-        var restantes = new Label("AÑOS");
+        var restantes = new Label(LocalizationService.T("ui.code.market_controller.anos"));
         restantes.AddToClassList("market-table-header-label");
         restantes.AddToClassList("market-table-header-restantes");
         header.Add(restantes);
@@ -797,29 +797,29 @@ public class MarketController : UIScreenController
             header.Add(photo);
         }
 
-        var name = new Label("JUGADOR");
+        var name = new Label(LocalizationService.T("ui.code.market_controller.jugador"));
         name.AddToClassList("market-table-header-label");
         name.AddToClassList("market-table-header-name");
         header.Add(name);
 
-        var pos = new Label("POS");
+        var pos = new Label(LocalizationService.T("ui.code.market_controller.pos"));
         pos.AddToClassList("market-table-header-label");
         pos.AddToClassList("market-table-header-pos");
         header.Add(pos);
 
-        var ovr = new Label("MED");
+        var ovr = new Label(LocalizationService.T("ui.code.market_controller.med"));
         ovr.AddToClassList("market-table-header-label");
         ovr.AddToClassList("market-table-header-ovr");
         header.Add(ovr);
 
-        var salary = new Label("SALARIO");
+        var salary = new Label(LocalizationService.T("ui.code.market_controller.salario"));
         salary.AddToClassList("market-table-header-label");
         salary.AddToClassList("market-table-header-salary");
         header.Add(salary);
 
         if (header != _freeAgentsTableHeader)
         {
-            var restantes = new Label("AÑOS");
+            var restantes = new Label(LocalizationService.T("ui.code.market_controller.anos"));
             restantes.AddToClassList("market-table-header-label");
             restantes.AddToClassList("market-table-header-restantes");
             header.Add(restantes);
@@ -917,7 +917,7 @@ public class MarketController : UIScreenController
 
     void BuildOwnSASection()
     {
-        var title = new Label("FA RECIENTES (BIRD RIGHTS) — SIGN & TRADE");
+        var title = new Label(LocalizationService.T("ui.code.market_controller.fa_recientes_bird_rights_sign_trade"));
         title.AddToClassList("market-trade-sat-section-title");
         _myTeamBody.Add(title);
 
@@ -978,7 +978,7 @@ public class MarketController : UIScreenController
             salary.AddToClassList("market-trade-col-salary");
             row.Add(salary);
 
-            var restantes = new Label("S&T");
+            var restantes = new Label(LocalizationService.T("ui.code.market_controller.s_t"));
             restantes.AddToClassList("market-trade-col-restantes");
             restantes.style.color = new StyleColor(new Color32(200, 160, 30, 255));
             row.Add(restantes);
@@ -1000,7 +1000,7 @@ public class MarketController : UIScreenController
         if (body == null) return;
         if (picks == null || picks.Count == 0)
         {
-            var empty = new Label("Sin picks disponibles");
+            var empty = new Label(LocalizationService.T("ui.code.market_controller.sin_picks_disponibles"));
             empty.AddToClassList("market-trade-empty");
             empty.style.color = new StyleColor(new Color32(120, 130, 150, 255));
             empty.style.fontSize = 16;
@@ -1181,7 +1181,7 @@ public class MarketController : UIScreenController
             pick.swap_original_team_id = 0;
             if (dd.SwapItem != null)
             {
-                dd.SwapItem.text = "Swap: NO";
+                dd.SwapItem.text = LocalizationService.T("ui.code.market_controller.swap_no");
                 dd.SwapItem.RemoveFromClassList("active");
             }
             dd.ValueLabel?.RemoveFromClassList("market-pick-trigger-value--swap");
@@ -1213,7 +1213,7 @@ public class MarketController : UIScreenController
             if (partner == null) return;
             pick.is_swap = 1;
             pick.swap_original_team_id = partner.original_team_id;
-            dd.ValueLabel.text = "Swap";
+            dd.ValueLabel.text = LocalizationService.T("ui.code.market_controller.swap");
         }
         else
         {
@@ -1336,22 +1336,22 @@ public class MarketController : UIScreenController
         var header = new VisualElement();
         header.AddToClassList("market-table-header");
 
-        var name = new Label("JUGADOR");
+        var name = new Label(LocalizationService.T("ui.code.market_controller.jugador"));
         name.AddToClassList("market-table-header-label");
         name.AddToClassList("market-table-header-name");
         header.Add(name);
 
-        var pos = new Label("POS");
+        var pos = new Label(LocalizationService.T("ui.code.market_controller.pos"));
         pos.AddToClassList("market-table-header-label");
         pos.AddToClassList("market-table-header-pos");
         header.Add(pos);
 
-        var ovr = new Label("MED");
+        var ovr = new Label(LocalizationService.T("ui.code.market_controller.med"));
         ovr.AddToClassList("market-table-header-label");
         ovr.AddToClassList("market-table-header-ovr");
         header.Add(ovr);
 
-        var salary = new Label("SALARIO");
+        var salary = new Label(LocalizationService.T("ui.code.market_controller.salario"));
         salary.AddToClassList("market-table-header-label");
         salary.AddToClassList("market-table-header-salary");
         header.Add(salary);
@@ -1664,7 +1664,7 @@ public class MarketController : UIScreenController
         box.Add(icon);
 
         var content = new VisualElement();
-        var title = new Label("OFERTA NO VÁLIDA");
+        var title = new Label(LocalizationService.T("ui.code.market_controller.oferta_no_valida"));
         title.AddToClassList("market-trade-status-title");
         content.Add(title);
 
@@ -1723,7 +1723,7 @@ public class MarketController : UIScreenController
             content.Add(userValue);
             if (!userCheck.Sane)
             {
-                var warning = new Label("Aviso: esta oferta desequilibra el valor para tu equipo.");
+                var warning = new Label(LocalizationService.T("ui.code.market_controller.aviso_esta_oferta_desequilibra_el_valor_5b363ec0"));
                 warning.style.color = new StyleColor(new Color32(212, 160, 23, 255));
                 warning.style.marginTop = 3;
                 content.Add(warning);
@@ -1749,7 +1749,7 @@ public class MarketController : UIScreenController
                 satRow.style.alignItems = Align.Center;
                 satRow.style.marginTop = 6;
 
-                var satToggle = new Label("☐ Sign & Trade");
+                var satToggle = new Label(LocalizationService.T("ui.code.market_controller.sign_trade"));
                 satToggle.AddToClassList("market-btn-sat-toggle");
                 satRow.Add(satToggle);
 
@@ -1782,7 +1782,7 @@ public class MarketController : UIScreenController
             box.Add(icon);
 
             var content = new VisualElement();
-            var title = new Label("EL VALOR NO CUADRA PARA EL OTRO EQUIPO");
+            var title = new Label(LocalizationService.T("ui.code.market_controller.el_valor_no_cuadra_para_el_otro_equipo"));
             title.AddToClassList("market-trade-status-title");
             content.Add(title);
 
@@ -1832,7 +1832,7 @@ public class MarketController : UIScreenController
         var header = new VisualElement();
         header.AddToClassList("market-fa-modal-header");
         var heading = new VisualElement();
-        var title = new Label("CONFIRMAR TRASPASO");
+        var title = new Label(LocalizationService.T("ui.code.market_controller.confirmar_traspaso"));
         title.AddToClassList("market-fa-modal-title");
         var subtitle = new Label($"{_myTeam.name}  ⇄  {_selectedTeam.name}");
         subtitle.AddToClassList("market-fa-modal-subtitle");
@@ -1866,13 +1866,13 @@ public class MarketController : UIScreenController
         actions.style.paddingRight = 24;
         actions.style.paddingBottom = 22;
 
-        var cancel = new Button { text = "CANCELAR" };
+        var cancel = new Button { text = LocalizationService.T("ui.code.market_controller.cancelar") };
         cancel.AddToClassList("btn-modal-cancel");
         cancel.AddToClassList("btn-modal-cancel--neutral"); // cancelar no es destructivo
         cancel.RegisterCallback<ClickEvent>(_ => { PlayClick(); overlay.RemoveFromHierarchy(); });
         actions.Add(cancel);
 
-        var confirm = new Button { text = "CONFIRMAR TRASPASO" };
+        var confirm = new Button { text = LocalizationService.T("ui.code.market_controller.confirmar_traspaso") };
         confirm.AddToClassList("btn-modal-confirm");
         confirm.RegisterCallback<ClickEvent>(_ =>
         {
@@ -2333,7 +2333,7 @@ public class MarketController : UIScreenController
             _tradeSuccessType.text = satApplied ? "SIGN & TRADE" : "TRASPASO";
 
         // ── Button ──
-        if (_btnTradeSuccessClose != null) _btnTradeSuccessClose.text = "IR A PLANTILLA";
+        if (_btnTradeSuccessClose != null) _btnTradeSuccessClose.text = LocalizationService.T("ui.code.market_controller.ir_a_plantilla");
         _tradeSuccessGoToRoster = true;
 
         _tradePanels.style.display = DisplayStyle.None;
@@ -2367,7 +2367,7 @@ public class MarketController : UIScreenController
         row.Add(posLbl);
 
         // Type
-        var typeLbl = new Label("Jugador");
+        var typeLbl = new Label(LocalizationService.T("ui.code.market_controller.jugador_2"));
         typeLbl.AddToClassList("trade-player-type");
         row.Add(typeLbl);
 
@@ -2399,7 +2399,7 @@ public class MarketController : UIScreenController
         row.Add(posLbl);
 
         // Type
-        var typeLbl = new Label("Pick");
+        var typeLbl = new Label(LocalizationService.T("ui.code.market_controller.pick"));
         typeLbl.AddToClassList("trade-pick-type");
         row.Add(typeLbl);
 
@@ -2433,7 +2433,7 @@ public class MarketController : UIScreenController
 
         if (_currentFARows.Count == 0)
         {
-            var empty = new Label("No hay agentes libres disponibles");
+            var empty = new Label(LocalizationService.T("ui.code.market_controller.no_hay_agentes_libres_disponibles"));
             empty.AddToClassList("market-empty-fa");
             _freeAgentsBody.Add(empty);
         }
@@ -2509,12 +2509,12 @@ public class MarketController : UIScreenController
         btnSign.AddToClassList("market-btn-fa-sign");
         if (pendingSet.Contains(playerId))
         {
-            btnSign.text = "NEGOCIANDO";
+            btnSign.text = LocalizationService.T("ui.code.market_controller.negociando");
             btnSign.SetEnabled(false);
         }
         else
         {
-            btnSign.text = "HACER OFERTA";
+            btnSign.text = LocalizationService.T("ui.code.market_controller.hacer_oferta");
             btnSign.clicked += () => { PlayClick(); OnSignPlayer(playerId); };
         }
         if (CursorManager.Instance != null)
@@ -2523,7 +2523,7 @@ public class MarketController : UIScreenController
 
         var btnProfile = new Button();
         btnProfile.AddToClassList("market-btn-fa-profile");
-        btnProfile.text = "VER PERFIL";
+        btnProfile.text = LocalizationService.T("ui.code.market_controller.ver_perfil");
         btnProfile.clicked += () =>
         {
             PlayClick();
@@ -2593,7 +2593,7 @@ public class MarketController : UIScreenController
         if (_btnConfirmFA != null)
         {
             _btnConfirmFA.SetEnabled(true);
-            _btnConfirmFA.text = "ENVIAR OFERTA";
+            _btnConfirmFA.text = LocalizationService.T("ui.code.market_controller.enviar_oferta");
         }
 
         // Valores por defecto
@@ -2612,7 +2612,7 @@ public class MarketController : UIScreenController
         }
         RefreshFASpinners();
 
-        _faPlayerName.text = "OFERTA DE CONTRATO";
+        _faPlayerName.text = LocalizationService.T("ui.code.market_controller.oferta_de_contrato");
         if (_faText1 != null)
             _faText1.text = $"Oferta de contrato para {player.first_name} {player.last_name}";
         if (_faIcon != null)
@@ -2684,7 +2684,7 @@ public class MarketController : UIScreenController
             {
                 if (_faWarningText != null)
                 {
-                    _faWarningText.text = "No puedes ofrecer un contrato a este jugador (sin espacio salarial ni excepciones disponibles).";
+                    _faWarningText.text = LocalizationService.T("ui.code.market_controller.no_puedes_ofrecer_un_contrato_a_este_jug_37e4d5ee");
                     _faWarningText.style.display = DisplayStyle.Flex;
                 }
                 return;
@@ -2729,7 +2729,7 @@ public class MarketController : UIScreenController
         if (_btnConfirmFA != null)
         {
             _btnConfirmFA.SetEnabled(false);
-            _btnConfirmFA.text = "ENVIADA";
+            _btnConfirmFA.text = LocalizationService.T("ui.code.market_controller.enviada");
         }
     }
 
@@ -2807,7 +2807,7 @@ public class MarketController : UIScreenController
 
         if (_faTwoWayActive)
         {
-            _faText2.text = "Contrato two-way: sin probabilidad de aceptación (firme por plaza de desarrollo).";
+            _faText2.text = LocalizationService.T("ui.code.market_controller.contrato_two_way_sin_probabilidad_de_ace_61c304ea");
             return;
         }
 

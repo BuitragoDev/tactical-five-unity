@@ -89,7 +89,7 @@ public class DorsalesController : UIScreenController
 
         if (sorted.Count == 0)
         {
-            var empty = new Label("No hay jugadores con dorsal asignado.");
+            var empty = new Label(LocalizationService.T("ui.code.dorsales_controller.no_hay_jugadores_con_dorsal_asignado"));
             empty.AddToClassList("dorsales-empty");
             _tablaActuales.Add(empty);
             return;
@@ -146,7 +146,7 @@ public class DorsalesController : UIScreenController
         if (_retired.Count == 0)
         {
             _paginatorRetirados.style.display = DisplayStyle.None;
-            var empty = new Label("Este equipo aún no ha retirado ningún dorsal.");
+            var empty = new Label(LocalizationService.T("ui.code.dorsales_controller.este_equipo_aun_no_ha_retirado_ningun_do_afbc060d"));
             empty.AddToClassList("dorsales-empty");
             _tablaRetirados.Add(empty);
             return;

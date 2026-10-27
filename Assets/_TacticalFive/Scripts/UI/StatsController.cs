@@ -218,7 +218,7 @@ using System.Linq;
             _root.Q<VisualElement>("HeaderTeamLogo").style.backgroundImage = new StyleBackground(sprite);
 
         _root.Q<Label>("HeaderTeamName").text = _myTeam.name.ToUpper();
-        _root.Q<Label>("HeaderManagerName").text = $"Manager: {_manager.name}";
+        _root.Q<Label>("HeaderManagerName").text = LocalizationService.T("ui.common.manager", _manager.name);
         var budgetLabel = _root.Q<Label>("HeaderBudget");
         budgetLabel.text = $"${_myTeam.budget / 1_000_000}M";
         budgetLabel.style.color = _myTeam.budget < 0
@@ -252,11 +252,11 @@ using System.Linq;
 
         if (_season != null)
         {
-            _root.Q<Label>("HeaderSeason").text = $"Temporada {_season.year_start}-{_season.year_end}";
+            _root.Q<Label>("HeaderSeason").text = LocalizationService.T("ui.common.season", _season.year_start, _season.year_end);
             _root.Q<Label>("HeaderDate").text = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
         }
 
-        _btnAction.text = "MENÚ PRINCIPAL";
+        _btnAction.text = LocalizationService.T("ui.code.stats_controller.menu_principal");
     }
 
     void SetMode(string mode)
@@ -1040,7 +1040,7 @@ using System.Linq;
             empty.AddToClassList("stats-empty");
             var emptyLbl = new Label();
             emptyLbl.AddToClassList("stats-empty-label");
-            emptyLbl.text = "No hay datos estadísticos disponibles todavía.\nJuega partidos para ver estadísticas.";
+            emptyLbl.text = LocalizationService.T("ui.code.stats_controller.no_hay_datos_estadisticos_disponibles_to_3ee67262");
             empty.Add(emptyLbl);
             _statsBody.Add(empty);
         }

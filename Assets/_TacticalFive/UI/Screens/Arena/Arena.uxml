@@ -17,7 +17,7 @@
             <ui:VisualElement class="screen-header panel--gold">
                 <ui:VisualElement class="screen-header-row">
                     <ui:VisualElement name="ArenaScreenIcon" class="screen-icon" />
-                    <ui:Label class="screen-title" text="GESTIÓN DEL PABELLÓN" />
+                    <ui:Label class="screen-title" text="{loc:ui.arena.gestion_del_pabellon}" />
                 </ui:VisualElement>
             </ui:VisualElement>
 
@@ -40,7 +40,7 @@
                     <ui:VisualElement class="arena-panel arena-panel--level">
                         <ui:VisualElement class="arena-panel-header">
                             <ui:Label class="arena-panel-header-icon" text="⭐" />
-                            <ui:Label class="arena-panel-header-title" text="NIVEL DEL PABELLÓN" />
+                            <ui:Label class="arena-panel-header-title" text="{loc:ui.arena.nivel_del_pabellon}" />
                         </ui:VisualElement>
                         <ui:VisualElement class="arena-level-body">
                             <ui:VisualElement name="ArenaStars" class="arena-stars" />
@@ -59,7 +59,7 @@
                 <ui:VisualElement class="arena-upgrades-section">
                     <ui:VisualElement class="arena-upgrades-header">
                         <ui:Label class="arena-upgrades-header-icon" text="🔧" />
-                        <ui:Label class="arena-upgrades-header-title" text="MEJORAS DISPONIBLES" />
+                        <ui:Label class="arena-upgrades-header-title" text="{loc:ui.arena.mejoras_disponibles}" />
                     </ui:VisualElement>
 
                     <!-- Warning message -->
@@ -82,12 +82,12 @@
         <!-- ══ MODAL CONFIGURACIÓN ══ -->
         <ui:VisualElement name="ConfigModalOverlay" class="modal-overlay">
             <ui:VisualElement name="ConfigModalBox" class="modal-box">
-                <ui:Label class="modal-title" text="CONFIGURACIÓN" />
+                <ui:Label class="modal-title" text="{loc:ui.arena.configuracion}" />
                 <ui:VisualElement class="modal-body">
                     <ui:VisualElement class="settings-section">
-                        <ui:Label class="settings-section-title" text="AUDIO" />
+                        <ui:Label class="settings-section-title" text="{loc:ui.arena.audio}" />
                         <ui:VisualElement class="settings-row">
-                            <ui:Label class="settings-label" text="Volumen General" />
+                            <ui:Label class="settings-label" text="{loc:ui.arena.volumen_general}" />
                             <ui:VisualElement name="ConfigSliderMaster" class="custom-slider">
                                 <ui:VisualElement class="custom-slider-track" />
                                 <ui:VisualElement name="ConfigFillMaster" class="custom-slider-fill" />
@@ -96,7 +96,7 @@
                             <ui:Label name="ConfigLabelMaster" class="settings-value" text="100%" />
                         </ui:VisualElement>
                         <ui:VisualElement class="settings-row">
-                            <ui:Label class="settings-label" text="Música" />
+                            <ui:Label class="settings-label" text="{loc:ui.arena.musica}" />
                             <ui:VisualElement name="ConfigSliderMusic" class="custom-slider">
                                 <ui:VisualElement class="custom-slider-track" />
                                 <ui:VisualElement name="ConfigFillMusic" class="custom-slider-fill" />
@@ -105,7 +105,7 @@
                             <ui:Label name="ConfigLabelMusic" class="settings-value" text="100%" />
                         </ui:VisualElement>
                         <ui:VisualElement class="settings-row">
-                            <ui:Label class="settings-label" text="Efectos" />
+                            <ui:Label class="settings-label" text="{loc:ui.arena.efectos}" />
                             <ui:VisualElement name="ConfigSliderSFX" class="custom-slider">
                                 <ui:VisualElement class="custom-slider-track" />
                                 <ui:VisualElement name="ConfigFillSFX" class="custom-slider-fill" />
@@ -115,39 +115,39 @@
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement class="settings-section">
-                        <ui:Label class="settings-section-title" text="GRÁFICOS" />
+                        <ui:Label class="settings-section-title" text="{loc:ui.arena.graficos}" />
                         <ui:VisualElement class="settings-quality-row">
-                            <ui:Label class="settings-label" text="Calidad" />
+                            <ui:Label class="settings-label" text="{loc:ui.arena.calidad}" />
                             <ui:VisualElement class="settings-quality-options">
-                                <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="Baja" />
-                                <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="Media" />
-                                <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="Alta" />
-                                <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="Ultra" />
+                                <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="{loc:ui.arena.config_btn_quality_low}" />
+                                <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="{loc:ui.arena.config_btn_quality_medium}" />
+                                <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="{loc:ui.arena.config_btn_quality_high}" />
+                                <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="{loc:ui.arena.config_btn_quality_ultra}" />
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement class="settings-section">
-                        <ui:Label class="settings-section-title" text="JUEGO" />
-                        <ui:Button name="ConfigBtnMainMenu" class="settings-btn settings-btn--secondary" text="VOLVER AL MENÚ PRINCIPAL" />
-                        <ui:Button name="ConfigBtnExit" class="settings-btn settings-btn--danger" text="SALIR DEL JUEGO" />
+                        <ui:Label class="settings-section-title" text="{loc:ui.arena.juego}" />
+                        <ui:Button name="ConfigBtnMainMenu" class="settings-btn settings-btn--secondary" text="{loc:ui.arena.config_btn_main_menu}" />
+                        <ui:Button name="ConfigBtnExit" class="settings-btn settings-btn--danger" text="{loc:ui.arena.config_btn_exit}" />
                     </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:Button name="ConfigBtnCerrar" class="modal-close" text="CERRAR" />
+                <ui:Button name="ConfigBtnCerrar" class="modal-close" text="{loc:ui.arena.config_btn_cerrar}" />
             </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- ══ MODAL CONFIRMAR VOLVER AL MENÚ PRINCIPAL ══ -->
         <ui:VisualElement name="ConfigMainMenuConfirmOverlay" class="modal-overlay">
             <ui:VisualElement name="ConfigMainMenuConfirmBox" class="modal-box">
-                <ui:Label class="modal-title" text="VOLVER AL MENÚ PRINCIPAL" />
+                <ui:Label class="modal-title" text="{loc:ui.arena.volver_al_menu_principal}" />
                 <ui:VisualElement class="modal-body">
-                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres volver al menú principal?" />
-                    <ui:Label class="modal-paragraph" text="Se perderá el progreso no guardado de la partida actual. Asegúrate de haber guardado antes de continuar." />
+                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="{loc:ui.arena.estas_seguro_de_que_quieres_volver_al_me_6f548452}" />
+                    <ui:Label class="modal-paragraph" text="{loc:ui.arena.se_perdera_el_progreso_no_guardado_de_la_b10b7334}" />
                 </ui:VisualElement>
                 <ui:VisualElement class="modal-actions">
-                    <ui:Button name="ConfigBtnMainMenuNo" class="modal-btn modal-btn--secondary" text="NO, QUEDARME" />
+                    <ui:Button name="ConfigBtnMainMenuNo" class="modal-btn modal-btn--secondary" text="{loc:ui.arena.config_btn_main_menu_no}" />
                     <ui:VisualElement class="modal-spacer" />
-                    <ui:Button name="ConfigBtnMainMenuYes" class="modal-btn modal-btn--danger" text="SÍ, VOLVER" />
+                    <ui:Button name="ConfigBtnMainMenuYes" class="modal-btn modal-btn--danger" text="{loc:ui.arena.config_btn_main_menu_yes}" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
@@ -155,15 +155,15 @@
         <!-- ══ MODAL CONFIRMAR SALIR DEL JUEGO ══ -->
         <ui:VisualElement name="ConfigExitConfirmOverlay" class="modal-overlay">
             <ui:VisualElement name="ConfigExitConfirmBox" class="modal-box">
-                <ui:Label class="modal-title" text="SALIR DEL JUEGO" />
+                <ui:Label class="modal-title" text="{loc:ui.arena.salir_del_juego}" />
                 <ui:VisualElement class="modal-body">
-                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres salir del juego?" />
-                    <ui:Label class="modal-paragraph" text="Tu progreso se guarda automáticamente durante la partida. Al volver a cargarla continuarás desde el último estado guardado." />
+                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="{loc:ui.arena.estas_seguro_de_que_quieres_salir_del_ju_c65dd5f1}" />
+                    <ui:Label class="modal-paragraph" text="{loc:ui.arena.tu_progreso_se_guarda_automaticamente_du_10fb1edb}" />
                 </ui:VisualElement>
                 <ui:VisualElement class="modal-actions">
-                    <ui:Button name="ConfigBtnExitNo" class="modal-btn modal-btn--secondary" text="NO" />
+                    <ui:Button name="ConfigBtnExitNo" class="modal-btn modal-btn--secondary" text="{loc:ui.arena.config_btn_exit_no}" />
                     <ui:VisualElement class="modal-spacer" />
-                    <ui:Button name="ConfigBtnExitYes" class="modal-btn modal-btn--danger" text="SÍ, SALIR" />
+                    <ui:Button name="ConfigBtnExitYes" class="modal-btn modal-btn--danger" text="{loc:ui.arena.config_btn_exit_yes}" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
@@ -173,26 +173,26 @@
             <ui:VisualElement name="ConfirmRenovationBox" class="modal-box" style="width: 650px; background-color: rgb(13, 14, 18); border-width: 1px; border-color: rgb(120, 95, 30); border-radius: 12px; padding: 0; overflow: hidden;">
                 <ui:VisualElement class="arena-confirm-header" style="flex-direction: row; align-items: center; padding: 16px 24px; background-color: rgb(33, 32, 28); border-bottom-width: 1px; border-bottom-color: rgb(120, 95, 30);">
                     <ui:Label name="ConfirmRenovationIcon" text="🔧" style="font-size: 24px; margin-right: 12px;" />
-                    <ui:Label name="ConfirmRenovationTitle" text="CONFIRMAR MEJORA" style="-unity-font: url('project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf'); font-size: 28px; letter-spacing: 2px; color: rgb(212, 160, 23);" />
+                    <ui:Label name="ConfirmRenovationTitle" text="{loc:ui.arena.confirm_renovation_title}" style="-unity-font: url('project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf'); font-size: 28px; letter-spacing: 2px; color: rgb(212, 160, 23);" />
                 </ui:VisualElement>
                 <ui:VisualElement style="flex-direction: column; padding: 24px;">
                     <ui:Label name="ConfirmRenovationName" text="" style="-unity-font: url('project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf'); font-size: 22px; color: rgb(255, 255, 255); margin-bottom: 12px;" />
                     <ui:Label name="ConfirmRenovationDesc" text="" style="-unity-font: url('project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf'); font-size: 18px; color: rgb(179, 190, 214); margin-bottom: 20px; white-space: normal;" />
                     <ui:VisualElement style="flex-direction: row; margin-bottom: 8px;">
-                        <ui:Label text="Coste: " style="-unity-font: url('project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf'); font-size: 18px; color: rgb(120, 130, 150);" />
+                        <ui:Label text="{loc:ui.arena.coste}" style="-unity-font: url('project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf'); font-size: 18px; color: rgb(120, 130, 150);" />
                         <ui:Label name="ConfirmRenovationCost" text="" style="-unity-font: url('project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf'); font-size: 18px; color: rgb(212, 160, 23);" />
                     </ui:VisualElement>
                     <ui:VisualElement style="flex-direction: row; margin-bottom: 8px;">
-                        <ui:Label text="Duración: " style="-unity-font: url('project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf'); font-size: 18px; color: rgb(120, 130, 150);" />
+                        <ui:Label text="{loc:ui.arena.duracion}" style="-unity-font: url('project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf'); font-size: 18px; color: rgb(120, 130, 150);" />
                         <ui:Label name="ConfirmRenovationDuration" text="" style="-unity-font: url('project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf'); font-size: 18px; color: rgb(255, 255, 255);" />
                     </ui:VisualElement>
                     <ui:VisualElement style="flex-direction: row; margin-bottom: 20px;">
-                        <ui:Label text="Capacidad: " style="-unity-font: url('project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf'); font-size: 18px; color: rgb(120, 130, 150);" />
+                        <ui:Label text="{loc:ui.arena.capacidad}" style="-unity-font: url('project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf'); font-size: 18px; color: rgb(120, 130, 150);" />
                         <ui:Label name="ConfirmRenovationCapacity" text="" style="-unity-font: url('project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf'); font-size: 18px; color: rgb(39, 174, 96);" />
                     </ui:VisualElement>
                     <ui:VisualElement style="flex-direction: row;">
-                        <ui:Button name="ConfirmRenovationNo" text="CANCELAR" style="flex-grow: 1; margin-right: 6px; height: 44px; background-color: rgb(35, 25, 30); border-width: 2px; border-color: rgb(192, 57, 43); color: rgb(230, 120, 100); font-size: 18px; letter-spacing: 1px; border-radius: 8px; -unity-text-align: middle-center; cursor: pointer; -unity-font: url('project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf');" />
-                        <ui:Button name="ConfirmRenovationYes" text="INICIAR MEJORA" style="flex-grow: 1; margin-left: 6px; height: 44px; background-color: rgb(20, 36, 35); border-width: 2px; border-color: rgb(39, 174, 96); color: rgb(100, 200, 140); font-size: 18px; letter-spacing: 1px; border-radius: 8px; -unity-text-align: middle-center; cursor: pointer; -unity-font: url('project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf');" />
+                        <ui:Button name="ConfirmRenovationNo" text="{loc:ui.arena.confirm_renovation_no}" style="flex-grow: 1; margin-right: 6px; height: 44px; background-color: rgb(35, 25, 30); border-width: 2px; border-color: rgb(192, 57, 43); color: rgb(230, 120, 100); font-size: 18px; letter-spacing: 1px; border-radius: 8px; -unity-text-align: middle-center; cursor: pointer; -unity-font: url('project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf');" />
+                        <ui:Button name="ConfirmRenovationYes" text="{loc:ui.arena.confirm_renovation_yes}" style="flex-grow: 1; margin-left: 6px; height: 44px; background-color: rgb(20, 36, 35); border-width: 2px; border-color: rgb(39, 174, 96); color: rgb(100, 200, 140); font-size: 18px; letter-spacing: 1px; border-radius: 8px; -unity-text-align: middle-center; cursor: pointer; -unity-font: url('project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf');" />
                     </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>

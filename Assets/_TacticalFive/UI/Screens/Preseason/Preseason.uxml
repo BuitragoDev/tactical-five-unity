@@ -8,22 +8,22 @@
 
         <!-- ══ HEADER ══ -->
         <ui:VisualElement name="Header" class="header">
-            <ui:Button name="BtnBack" class="btn-back" text="VOLVER" />
+            <ui:Button name="BtnBack" class="btn-back" text="{loc:ui.preseason.btn_back}" />
             <ui:VisualElement class="header-title">
-                <ui:Label class="header-title-white" text="PRETEMPORADA" />
+                <ui:Label class="header-title-white" text="{loc:ui.preseason.pretemporada}" />
                 <ui:Label name="HeaderYear" class="header-title-gold"  text="" />
-                <ui:Label class="header-title-white" text="· PARTIDOS AMISTOSOS" />
+                <ui:Label class="header-title-white" text="{loc:ui.preseason.partidos_amistosos}" />
             </ui:VisualElement>
-            <ui:Button name="BtnContinue" class="btn-continue" text="CONTINUAR" />
+            <ui:Button name="BtnContinue" class="btn-continue" text="{loc:ui.preseason.btn_continue}" />
         </ui:VisualElement>
 
         <!-- ══ INFO BAR ══ -->
         <ui:VisualElement class="info-bar">
             <ui:VisualElement name="InfoBarLogo" class="info-bar-logo" />
             <ui:Label name="InfoBarTeam" class="info-bar-team" text="" />
-            <ui:Label class="info-bar-label" text="PARTIDOS ELEGIDOS" />
+            <ui:Label class="info-bar-label" text="{loc:ui.preseason.partidos_elegidos}" />
             <ui:Label name="InfoBarCount" class="info-bar-value" text="0 / 4" />
-            <ui:Label class="info-bar-label" text="CONCENTRACIÓN" />
+            <ui:Label class="info-bar-label" text="{loc:ui.preseason.concentracion}" />
                 <ui:Label name="InfoBarSeason" class="info-bar-value" text="" />
         </ui:VisualElement>
 
@@ -41,10 +41,10 @@
             <!-- Toggle LOCAL / VISITANTE -->
             <ui:VisualElement class="location-toggle">
                 <ui:Button name="BtnHome" class="toggle-btn toggle-btn--active toggle-btn--left"
-                           text="LOCAL">
+                           text="{loc:ui.preseason.btn_home}">
                     <ui:VisualElement name="HomeIcon" class="location-toggle-icon" />
                 </ui:Button>
-                <ui:Button name="BtnAway" class="toggle-btn" text="VISITANTE">
+                <ui:Button name="BtnAway" class="toggle-btn" text="{loc:ui.preseason.btn_away}">
                     <ui:VisualElement name="AwayIcon" class="location-toggle-icon" />
                 </ui:Button>
             </ui:VisualElement>

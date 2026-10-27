@@ -15,7 +15,7 @@
             <ui:VisualElement class="screen-header panel--gold">
                 <ui:VisualElement class="screen-header-row">
                     <ui:VisualElement name="ScreenIcon" class="screen-icon" />
-                    <ui:Label class="screen-title" text="ROTACIÓN DE MINUTOS" />
+                    <ui:Label class="screen-title" text="{loc:ui.rotation.rotacion_de_minutos}" />
                 </ui:VisualElement>
                 <ui:Label name="ScreenSubtitle" class="screen-subtitle" text="" />
             </ui:VisualElement>
@@ -27,34 +27,34 @@
 
                     <ui:VisualElement class="rotation-section">
                         <ui:VisualElement class="rotation-section-header">
-                            <ui:Label class="rotation-section-title" text="TITULARES" />
-                            <ui:Label class="rotation-section-subtitle" text="5 JUGADORES" />
+                            <ui:Label class="rotation-section-title" text="{loc:ui.rotation.titulares}" />
+                            <ui:Label class="rotation-section-subtitle" text="{loc:ui.rotation.5_jugadores}" />
                         </ui:VisualElement>
                         <ui:VisualElement class="rotation-list-header">
-                            <ui:Label class="rot-col rot-col--name rot-col--head" text="JUGADOR" />
-                            <ui:Label class="rot-col rot-col--pos rot-col--head" text="POS" />
-                            <ui:Label class="rot-col rot-col--role rot-col--head" text="ROL" />
-                            <ui:Label class="rot-col rot-col--ovr rot-col--head" text="MED" />
-                            <ui:Label class="rot-col rot-col--min rot-col--head" text="MINUTOS" />
-                            <ui:Label class="rot-col rot-col--val rot-col--head" text="MIN" />
-                            <ui:Label class="rot-col rot-col--sug rot-col--head" text="SUG." />
+                            <ui:Label class="rot-col rot-col--name rot-col--head" text="{loc:ui.rotation.jugador}" />
+                            <ui:Label class="rot-col rot-col--pos rot-col--head" text="{loc:ui.rotation.pos}" />
+                            <ui:Label class="rot-col rot-col--role rot-col--head" text="{loc:ui.rotation.rol}" />
+                            <ui:Label class="rot-col rot-col--ovr rot-col--head" text="{loc:ui.rotation.med}" />
+                            <ui:Label class="rot-col rot-col--min rot-col--head" text="{loc:ui.rotation.minutos}" />
+                            <ui:Label class="rot-col rot-col--val rot-col--head" text="{loc:ui.rotation.min}" />
+                            <ui:Label class="rot-col rot-col--sug rot-col--head" text="{loc:ui.rotation.sug}" />
                         </ui:VisualElement>
                         <ui:VisualElement name="StartersList" class="rotation-list" />
                     </ui:VisualElement>
 
                     <ui:VisualElement class="rotation-section">
                         <ui:VisualElement class="rotation-section-header">
-                            <ui:Label class="rotation-section-title" text="BANQUILLO" />
-                            <ui:Label class="rotation-section-subtitle" text="7 JUGADORES" />
+                            <ui:Label class="rotation-section-title" text="{loc:ui.rotation.banquillo}" />
+                            <ui:Label class="rotation-section-subtitle" text="{loc:ui.rotation.7_jugadores}" />
                         </ui:VisualElement>
                         <ui:VisualElement class="rotation-list-header">
-                            <ui:Label class="rot-col rot-col--name rot-col--head" text="JUGADOR" />
-                            <ui:Label class="rot-col rot-col--pos rot-col--head" text="POS" />
-                            <ui:Label class="rot-col rot-col--role rot-col--head" text="ROL" />
-                            <ui:Label class="rot-col rot-col--ovr rot-col--head" text="MED" />
-                            <ui:Label class="rot-col rot-col--min rot-col--head" text="MINUTOS" />
-                            <ui:Label class="rot-col rot-col--val rot-col--head" text="MIN" />
-                            <ui:Label class="rot-col rot-col--sug rot-col--head" text="SUG." />
+                            <ui:Label class="rot-col rot-col--name rot-col--head" text="{loc:ui.rotation.jugador}" />
+                            <ui:Label class="rot-col rot-col--pos rot-col--head" text="{loc:ui.rotation.pos}" />
+                            <ui:Label class="rot-col rot-col--role rot-col--head" text="{loc:ui.rotation.rol}" />
+                            <ui:Label class="rot-col rot-col--ovr rot-col--head" text="{loc:ui.rotation.med}" />
+                            <ui:Label class="rot-col rot-col--min rot-col--head" text="{loc:ui.rotation.minutos}" />
+                            <ui:Label class="rot-col rot-col--val rot-col--head" text="{loc:ui.rotation.min}" />
+                            <ui:Label class="rot-col rot-col--sug rot-col--head" text="{loc:ui.rotation.sug}" />
                         </ui:VisualElement>
                         <ui:VisualElement name="BenchList" class="rotation-list" />
                     </ui:VisualElement>
@@ -67,34 +67,34 @@
                     <!-- ══ MINUTOS POR POSICIÓN (solo lectura) ══ -->
                     <ui:VisualElement class="rotation-section">
                         <ui:VisualElement class="rotation-section-header">
-                            <ui:Label class="rotation-section-title" text="MINUTOS POR POSICIÓN" />
-                            <ui:Label class="rotation-section-subtitle" text="PRINCIPAL / SECUNDARIA" />
+                            <ui:Label class="rotation-section-title" text="{loc:ui.rotation.minutos_por_posicion}" />
+                            <ui:Label class="rotation-section-subtitle" text="{loc:ui.rotation.principal_secundaria}" />
                         </ui:VisualElement>
                         <ui:VisualElement name="PosSummary" class="pos-summary" />
                     </ui:VisualElement>
 
                     <!-- ══ MINUTOS RESTANTES ══ -->
                     <ui:VisualElement name="RemainingBox" class="remaining-box">
-                        <ui:Label name="RemainingCaption" class="remaining-caption" text="MINUTOS DEL PARTIDO" />
+                        <ui:Label name="RemainingCaption" class="remaining-caption" text="{loc:ui.rotation.remaining_caption}" />
                         <ui:Label name="RemainingValue" class="remaining-value" text="240" />
                         <ui:Label name="RemainingHint" class="remaining-hint" text="" />
                     </ui:VisualElement>
 
                     <!-- ══ ACCIONES ══ -->
                     <ui:VisualElement class="rotation-actions">
-                        <ui:Button name="AutoMinutesBtn" class="rot-btn rot-btn--primary rot-btn--lead" text="AUTO (240 MIN)" />
-                        <ui:Button name="ResetMinutesBtn" class="rot-btn rot-btn--danger" text="RESET (0 MIN)" />
+                        <ui:Button name="AutoMinutesBtn" class="rot-btn rot-btn--primary rot-btn--lead" text="{loc:ui.rotation.auto_minutes_btn}" />
+                        <ui:Button name="ResetMinutesBtn" class="rot-btn rot-btn--danger" text="{loc:ui.rotation.reset_minutes_btn}" />
                     </ui:VisualElement>
 
                     <ui:VisualElement class="rotation-help">
                         <ui:Label class="rotation-help-text"
-                                  text="Arrastra la barra de cada jugador para fijar sus minutos objetivo. El simulador usa esos minutos para decidir quién descansa y quién entra. Si no configuras nada (convocatoria nueva), mantiene lo sugerido (SUG.)." />
+                                  text="{loc:ui.rotation.arrastra_la_barra_de_cada_jugador_para_f_f8b27d30}" />
                         <ui:Label class="rotation-help-text"
-                                  text="AUTO reparte los 240 minutos del partido proporcionalmente a lo sugerido. RESET pone todos los minutos a 0 para que los repartas tú desde cero." />
+                                  text="{loc:ui.rotation.auto_reparte_los_240_minutos_del_partido_6c85a4d5}" />
                         <ui:Label class="rotation-help-text"
-                                  text="Los lesionados y los asignados a la G-League no juegan: no cuentan en el reparto." />
+                                  text="{loc:ui.rotation.los_lesionados_y_los_asignados_a_la_g_le_7027bdf4}" />
                         <ui:Label class="rotation-help-text rotation-help-text--last"
-                                  text="Estos minutos son vinculantes en tus partidos (mínimo 8 por jugador; 0 = no juega). Si la suma no llega a 240, juegan más los que estén en pista." />
+                                  text="{loc:ui.rotation.estos_minutos_son_vinculantes_en_tus_par_a73c4b6a}" />
                     </ui:VisualElement>
 
                 </ui:VisualElement>
@@ -108,12 +108,12 @@
     <!-- ══ MODAL CONFIGURACIÓN ══ -->
     <ui:VisualElement name="ConfigModalOverlay" class="modal-overlay">
         <ui:VisualElement name="ConfigModalBox" class="modal-box">
-            <ui:Label class="modal-title" text="CONFIGURACIÓN" />
+            <ui:Label class="modal-title" text="{loc:ui.rotation.configuracion}" />
             <ui:VisualElement class="modal-body">
                 <ui:VisualElement class="settings-section">
-                    <ui:Label class="settings-section-title" text="AUDIO" />
+                    <ui:Label class="settings-section-title" text="{loc:ui.rotation.audio}" />
                     <ui:VisualElement class="settings-row">
-                        <ui:Label class="settings-label" text="Volumen General" />
+                        <ui:Label class="settings-label" text="{loc:ui.rotation.volumen_general}" />
                         <ui:VisualElement name="ConfigSliderMaster" class="custom-slider">
                             <ui:VisualElement class="custom-slider-track" />
                             <ui:VisualElement name="ConfigFillMaster" class="custom-slider-fill" />
@@ -122,7 +122,7 @@
                         <ui:Label name="ConfigLabelMaster" class="settings-value" text="100%" />
                     </ui:VisualElement>
                     <ui:VisualElement class="settings-row">
-                        <ui:Label class="settings-label" text="Música" />
+                        <ui:Label class="settings-label" text="{loc:ui.rotation.musica}" />
                         <ui:VisualElement name="ConfigSliderMusic" class="custom-slider">
                             <ui:VisualElement class="custom-slider-track" />
                             <ui:VisualElement name="ConfigFillMusic" class="custom-slider-fill" />
@@ -131,7 +131,7 @@
                         <ui:Label name="ConfigLabelMusic" class="settings-value" text="100%" />
                     </ui:VisualElement>
                     <ui:VisualElement class="settings-row">
-                        <ui:Label class="settings-label" text="Efectos" />
+                        <ui:Label class="settings-label" text="{loc:ui.rotation.efectos}" />
                         <ui:VisualElement name="ConfigSliderSFX" class="custom-slider">
                             <ui:VisualElement class="custom-slider-track" />
                             <ui:VisualElement name="ConfigFillSFX" class="custom-slider-fill" />
@@ -141,39 +141,39 @@
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement class="settings-section">
-                    <ui:Label class="settings-section-title" text="GRÁFICOS" />
+                    <ui:Label class="settings-section-title" text="{loc:ui.rotation.graficos}" />
                     <ui:VisualElement class="settings-quality-row">
-                        <ui:Label class="settings-label" text="Calidad" />
+                        <ui:Label class="settings-label" text="{loc:ui.rotation.calidad}" />
                         <ui:VisualElement class="settings-quality-options">
-                            <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="Baja" />
-                            <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="Media" />
-                            <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="Alta" />
-                            <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="Ultra" />
+                            <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="{loc:ui.rotation.config_btn_quality_low}" />
+                            <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="{loc:ui.rotation.config_btn_quality_medium}" />
+                            <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="{loc:ui.rotation.config_btn_quality_high}" />
+                            <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="{loc:ui.rotation.config_btn_quality_ultra}" />
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement class="settings-section">
-                    <ui:Label class="settings-section-title" text="JUEGO" />
-                    <ui:Button name="ConfigBtnMainMenu" class="settings-btn settings-btn--secondary" text="VOLVER AL MENÚ PRINCIPAL" />
-                    <ui:Button name="ConfigBtnExit" class="settings-btn settings-btn--danger" text="SALIR DEL JUEGO" />
+                    <ui:Label class="settings-section-title" text="{loc:ui.rotation.juego}" />
+                    <ui:Button name="ConfigBtnMainMenu" class="settings-btn settings-btn--secondary" text="{loc:ui.rotation.config_btn_main_menu}" />
+                    <ui:Button name="ConfigBtnExit" class="settings-btn settings-btn--danger" text="{loc:ui.rotation.config_btn_exit}" />
                 </ui:VisualElement>
             </ui:VisualElement>
-            <ui:Button name="ConfigBtnCerrar" class="modal-close" text="CERRAR" />
+            <ui:Button name="ConfigBtnCerrar" class="modal-close" text="{loc:ui.rotation.config_btn_cerrar}" />
         </ui:VisualElement>
     </ui:VisualElement>
 
     <!-- ══ MODAL CONFIRMAR VOLVER AL MENÚ PRINCIPAL ══ -->
     <ui:VisualElement name="ConfigMainMenuConfirmOverlay" class="modal-overlay">
         <ui:VisualElement name="ConfigMainMenuConfirmBox" class="modal-box">
-            <ui:Label class="modal-title" text="VOLVER AL MENÚ PRINCIPAL" />
+            <ui:Label class="modal-title" text="{loc:ui.rotation.volver_al_menu_principal}" />
             <ui:VisualElement class="modal-body">
-                <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres volver al menú principal?" />
-                <ui:Label class="modal-paragraph" text="Se perderá el progreso no guardado de la partida actual. Asegúrate de haber guardado antes de continuar." />
+                <ui:Label class="modal-paragraph modal-paragraph--highlight" text="{loc:ui.rotation.estas_seguro_de_que_quieres_volver_al_me_6f548452}" />
+                <ui:Label class="modal-paragraph" text="{loc:ui.rotation.se_perdera_el_progreso_no_guardado_de_la_b10b7334}" />
             </ui:VisualElement>
             <ui:VisualElement class="modal-actions">
-                <ui:Button name="ConfigBtnMainMenuNo" class="modal-btn modal-btn--secondary" text="NO, QUEDARME" />
+                <ui:Button name="ConfigBtnMainMenuNo" class="modal-btn modal-btn--secondary" text="{loc:ui.rotation.config_btn_main_menu_no}" />
                 <ui:VisualElement class="modal-spacer" />
-                <ui:Button name="ConfigBtnMainMenuYes" class="modal-btn modal-btn--danger" text="SÍ, VOLVER" />
+                <ui:Button name="ConfigBtnMainMenuYes" class="modal-btn modal-btn--danger" text="{loc:ui.rotation.config_btn_main_menu_yes}" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
@@ -181,15 +181,15 @@
     <!-- ══ MODAL CONFIRMAR SALIR DEL JUEGO ══ -->
     <ui:VisualElement name="ConfigExitConfirmOverlay" class="modal-overlay">
         <ui:VisualElement name="ConfigExitConfirmBox" class="modal-box">
-            <ui:Label class="modal-title" text="SALIR DEL JUEGO" />
+            <ui:Label class="modal-title" text="{loc:ui.rotation.salir_del_juego}" />
             <ui:VisualElement class="modal-body">
-                <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres salir del juego?" />
-                <ui:Label class="modal-paragraph" text="Tu progreso se guarda automáticamente durante la partida. Al volver a cargarla continuarás desde el último estado guardado." />
+                <ui:Label class="modal-paragraph modal-paragraph--highlight" text="{loc:ui.rotation.estas_seguro_de_que_quieres_salir_del_ju_c65dd5f1}" />
+                <ui:Label class="modal-paragraph" text="{loc:ui.rotation.tu_progreso_se_guarda_automaticamente_du_10fb1edb}" />
             </ui:VisualElement>
             <ui:VisualElement class="modal-actions">
-                <ui:Button name="ConfigBtnExitNo" class="modal-btn modal-btn--secondary" text="NO" />
+                <ui:Button name="ConfigBtnExitNo" class="modal-btn modal-btn--secondary" text="{loc:ui.rotation.config_btn_exit_no}" />
                 <ui:VisualElement class="modal-spacer" />
-                <ui:Button name="ConfigBtnExitYes" class="modal-btn modal-btn--danger" text="SÍ, SALIR" />
+                <ui:Button name="ConfigBtnExitYes" class="modal-btn modal-btn--danger" text="{loc:ui.rotation.config_btn_exit_yes}" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

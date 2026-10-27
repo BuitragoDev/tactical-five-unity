@@ -215,11 +215,11 @@ using System.Linq;
             _headerTeamLogo.style.backgroundImage = new StyleBackground(sprite);
 
         _headerTeamName.text = _myTeam.name.ToUpper();
-        _headerManagerName.text = $"Manager: {_manager.name}";
+        _headerManagerName.text = LocalizationService.T("ui.common.manager", _manager.name);
 
         if (_season != null)
         {
-            _headerSeason.text = $"Temporada {_season.year_start}-{_season.year_end}";
+            _headerSeason.text = LocalizationService.T("ui.common.season", _season.year_start, _season.year_end);
             _headerDate.text = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
         }
 
@@ -248,7 +248,7 @@ using System.Linq;
                                          chem >= 40 ? new StyleColor(new Color(212f / 255, 160f / 255, 23f / 255)) :
                                          new StyleColor(new Color(192f / 255, 57f / 255, 43f / 255));
 
-        _btnAction.text = "MENÚ PRINCIPAL";
+        _btnAction.text = LocalizationService.T("ui.code.quinteto_controller.menu_principal");
     }
 
     void BuildLineup()
@@ -469,7 +469,7 @@ using System.Linq;
         var autoBtn = new Button();
         autoBtn.name = "AutoLineupBtn";
         autoBtn.AddToClassList("lineup-auto-btn");
-        autoBtn.text = "CONVOCATORIA AUTOM\u00c1TICA";
+        autoBtn.text = LocalizationService.T("ui.code.quinteto_controller.convocatoria_automatica");
         autoBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
@@ -654,7 +654,7 @@ using System.Linq;
         {
             var glBadge = new Label();
             glBadge.AddToClassList("player-card-gl-badge");
-            glBadge.text = "G-LEAGUE";
+            glBadge.text = LocalizationService.T("ui.code.quinteto_controller.g_league");
             glBadge.tooltip = "Asignado a la G-League";
             meta.Add(glBadge);
         }

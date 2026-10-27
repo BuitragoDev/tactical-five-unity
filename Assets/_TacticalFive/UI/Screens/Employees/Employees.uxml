@@ -14,7 +14,7 @@
             <ui:VisualElement class="screen-header panel--gold">
                 <ui:VisualElement class="screen-header-row">
                     <ui:VisualElement name="ScreenIcon" class="screen-icon" />
-                    <ui:Label class="screen-title" text="GESTIÓN DE EMPLEADOS" />
+                    <ui:Label class="screen-title" text="{loc:ui.employees.gestion_de_empleados}" />
                 </ui:VisualElement>
                 <ui:Label name="ScreenSubtitle" class="screen-subtitle" text="" />
             </ui:VisualElement>
@@ -23,8 +23,8 @@
 
                 <!-- ══ TAB BAR ══ -->
                 <ui:VisualElement class="employees-tab-bar">
-                    <ui:Button name="TabEmpleados" class="employees-tab employees-tab--active" text="EMPLEADOS CONTRATADOS" />
-                    <ui:Button name="TabMercado"   class="employees-tab" text="MERCADO DE EMPLEADOS" />
+                    <ui:Button name="TabEmpleados" class="employees-tab employees-tab--active" text="{loc:ui.employees.tab_empleados}" />
+                    <ui:Button name="TabMercado"   class="employees-tab" text="{loc:ui.employees.tab_mercado}" />
                 </ui:VisualElement>
 
                 <!-- ══ PAGE: EMPLEADOS ══ -->
@@ -32,12 +32,12 @@
 
                     <!-- Table header -->
                     <ui:VisualElement class="emp-table-header">
-                        <ui:Label class="emp-col emp-col--nombre" text="NOMBRE" />
-                        <ui:Label class="emp-col emp-col--puesto" text="PUESTO" />
-                        <ui:Label class="emp-col emp-col--nacionalidad" text="NACIONALIDAD" />
-                        <ui:Label class="emp-col emp-col--reputacion" text="REPUTACIÓN" />
-                        <ui:Label class="emp-col emp-col--sueldo" text="SUELDO" />
-                        <ui:Label class="emp-col emp-col--contrato" text="CONTRATO" />
+                        <ui:Label class="emp-col emp-col--nombre" text="{loc:ui.employees.nombre}" />
+                        <ui:Label class="emp-col emp-col--puesto" text="{loc:ui.employees.puesto}" />
+                        <ui:Label class="emp-col emp-col--nacionalidad" text="{loc:ui.employees.nacionalidad}" />
+                        <ui:Label class="emp-col emp-col--reputacion" text="{loc:ui.employees.reputacion}" />
+                        <ui:Label class="emp-col emp-col--sueldo" text="{loc:ui.employees.sueldo}" />
+                        <ui:Label class="emp-col emp-col--contrato" text="{loc:ui.employees.contrato}" />
                         <ui:Label class="emp-col emp-col--acciones" text="" />
                     </ui:VisualElement>
 
@@ -51,21 +51,21 @@
 
                     <!-- Market position tabs -->
                     <ui:VisualElement class="market-tab-bar">
-                        <ui:Button name="MarketTabASISTENTE"  class="market-tab market-tab--active" text="ASISTENTE" />
-                        <ui:Button name="MarketTabMEDICO"     class="market-tab" text="SERVICIO MÉDICO" />
-                        <ui:Button name="MarketTabFINANCIERO" class="market-tab" text="FINANCIERO" />
-                        <ui:Button name="MarketTabOJEADOR"    class="market-tab" text="OJEADOR" />
-                        <ui:Button name="MarketTabPSICOLOGO"  class="market-tab" text="PSICÓLOGO" />
-                        <ui:Button name="MarketTabPABELLON"   class="market-tab" text="PABELLÓN" />
+                        <ui:Button name="MarketTabASISTENTE"  class="market-tab market-tab--active" text="{loc:ui.employees.market_tab_asistente}" />
+                        <ui:Button name="MarketTabMEDICO"     class="market-tab" text="{loc:ui.employees.market_tab_medico}" />
+                        <ui:Button name="MarketTabFINANCIERO" class="market-tab" text="{loc:ui.employees.market_tab_financiero}" />
+                        <ui:Button name="MarketTabOJEADOR"    class="market-tab" text="{loc:ui.employees.market_tab_ojeador}" />
+                        <ui:Button name="MarketTabPSICOLOGO"  class="market-tab" text="{loc:ui.employees.market_tab_psicologo}" />
+                        <ui:Button name="MarketTabPABELLON"   class="market-tab" text="{loc:ui.employees.market_tab_pabellon}" />
                     </ui:VisualElement>
 
                     <!-- Market table header -->
                     <ui:VisualElement class="emp-table-header">
-                        <ui:Label class="emp-col emp-col--nombre" text="NOMBRE" />
-                        <ui:Label class="emp-col emp-col--nacionalidad" text="NACIONALIDAD" />
-                        <ui:Label class="emp-col emp-col--reputacion" text="REPUTACIÓN" />
-                        <ui:Label class="emp-col emp-col--sueldo" text="SUELDO" />
-                        <ui:Label class="emp-col emp-col--contrato" text="CONTRATO" />
+                        <ui:Label class="emp-col emp-col--nombre" text="{loc:ui.employees.nombre}" />
+                        <ui:Label class="emp-col emp-col--nacionalidad" text="{loc:ui.employees.nacionalidad}" />
+                        <ui:Label class="emp-col emp-col--reputacion" text="{loc:ui.employees.reputacion}" />
+                        <ui:Label class="emp-col emp-col--sueldo" text="{loc:ui.employees.sueldo}" />
+                        <ui:Label class="emp-col emp-col--contrato" text="{loc:ui.employees.contrato}" />
                         <ui:Label class="emp-col emp-col--acciones" text="" />
                     </ui:VisualElement>
 
@@ -81,8 +81,8 @@
                         <ui:VisualElement class="emp-detail-left-content">
                             <ui:VisualElement name="EmpDetailLeftLogo" class="emp-detail-left-logo"/>
                             <ui:VisualElement class="emp-detail-left-text">
-                                <ui:Label class="emp-detail-left-quote" text="&quot;El éxito no es un accidente,"/>
-                                <ui:Label class="emp-detail-left-quote emp-detail-left-quote--second" text=" es el resultado de un gran equipo.&quot;"/>
+                                <ui:Label class="emp-detail-left-quote" text="{loc:ui.employees.el_exito_no_es_un_accidente}"/>
+                                <ui:Label class="emp-detail-left-quote emp-detail-left-quote--second" text="{loc:ui.employees.es_el_resultado_de_un_gran_equipo}"/>
                                 <ui:Label name="EmpDetailLeftTeamName" class="emp-detail-left-teamname" text=""/>
                             </ui:VisualElement>
                         </ui:VisualElement>
@@ -99,17 +99,17 @@
                                     <ui:Label name="EmpDetailName" class="emp-detail-name" text=""/>
                                 </ui:VisualElement>
                                 <ui:VisualElement class="emp-detail-stat-row">
-                                    <ui:Label class="emp-detail-label" text="Nivel:"/>
+                                    <ui:Label class="emp-detail-label" text="{loc:ui.employees.nivel}"/>
                                     <ui:VisualElement name="EmpDetailStars" class="emp-detail-stars"/>
                                 </ui:VisualElement>
                                 <ui:VisualElement class="emp-detail-stat-row">
-                                    <ui:Label class="emp-detail-label" text="Salario"/>
+                                    <ui:Label class="emp-detail-label" text="{loc:ui.employees.salario}"/>
                                     <ui:Label name="EmpDetailSalary" class="emp-detail-salary" text=""/>
                                 </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>
                         <ui:VisualElement class="emp-detail-info-header">
-                            <ui:Label class="emp-detail-info-title" text="INFO"/>
+                            <ui:Label class="emp-detail-info-title" text="{loc:ui.employees.info}"/>
                         </ui:VisualElement>
                         <ui:Label name="EmpDetailDescription" class="emp-detail-description" text=""/>
                     </ui:VisualElement>
@@ -123,15 +123,15 @@
         <ui:VisualElement name="HireOverlay" class="hire-modal-overlay">
             <ui:VisualElement name="HireBox" class="hire-modal-box">
                 <ui:VisualElement class="hire-modal-header">
-                    <ui:Label name="HireTitle" class="hire-modal-title" text="CONTRATAR EMPLEADO" />
+                    <ui:Label name="HireTitle" class="hire-modal-title" text="{loc:ui.employees.hire_title}" />
                 </ui:VisualElement>
                 <ui:VisualElement class="hire-modal-body">
                     <ui:Label name="HireText1" class="hire-modal-text" text="" />
                     <ui:Label name="HireText2" class="hire-modal-text" text="" />
                     <ui:Label name="HireText3" class="hire-modal-text" text="" />
                     <ui:VisualElement class="hire-modal-buttons">
-                        <ui:Button name="BtnHireCancel"  class="btn-modal-cancel" text="CANCELAR" />
-                        <ui:Button name="BtnHireConfirm" class="btn-modal-confirm" text="CONTRATAR" />
+                        <ui:Button name="BtnHireCancel"  class="btn-modal-cancel" text="{loc:ui.employees.btn_hire_cancel}" />
+                        <ui:Button name="BtnHireConfirm" class="btn-modal-confirm" text="{loc:ui.employees.btn_hire_confirm}" />
                     </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
@@ -146,7 +146,7 @@
                 <ui:VisualElement class="hire-modal-body">
                     <ui:Label name="HireResultText"  class="hire-modal-text"  text="" />
                     <ui:VisualElement class="hire-modal-buttons">
-                        <ui:Button name="BtnHireResultOk" class="btn-modal-cancel" text="ENTENDIDO" />
+                        <ui:Button name="BtnHireResultOk" class="btn-modal-cancel" text="{loc:ui.employees.btn_hire_result_ok}" />
                     </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
@@ -157,12 +157,12 @@
     <!-- ══ MODAL CONFIGURACIÓN ══ -->
     <ui:VisualElement name="ConfigModalOverlay" class="modal-overlay">
         <ui:VisualElement name="ConfigModalBox" class="modal-box">
-            <ui:Label class="modal-title" text="CONFIGURACIÓN" />
+            <ui:Label class="modal-title" text="{loc:ui.employees.configuracion}" />
             <ui:VisualElement class="modal-body">
                 <ui:VisualElement class="settings-section">
-                    <ui:Label class="settings-section-title" text="AUDIO" />
+                    <ui:Label class="settings-section-title" text="{loc:ui.employees.audio}" />
                     <ui:VisualElement class="settings-row">
-                        <ui:Label class="settings-label" text="Volumen General" />
+                        <ui:Label class="settings-label" text="{loc:ui.employees.volumen_general}" />
                         <ui:VisualElement name="ConfigSliderMaster" class="custom-slider">
                             <ui:VisualElement class="custom-slider-track" />
                             <ui:VisualElement name="ConfigFillMaster" class="custom-slider-fill" />
@@ -171,7 +171,7 @@
                         <ui:Label name="ConfigLabelMaster" class="settings-value" text="100%" />
                     </ui:VisualElement>
                     <ui:VisualElement class="settings-row">
-                        <ui:Label class="settings-label" text="Música" />
+                        <ui:Label class="settings-label" text="{loc:ui.employees.musica}" />
                         <ui:VisualElement name="ConfigSliderMusic" class="custom-slider">
                             <ui:VisualElement class="custom-slider-track" />
                             <ui:VisualElement name="ConfigFillMusic" class="custom-slider-fill" />
@@ -180,7 +180,7 @@
                         <ui:Label name="ConfigLabelMusic" class="settings-value" text="100%" />
                     </ui:VisualElement>
                     <ui:VisualElement class="settings-row">
-                        <ui:Label class="settings-label" text="Efectos" />
+                        <ui:Label class="settings-label" text="{loc:ui.employees.efectos}" />
                         <ui:VisualElement name="ConfigSliderSFX" class="custom-slider">
                             <ui:VisualElement class="custom-slider-track" />
                             <ui:VisualElement name="ConfigFillSFX" class="custom-slider-fill" />
@@ -190,39 +190,39 @@
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement class="settings-section">
-                    <ui:Label class="settings-section-title" text="GRÁFICOS" />
+                    <ui:Label class="settings-section-title" text="{loc:ui.employees.graficos}" />
                     <ui:VisualElement class="settings-quality-row">
-                        <ui:Label class="settings-label" text="Calidad" />
+                        <ui:Label class="settings-label" text="{loc:ui.employees.calidad}" />
                         <ui:VisualElement class="settings-quality-options">
-                            <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="Baja" />
-                            <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="Media" />
-                            <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="Alta" />
-                            <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="Ultra" />
+                            <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="{loc:ui.employees.config_btn_quality_low}" />
+                            <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="{loc:ui.employees.config_btn_quality_medium}" />
+                            <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="{loc:ui.employees.config_btn_quality_high}" />
+                            <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="{loc:ui.employees.config_btn_quality_ultra}" />
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement class="settings-section">
-                    <ui:Label class="settings-section-title" text="JUEGO" />
-                    <ui:Button name="ConfigBtnMainMenu" class="settings-btn settings-btn--secondary" text="VOLVER AL MENÚ PRINCIPAL" />
-                    <ui:Button name="ConfigBtnExit" class="settings-btn settings-btn--danger" text="SALIR DEL JUEGO" />
+                    <ui:Label class="settings-section-title" text="{loc:ui.employees.juego}" />
+                    <ui:Button name="ConfigBtnMainMenu" class="settings-btn settings-btn--secondary" text="{loc:ui.employees.config_btn_main_menu}" />
+                    <ui:Button name="ConfigBtnExit" class="settings-btn settings-btn--danger" text="{loc:ui.employees.config_btn_exit}" />
                 </ui:VisualElement>
             </ui:VisualElement>
-            <ui:Button name="ConfigBtnCerrar" class="modal-close" text="CERRAR" />
+            <ui:Button name="ConfigBtnCerrar" class="modal-close" text="{loc:ui.employees.config_btn_cerrar}" />
         </ui:VisualElement>
     </ui:VisualElement>
 
     <!-- ══ MODAL CONFIRMAR VOLVER AL MENÚ PRINCIPAL ══ -->
     <ui:VisualElement name="ConfigMainMenuConfirmOverlay" class="modal-overlay">
         <ui:VisualElement name="ConfigMainMenuConfirmBox" class="modal-box">
-            <ui:Label class="modal-title" text="VOLVER AL MENÚ PRINCIPAL" />
+            <ui:Label class="modal-title" text="{loc:ui.employees.volver_al_menu_principal}" />
             <ui:VisualElement class="modal-body">
-                <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres volver al menú principal?" />
-                <ui:Label class="modal-paragraph" text="Se perderá el progreso no guardado de la partida actual. Asegúrate de haber guardado antes de continuar." />
+                <ui:Label class="modal-paragraph modal-paragraph--highlight" text="{loc:ui.employees.estas_seguro_de_que_quieres_volver_al_me_6f548452}" />
+                <ui:Label class="modal-paragraph" text="{loc:ui.employees.se_perdera_el_progreso_no_guardado_de_la_b10b7334}" />
             </ui:VisualElement>
             <ui:VisualElement class="modal-actions">
-                <ui:Button name="ConfigBtnMainMenuNo" class="modal-btn modal-btn--secondary" text="NO, QUEDARME" />
+                <ui:Button name="ConfigBtnMainMenuNo" class="modal-btn modal-btn--secondary" text="{loc:ui.employees.config_btn_main_menu_no}" />
                 <ui:VisualElement class="modal-spacer" />
-                <ui:Button name="ConfigBtnMainMenuYes" class="modal-btn modal-btn--danger" text="SÍ, VOLVER" />
+                <ui:Button name="ConfigBtnMainMenuYes" class="modal-btn modal-btn--danger" text="{loc:ui.employees.config_btn_main_menu_yes}" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
@@ -230,15 +230,15 @@
     <!-- ══ MODAL CONFIRMAR SALIR DEL JUEGO ══ -->
     <ui:VisualElement name="ConfigExitConfirmOverlay" class="modal-overlay">
         <ui:VisualElement name="ConfigExitConfirmBox" class="modal-box">
-            <ui:Label class="modal-title" text="SALIR DEL JUEGO" />
+            <ui:Label class="modal-title" text="{loc:ui.employees.salir_del_juego}" />
             <ui:VisualElement class="modal-body">
-                <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres salir del juego?" />
-                <ui:Label class="modal-paragraph" text="Tu progreso se guarda automáticamente durante la partida. Al volver a cargarla continuarás desde el último estado guardado." />
+                <ui:Label class="modal-paragraph modal-paragraph--highlight" text="{loc:ui.employees.estas_seguro_de_que_quieres_salir_del_ju_c65dd5f1}" />
+                <ui:Label class="modal-paragraph" text="{loc:ui.employees.tu_progreso_se_guarda_automaticamente_du_10fb1edb}" />
             </ui:VisualElement>
             <ui:VisualElement class="modal-actions">
-                <ui:Button name="ConfigBtnExitNo" class="modal-btn modal-btn--secondary" text="NO" />
+                <ui:Button name="ConfigBtnExitNo" class="modal-btn modal-btn--secondary" text="{loc:ui.employees.config_btn_exit_no}" />
                 <ui:VisualElement class="modal-spacer" />
-                <ui:Button name="ConfigBtnExitYes" class="modal-btn modal-btn--danger" text="SÍ, SALIR" />
+                <ui:Button name="ConfigBtnExitYes" class="modal-btn modal-btn--danger" text="{loc:ui.employees.config_btn_exit_yes}" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

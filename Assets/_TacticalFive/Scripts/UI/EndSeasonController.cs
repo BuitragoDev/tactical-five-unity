@@ -321,8 +321,8 @@ public class EndSeasonController : UIScreenController
             _headerTeamLogo.style.backgroundImage = new StyleBackground(sprite);
 
         _headerTeamName.text = _myTeam.name.ToUpper();
-        _headerManagerName.text = $"Manager: {_manager.name}";
-        _headerSeason.text = $"Temporada {_season.year_start}-{_season.year_end}";
+        _headerManagerName.text = LocalizationService.T("ui.common.manager", _manager.name);
+        _headerSeason.text = LocalizationService.T("ui.common.season", _season.year_start, _season.year_end);
         if (!string.IsNullOrEmpty(_season.current_date))
         {
             if (DateTime.TryParse(_season.current_date, out var dt))
@@ -334,7 +334,7 @@ public class EndSeasonController : UIScreenController
     {
         string seasonLabel = $"{_season.year_start}-{_season.year_end.ToString().Substring(2)}";
         _seasonTag.text = seasonLabel;
-        _draftYearTitle.text = "DRAFT";
+        _draftYearTitle.text = LocalizationService.T("ui.code.end_season_controller.draft");
         _draftYearLabel.text = _season.year_end.ToString();
         LoadRetiringPlayers();
         LoadFamePlayers();
@@ -342,7 +342,7 @@ public class EndSeasonController : UIScreenController
         var draftStateRow = _season != null ? DatabaseManager.Instance.GetDraftState(_season.id) : null;
         if (draftStateRow != null && draftStateRow.completed == 1)
         {
-            _btnDraft.text = "DRAFT COMPLETADO";
+            _btnDraft.text = LocalizationService.T("ui.code.end_season_controller.draft_completado");
             _btnDraft.SetEnabled(false);
         }
 
@@ -381,7 +381,7 @@ public class EndSeasonController : UIScreenController
         {
             Debug.LogWarning("[Draft] El draft de esta temporada ya está completado; no se repite.");
             _btnDraft.SetEnabled(false);
-            _btnDraft.text = "DRAFT COMPLETADO";
+            _btnDraft.text = LocalizationService.T("ui.code.end_season_controller.draft_completado");
             return;
         }
 
@@ -392,7 +392,7 @@ public class EndSeasonController : UIScreenController
             DatabaseManager.Instance.ClearAllRookies();
 
         _btnDraft.SetEnabled(false);
-        _btnDraft.text = "GENERANDO...";
+        _btnDraft.text = LocalizationService.T("ui.code.end_season_controller.generando");
 
         var (order, classLabel, classQuality) = DraftGenerator.GenerateDraftOrder(_season, _manager.id, _myTeam.id);
         _draftOrder = order;
@@ -473,7 +473,7 @@ public class EndSeasonController : UIScreenController
         _btnDraftPick.style.display = DisplayStyle.None;
         _btnAutoPick.style.display = DisplayStyle.None;
         _prospectCount.text = "0";
-        _btnNextSeason.text = "FINALIZAR DRAFT";
+        _btnNextSeason.text = LocalizationService.T("ui.code.end_season_controller.finalizar_draft");
         _btnNextSeason.SetEnabled(true);
 
         yield return null;
@@ -682,7 +682,7 @@ public class EndSeasonController : UIScreenController
     void ClearPlayerCard()
     {
         _draftCardPickPos.text = "";
-        _draftCardName.text = "Selecciona un prospecto";
+        _draftCardName.text = LocalizationService.T("ui.code.end_season_controller.selecciona_un_prospecto");
         _draftCardCollege.text = "";
         _draftCardBio.text = "";
         _draftCardOvr.text = "--";
@@ -807,7 +807,7 @@ public class EndSeasonController : UIScreenController
         {
             var empty = new Label();
             empty.AddToClassList("es-empty");
-            empty.text = "No hay jugadores que se retiren esta temporada";
+            empty.text = LocalizationService.T("ui.code.end_season_controller.no_hay_jugadores_que_se_retiren_esta_tem_05555b18");
             _retiringList.Add(empty);
             _btnRetiringPrev.SetEnabled(false);
             _btnRetiringNext.SetEnabled(false);
@@ -837,7 +837,7 @@ public class EndSeasonController : UIScreenController
         {
             var empty = new Label();
             empty.AddToClassList("es-empty");
-            empty.text = "Ningun jugador entra al Salon de la Fama esta temporada";
+            empty.text = LocalizationService.T("ui.code.end_season_controller.ningun_jugador_entra_al_salon_de_la_fama_e7b0273d");
             _fameList.Add(empty);
             _btnFamePrev.SetEnabled(false);
             _btnFameNext.SetEnabled(false);
@@ -881,7 +881,7 @@ public class EndSeasonController : UIScreenController
         // Age
         var ageLbl = new Label();
         ageLbl.AddToClassList("es-player-age");
-        ageLbl.text = $"{p.age} años";
+        ageLbl.text = LocalizationService.T("ui.common.years", p.age);
         card.Add(ageLbl);
 
         // Bottom row: position badge + team logo + team abbreviation
@@ -1153,7 +1153,7 @@ public class EndSeasonController : UIScreenController
 
         if (ovrs.Count == 0)
         {
-            valLabel.text = "SIN";
+            valLabel.text = LocalizationService.T("ui.code.end_season_controller.sin");
             badge.AddToClassList("draft-need-badge--low");
             return;
         }
@@ -1229,7 +1229,7 @@ public class EndSeasonController : UIScreenController
         header.AddToClassList("modal-header");
         box.Add(header);
 
-        var title = new Label("LOTERIA DEL DRAFT");
+        var title = new Label(LocalizationService.T("ui.code.end_season_controller.loteria_del_draft"));
         title.AddToClassList("modal-title");
         header.Add(title);
 
@@ -1261,7 +1261,7 @@ public class EndSeasonController : UIScreenController
         box.Add(actions);
 
         var closeBtn = new Button();
-        closeBtn.text = "CERRAR";
+        closeBtn.text = LocalizationService.T("ui.code.end_season_controller.cerrar");
         closeBtn.AddToClassList("modal-close-btn");
         closeBtn.RegisterCallback<ClickEvent>(_ =>
         {

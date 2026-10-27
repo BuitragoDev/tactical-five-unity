@@ -119,8 +119,8 @@ public class NewSeasonController : UIScreenController
             _headerTeamLogo.style.backgroundImage = new StyleBackground(sprite);
 
         _headerTeamName.text = _myTeam.name.ToUpper();
-        _headerManagerName.text = $"Manager: {_manager.name}";
-        _headerSeason.text = $"Temporada {_season.year_start}-{_season.year_end}";
+        _headerManagerName.text = LocalizationService.T("ui.common.manager", _manager.name);
+        _headerSeason.text = LocalizationService.T("ui.common.season", _season.year_start, _season.year_end);
         if (!string.IsNullOrEmpty(_season.current_date))
         {
             if (DateTime.TryParse(_season.current_date, out var dt))
@@ -137,9 +137,9 @@ public class NewSeasonController : UIScreenController
         BuildTeamCards();
 
         if (_season.game_mode == "promanager")
-            _noteText.text = "Selecciona tu equipo actual o uno de los 3 equipos disponibles para la nueva temporada.";
+            _noteText.text = LocalizationService.T("ui.code.new_season_controller.selecciona_tu_equipo_actual_o_uno_de_los_0cfc8f9e");
         else
-            _noteText.text = "Continuarás con tu equipo actual en la nueva temporada.";
+            _noteText.text = LocalizationService.T("ui.code.new_season_controller.continuaras_con_tu_equipo_actual_en_la_n_f29723fc");
     }
 
     void LoadAvailableTeams()
@@ -246,7 +246,7 @@ public class NewSeasonController : UIScreenController
             {
                 var badge = new Label();
                 badge.AddToClassList("team-select-badge");
-                badge.text = "SELECCIONADO";
+                badge.text = LocalizationService.T("ui.code.new_season_controller.seleccionado");
                 card.Add(badge);
             }
 
@@ -476,7 +476,7 @@ public class NewSeasonController : UIScreenController
         box.AddToClassList("ns-roster-box");
         _summerLeagueOverlay.Add(box);
 
-        var title = new Label("SUMMER LEAGUE · CAMP DE DESARROLLO");
+        var title = new Label(LocalizationService.T("ui.code.new_season_controller.summer_league_camp_de_desarrollo"));
         title.AddToClassList("ns-roster-title");
         box.Add(title);
 
@@ -535,7 +535,7 @@ public class NewSeasonController : UIScreenController
         var skip = new Button();
         skip.AddToClassList("ns-roster-continue");
         skip.style.backgroundColor = new Color(0.55f, 0.18f, 0.15f);
-        skip.text = "SALTAR CAMP";
+        skip.text = LocalizationService.T("ui.code.new_season_controller.saltar_camp");
         skip.style.marginRight = 8;
         skip.RegisterCallback<ClickEvent>(_ =>
         {
@@ -549,7 +549,7 @@ public class NewSeasonController : UIScreenController
 
         var simulate = new Button();
         simulate.AddToClassList("ns-roster-continue");
-        simulate.text = "SIMULAR SUMMER LEAGUE";
+        simulate.text = LocalizationService.T("ui.code.new_season_controller.simular_summer_league");
         simulate.SetEnabled(_summerLeagueSelected.Count > 0);
         simulate.RegisterCallback<ClickEvent>(_ =>
         {
@@ -592,11 +592,11 @@ public class NewSeasonController : UIScreenController
         box.AddToClassList("ns-roster-box");
         _summerLeagueOverlay.Add(box);
 
-        var title = new Label("SUMMER LEAGUE COMPLETADA");
+        var title = new Label(LocalizationService.T("ui.code.new_season_controller.summer_league_completada"));
         title.AddToClassList("ns-roster-title");
         box.Add(title);
 
-        var subtitle = new Label("Resumen del camp. Los jugadores con minutos suficientes pueden ganar +1 en su atributo más bajo.");
+        var subtitle = new Label(LocalizationService.T("ui.code.new_season_controller.resumen_del_camp_los_jugadores_con_minut_8c87d326"));
         subtitle.AddToClassList("ns-roster-subtitle");
         box.Add(subtitle);
 
@@ -624,7 +624,7 @@ public class NewSeasonController : UIScreenController
 
         var continueBtn = new Button();
         continueBtn.AddToClassList("ns-roster-continue");
-        continueBtn.text = "CONTINUAR A LA TEMPORADA";
+        continueBtn.text = LocalizationService.T("ui.code.new_season_controller.continuar_a_la_temporada");
         continueBtn.style.marginTop = 10;
         continueBtn.RegisterCallback<ClickEvent>(_ =>
         {
@@ -640,7 +640,7 @@ public class NewSeasonController : UIScreenController
     void ExecuteStartSeason()
     {
         _btnStartSeason.SetEnabled(false);
-        _btnStartSeason.text = "INICIANDO...";
+        _btnStartSeason.text = LocalizationService.T("ui.code.new_season_controller.iniciando");
         StartCoroutine(ExecuteStartSeasonAsync());
     }
 
@@ -684,7 +684,7 @@ public class NewSeasonController : UIScreenController
         {
             ScreenManager.NavigationLocked = false;
             _btnStartSeason.SetEnabled(true);
-            _btnStartSeason.text = "EMPEZAR TEMPORADA";
+            _btnStartSeason.text = LocalizationService.T("ui.code.new_season_controller.empezar_temporada");
             Debug.LogError($"[NewSeason] Error al iniciar la nueva temporada: {ex.Message}\n{ex.StackTrace}");
             yield break;
         }
@@ -715,7 +715,7 @@ public class NewSeasonController : UIScreenController
         box.AddToClassList("ns-roster-box");
         _rosterOverlay.Add(box);
 
-        var title = new Label("PLANTILLA COMPLETA");
+        var title = new Label(LocalizationService.T("ui.code.new_season_controller.plantilla_completa"));
         title.AddToClassList("ns-roster-title");
         box.Add(title);
 
@@ -757,7 +757,7 @@ public class NewSeasonController : UIScreenController
 
         _btnRosterContinue = new Button();
         _btnRosterContinue.AddToClassList("ns-roster-continue");
-        _btnRosterContinue.text = "CONTINUAR A LA SIGUIENTE TEMPORADA";
+        _btnRosterContinue.text = LocalizationService.T("ui.code.new_season_controller.continuar_a_la_siguiente_temporada");
         _btnRosterContinue.SetEnabled(_rosterActiveCount <= TradeHelper.MAX_STANDARD_ROSTER
             && DatabaseManager.Instance.GetTwoWayCount(_selectedTeamId) <= TradeHelper.MAX_TWO_WAY);
         _btnRosterContinue.RegisterCallback<ClickEvent>(_ =>
@@ -792,7 +792,7 @@ public class NewSeasonController : UIScreenController
 
         var medLbl = new Label();
         medLbl.AddToClassList("ns-roster-med-lbl");
-        medLbl.text = "MED";
+        medLbl.text = LocalizationService.T("ui.code.new_season_controller.med");
         medBox.Add(medLbl);
 
         var medVal = new Label();
@@ -828,7 +828,7 @@ public class NewSeasonController : UIScreenController
 
         var btn = new Button();
         btn.AddToClassList("ns-roster-btn");
-        btn.text = "RESCINDIR CONTRATO";
+        btn.text = LocalizationService.T("ui.code.new_season_controller.rescindir_contrato");
         int capturedId = p.id;
         btn.RegisterCallback<ClickEvent>(_ =>
         {
@@ -894,7 +894,7 @@ public class NewSeasonController : UIScreenController
             news_type = NewsType.DESPEDIDO
         });
 
-        btn.text = "DESPEDIDO";
+        btn.text = LocalizationService.T("ui.code.new_season_controller.despedido");
         btn.SetEnabled(false);
         btn.AddToClassList("ns-roster-btn--dismissed");
 
@@ -924,11 +924,11 @@ public class NewSeasonController : UIScreenController
         box.AddToClassList("ns-option-box");
         _teamOptionOverlay.Add(box);
 
-        var title = new Label("DECISIONES DE CONTRATO");
+        var title = new Label(LocalizationService.T("ui.code.new_season_controller.decisiones_de_contrato"));
         title.AddToClassList("ns-roster-title");
         box.Add(title);
 
-        var subtitle = new Label("Los siguientes jugadores tienen una team option pendiente.\nDecide si ejecutar o declinar cada opción antes de avanzar la temporada.");
+        var subtitle = new Label(LocalizationService.T("ui.code.new_season_controller.los_siguientes_jugadores_tienen_una_team_bb4c121e"));
         subtitle.AddToClassList("ns-roster-subtitle");
         box.Add(subtitle);
 
@@ -954,12 +954,12 @@ public class NewSeasonController : UIScreenController
             var btns = new VisualElement();
             btns.AddToClassList("ns-option-btns");
 
-            var exerciseBtn = new Button { text = "EJECUTAR" };
+            var exerciseBtn = new Button { text = LocalizationService.T("ui.code.new_season_controller.ejecutar") };
             exerciseBtn.AddToClassList("ns-option-btn");
             exerciseBtn.AddToClassList("ns-option-btn--exercise");
             CursorManager.Instance?.RegisterHandCursor(exerciseBtn);
 
-            var declineBtn = new Button { text = "DECLINAR" };
+            var declineBtn = new Button { text = LocalizationService.T("ui.code.new_season_controller.declinar") };
             declineBtn.AddToClassList("ns-option-btn");
             declineBtn.AddToClassList("ns-option-btn--decline");
             CursorManager.Instance?.RegisterHandCursor(declineBtn);
@@ -1037,11 +1037,11 @@ public class NewSeasonController : UIScreenController
         box.AddToClassList("ns-option-box");
         _teamOptionOverlay.Add(box);
 
-        var title = new Label("DECISIONES DE JUGADOR");
+        var title = new Label(LocalizationService.T("ui.code.new_season_controller.decisiones_de_jugador"));
         title.AddToClassList("ns-roster-title");
         box.Add(title);
 
-        var subtitle = new Label("Los siguientes jugadores tenían player option y han decidido su futuro:");
+        var subtitle = new Label(LocalizationService.T("ui.code.new_season_controller.los_siguientes_jugadores_tenian_player_o_0ad6377c"));
         subtitle.AddToClassList("ns-roster-subtitle");
         box.Add(subtitle);
 
@@ -1066,7 +1066,7 @@ public class NewSeasonController : UIScreenController
             list.Add(row);
         }
 
-        var continueBtn = new Button { text = "CONTINUAR" };
+        var continueBtn = new Button { text = LocalizationService.T("ui.code.new_season_controller.continuar") };
         continueBtn.AddToClassList("ns-roster-continue");
         continueBtn.RegisterCallback<ClickEvent>(_ =>
         {
@@ -1093,11 +1093,11 @@ public class NewSeasonController : UIScreenController
         box.AddToClassList("ns-option-box");
         _teamOptionOverlay.Add(box);
 
-        var title = new Label("RE-FIRMA DE AGENTES LIBRES");
+        var title = new Label(LocalizationService.T("ui.code.new_season_controller.re_firma_de_agentes_libres"));
         title.AddToClassList("ns-roster-title");
         box.Add(title);
 
-        var subtitle = new Label("Estos jugadores declinaron su player option y son agentes libres recientes de tu equipo.\nPuedes ofrecerles una re-firma con Bird rights, o dejarlos salir al mercado.");
+        var subtitle = new Label(LocalizationService.T("ui.code.new_season_controller.estos_jugadores_declinaron_su_player_opt_2ffbddd3"));
         subtitle.AddToClassList("ns-roster-subtitle");
         box.Add(subtitle);
 
@@ -1127,12 +1127,12 @@ public class NewSeasonController : UIScreenController
             var btns = new VisualElement();
             btns.AddToClassList("ns-option-btns");
 
-            var signBtn = new Button { text = "RE-FIRMAR" };
+            var signBtn = new Button { text = LocalizationService.T("ui.code.new_season_controller.re_firmar") };
             signBtn.AddToClassList("ns-option-btn");
             signBtn.AddToClassList("ns-option-btn--exercise");
             CursorManager.Instance?.RegisterHandCursor(signBtn);
 
-            var releaseBtn = new Button { text = "SALIR A MERCADO" };
+            var releaseBtn = new Button { text = LocalizationService.T("ui.code.new_season_controller.salir_a_mercado") };
             releaseBtn.AddToClassList("ns-option-btn");
             releaseBtn.AddToClassList("ns-option-btn--decline");
             CursorManager.Instance?.RegisterHandCursor(releaseBtn);
@@ -1159,7 +1159,7 @@ public class NewSeasonController : UIScreenController
             list.Add(row);
         }
 
-        var continueBtn = new Button { text = "CONTINUAR" };
+        var continueBtn = new Button { text = LocalizationService.T("ui.code.new_season_controller.continuar") };
         continueBtn.AddToClassList("ns-roster-continue");
         continueBtn.RegisterCallback<ClickEvent>(_ =>
         {

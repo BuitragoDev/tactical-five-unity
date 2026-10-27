@@ -213,7 +213,7 @@ using System.Linq;
             var icon = new Label("✓");
             icon.AddToClassList("arena-status-icon");
 
-            var text = new Label("Sin obras en curso");
+            var text = new Label(LocalizationService.T("ui.code.arena_controller.sin_obras_en_curso"));
             text.AddToClassList("arena-status-text");
             text.AddToClassList("arena-status-text--idle");
 
@@ -349,25 +349,25 @@ using System.Linq;
 
         if (underRenovation)
         {
-            btn.text = "EN OBRAS";
+            btn.text = LocalizationService.T("ui.code.arena_controller.en_obras");
             btn.AddToClassList("upgrade-card-btn--disabled");
             btn.SetEnabled(false);
         }
         else if (_myTeam.capacity + info.capacityBonus > MAX_CAPACITY)
         {
-            btn.text = "CAPACIDAD MÁXIMA";
+            btn.text = LocalizationService.T("ui.code.arena_controller.capacidad_maxima");
             btn.AddToClassList("upgrade-card-btn--disabled");
             btn.SetEnabled(false);
         }
         else if (_myTeam.budget < discountedCost)
         {
-            btn.text = "SIN FONDOS";
+            btn.text = LocalizationService.T("ui.code.arena_controller.sin_fondos");
             btn.AddToClassList("upgrade-card-btn--no-funds");
             btn.SetEnabled(false);
         }
         else
         {
-            btn.text = "INICIAR";
+            btn.text = LocalizationService.T("ui.code.arena_controller.iniciar");
             btn.clicked += () => { PlayClick(); ShowConfirmModal(type, info, discountedCost); };
         }
         card.Add(btn);

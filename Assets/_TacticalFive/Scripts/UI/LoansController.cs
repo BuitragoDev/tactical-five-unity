@@ -109,7 +109,7 @@ using System.Linq;
             headerTeamLogo.style.backgroundImage = new StyleBackground(sprite);
 
         headerTeamName.text = _myTeam.name.ToUpper();
-        headerManagerName.text = $"Manager: {_manager.name}";
+        headerManagerName.text = LocalizationService.T("ui.common.manager", _manager.name);
 
         var players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
         long totalPayroll = players.Sum(p => p.salary);
@@ -140,11 +140,11 @@ using System.Linq;
 
         if (_season != null)
         {
-            headerSeason.text = $"Temporada {_season.year_start}-{_season.year_end}";
+            headerSeason.text = LocalizationService.T("ui.common.season", _season.year_start, _season.year_end);
             headerDate.text = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
         }
 
-        _btnAction.text = "MENÚ PRINCIPAL";
+        _btnAction.text = LocalizationService.T("ui.code.loans_controller.menu_principal");
     }
 
     void BuildFinancialStaff()
@@ -200,12 +200,12 @@ using System.Linq;
 
             var emptyLbl = new Label();
             emptyLbl.AddToClassList("fin-staff-empty-text");
-            emptyLbl.text = "A\u00fan no se ha contratado ning\u00fan director financiero.";
+            emptyLbl.text = LocalizationService.T("ui.code.loans_controller.aun_no_se_ha_contratado_ningun_director_f769ecde");
             emptyPanel.Add(emptyLbl);
 
             var hireBtn = new Button();
             hireBtn.AddToClassList("btn-hire");
-            hireBtn.text = "IR A EMPLEADOS";
+            hireBtn.text = LocalizationService.T("ui.code.loans_controller.ir_a_empleados");
             hireBtn.RegisterCallback<ClickEvent>(_ =>
             {
                 PlayClick();
@@ -226,7 +226,7 @@ using System.Linq;
         {
             var emptyLbl = new Label();
             emptyLbl.AddToClassList("loan-empty-text");
-            emptyLbl.text = "Contrata un director financiero para gestionar pr\u00e9stamos.";
+            emptyLbl.text = LocalizationService.T("ui.code.loans_controller.contrata_un_director_financiero_para_ges_78358195");
             _loansContainer.Add(emptyLbl);
             return;
         }
@@ -312,7 +312,7 @@ using System.Linq;
 
         var payLbl = new Label();
         payLbl.AddToClassList("loan-payment-label");
-        payLbl.text = "Pago mensual:";
+        payLbl.text = LocalizationService.T("ui.code.loans_controller.pago_mensual");
         paymentRow.Add(payLbl);
 
         var payVal = new Label();
@@ -409,7 +409,7 @@ using System.Linq;
 
         var payLbl = new Label();
         payLbl.AddToClassList("loan-payment-label");
-        payLbl.text = "Pago mensual:";
+        payLbl.text = LocalizationService.T("ui.code.loans_controller.pago_mensual");
         paymentRow.Add(payLbl);
 
         var payVal = new Label();
@@ -427,12 +427,12 @@ using System.Linq;
         payBtn.AddToClassList("btn-pay");
         payBtn.AddToClassList("btn-pay--disabled");
         payBtn.SetEnabled(false);
-        payBtn.text = "DEVOLVER";
+        payBtn.text = LocalizationService.T("ui.code.loans_controller.devolver");
         actionsRow.Add(payBtn);
 
         var contractBtn = new Button();
         contractBtn.AddToClassList("btn-contract");
-        contractBtn.text = "CONTRATAR";
+        contractBtn.text = LocalizationService.T("ui.code.loans_controller.contratar");
         contractBtn.userData = slotIndex;
         contractBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnContractLoan(slotIndex); });
         if (CursorManager.Instance != null)

@@ -7,6 +7,7 @@ en cada cambio de código o commit.
 """
 
 from pathlib import Path
+import json
 import re
 import subprocess
 import sys
@@ -16,12 +17,28 @@ ROOT = Path(__file__).resolve().parent.parent
 TESTS_DIR = ROOT / "Assets/_TacticalFive/Tests/Editor"
 ENUMS_FILE = ROOT / "Assets/_TacticalFive/Scripts/Core/GameEnums.cs"
 SCREEN_MANAGER_FILE = ROOT / "Assets/_TacticalFive/Scripts/Core/ScreenManager.cs"
+LOCALIZATION_FILE = ROOT / "Assets/_TacticalFive/Resources/Localization/es.json"
 
 
 def git(*args):
     return subprocess.check_output(
         ["git", "-C", str(ROOT), *args], text=True, stderr=subprocess.PIPE
     ).strip()
+
+
+def resolve_localization_token(text):
+    """Resuelve una etiqueta UXML del tipo {loc:clave} con la tabla española."""
+    match = re.fullmatch(r"\{loc:([A-Za-z0-9_.-]+)\}", text or "")
+    if not match:
+        return text
+    try:
+        data = json.loads(LOCALIZATION_FILE.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return text
+    for entry in data.get("entries", []):
+        if entry.get("key") == match.group(1):
+            return entry.get("value", text)
+    return text
 
 
 def strip_csharp_comments(source):
@@ -95,6 +112,7 @@ def main():
         product_match = re.search(r'<ui:Label\s+text="([^"]+)"\s+class="version-label"', main_menu)
         if not product_match:
             raise RuntimeError("No se encontró la etiqueta de versión en MainMenu.uxml")
+        product_version = resolve_localization_token(product_match.group(1))
 
         plain, parameterized, unity_tests = count_tests()
         screens, documents, cases = screen_counts()
@@ -106,7 +124,7 @@ def main():
     print()
     print("| Dato | Valor | Fuente |")
     print("|---|---|---|")
-    print(f"| Versión del juego | `{product_match.group(1)}` | `MainMenu.uxml` |")
+    print(f"| Versión del juego | `{product_version}` | `MainMenu.uxml` |")
     print(f"| Unity | `{unity_version}` | `ProjectSettings/ProjectVersion.txt` |")
     print(f"| Rama | `{branch}` | Git |")
     print(f"| HEAD | `{head}` | Git |")

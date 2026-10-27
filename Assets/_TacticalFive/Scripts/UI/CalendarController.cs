@@ -204,7 +204,7 @@ using System.Linq;
             _root.Q<VisualElement>("HeaderTeamLogo").style.backgroundImage = new StyleBackground(sprite);
 
         _root.Q<Label>("HeaderTeamName").text = _myTeam.name.ToUpper();
-        _root.Q<Label>("HeaderManagerName").text = $"Manager: {_manager.name}";
+        _root.Q<Label>("HeaderManagerName").text = LocalizationService.T("ui.common.manager", _manager.name);
         var budgetLabel = _root.Q<Label>("HeaderBudget");
         budgetLabel.text = $"${_myTeam.budget / 1_000_000}M";
         budgetLabel.style.color = _myTeam.budget < 0
@@ -238,11 +238,11 @@ using System.Linq;
 
         if (_season != null)
         {
-            _root.Q<Label>("HeaderSeason").text = $"Temporada {_season.year_start}-{_season.year_end}";
+            _root.Q<Label>("HeaderSeason").text = LocalizationService.T("ui.common.season", _season.year_start, _season.year_end);
             _root.Q<Label>("HeaderDate").text = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
         }
 
-        _btnAction.text = "MENÚ PRINCIPAL";
+        _btnAction.text = LocalizationService.T("ui.code.calendar_controller.menu_principal");
     }
 
     void ChangeMonth(int delta)
@@ -473,7 +473,7 @@ using System.Linq;
 
                     var name = new Label();
                     name.AddToClassList("selected-game-team-name");
-                    name.text = "ALL-STAR GAME";
+                    name.text = LocalizationService.T("ui.code.calendar_controller.all_star_game");
                     teamsBlock.Add(name);
 
                     row.Add(teamsBlock);

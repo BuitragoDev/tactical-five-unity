@@ -334,13 +334,13 @@ public class MatchDayController : UIScreenController
         SetLogo(_root.Q<VisualElement>("HeaderTeamLogo"), _myTeam.logo, "64x64");
 
         _root.Q<Label>("HeaderTeamName").text = _myTeam.name.ToUpper();
-        _root.Q<Label>("HeaderManagerName").text = $"Manager: {_manager.name}";
+        _root.Q<Label>("HeaderManagerName").text = LocalizationService.T("ui.common.manager", _manager.name);
 
         int displayDay = GameResultCache.LastGameDay > 0 ? GameResultCache.LastGameDay : _season?.current_game_day ?? 0;
 
         if (_season != null)
         {
-            _root.Q<Label>("HeaderSeason").text = $"Temporada {_season.year_start}-{_season.year_end}";
+            _root.Q<Label>("HeaderSeason").text = LocalizationService.T("ui.common.season", _season.year_start, _season.year_end);
             _headerGameDay.text = displayDay < 0 ? "AMISTOSO" : $"Jornada {displayDay}";
 
             var gamesOnDay = DatabaseManager.Instance.GetAllGamesByGameDay(_manager.id, displayDay);
@@ -375,8 +375,8 @@ public class MatchDayController : UIScreenController
             _awayLogoName = "all-star-game";
             SetLogo(_homeLogo, "all-star-game", "80x80");
             SetLogo(_awayLogo, "all-star-game", "80x80");
-            _homeName.text = "ESTE";
-            _awayName.text = "OESTE";
+            _homeName.text = LocalizationService.T("ui.code.match_day_controller.este");
+            _awayName.text = LocalizationService.T("ui.code.match_day_controller.oeste");
         }
         else
         {
@@ -393,7 +393,7 @@ public class MatchDayController : UIScreenController
         // Venue with attendance
         if (isAllStar)
         {
-            _venueLabel.text = "All-Star Arena (50,000 espectadores)";
+            _venueLabel.text = LocalizationService.T("ui.code.match_day_controller.all_star_arena_50_000_espectadores");
         }
         else
         {
@@ -503,8 +503,8 @@ public class MatchDayController : UIScreenController
         // Box headers
         if (isAllStar)
         {
-            _homeBoxName.text = "ESTE";
-            _awayBoxName.text = "OESTE";
+            _homeBoxName.text = LocalizationService.T("ui.code.match_day_controller.este");
+            _awayBoxName.text = LocalizationService.T("ui.code.match_day_controller.oeste");
             SetLogo(_homeBoxLogo, "all-star-game", "64x64");
             SetLogo(_awayBoxLogo, "all-star-game", "64x64");
         }
@@ -599,7 +599,7 @@ public class MatchDayController : UIScreenController
         var totalRow = new VisualElement();
         totalRow.AddToClassList("box-total-row");
 
-        var totalPlayerLbl = new Label { text = "Totales" };
+        var totalPlayerLbl = new Label { text = LocalizationService.T("ui.code.match_day_controller.totales") };
         totalPlayerLbl.AddToClassList("col-player");
         totalRow.Add(totalPlayerLbl);
 
@@ -689,7 +689,7 @@ public class MatchDayController : UIScreenController
     {
         _pbpActive = true;
         _pbpFinished = false;
-        _pbpSkip.text = "SALTAR ►";
+        _pbpSkip.text = LocalizationService.T("ui.code.match_day_controller.saltar");
         _pbpHomeName.text = _homeName.text;
         _pbpAwayName.text = _awayName.text;
         SetLogo(_pbpHomeLogo, _homeLogoName, "120x120");
@@ -781,7 +781,7 @@ public class MatchDayController : UIScreenController
             _pbpScore.text = $"{finalEv.homeScore} - {finalEv.awayScore}";
             _pbpProgressFill.style.width = new StyleLength(new Length(100f, LengthUnit.Percent));
             if (_pbpProgressLabel != null) _pbpProgressLabel.text = "100%";
-            _pbpText.text = "FIN DEL PARTIDO";
+            _pbpText.text = LocalizationService.T("ui.code.match_day_controller.fin_del_partido");
             _pbpQuarter.text = finalEv.quarter > 4 ? "PRÓRROGA" : "FINAL";
             float qLen = finalEv.quarter <= 4 ? 12f : 5f;
             float remaining = Mathf.Max(0, qLen - finalEv.timeElapsed);
@@ -796,10 +796,10 @@ public class MatchDayController : UIScreenController
     void OnPbpComplete()
     {
         _pbpFinished = true;
-        _pbpSkip.text = "IR AL RESUMEN ►";
+        _pbpSkip.text = LocalizationService.T("ui.code.match_day_controller.ir_al_resumen");
         _pbpProgressFill.style.width = new StyleLength(new Length(100f, LengthUnit.Percent));
         if (_pbpProgressLabel != null) _pbpProgressLabel.text = "100%";
-        _pbpText.text = "FIN DEL PARTIDO";
+        _pbpText.text = LocalizationService.T("ui.code.match_day_controller.fin_del_partido");
     }
 
     void SortBodyByVal(VisualElement body)
@@ -939,7 +939,7 @@ public class MatchDayController : UIScreenController
         footer.AddToClassList("box-table-footer");
         var totalRow = new VisualElement();
         totalRow.AddToClassList("box-total-row");
-        var totalLbl = new Label { text = "Totales" };
+        var totalLbl = new Label { text = LocalizationService.T("ui.code.match_day_controller.totales") };
         totalLbl.AddToClassList("col-player");
         totalRow.Add(totalLbl);
         totalRow.Add(MakeStatLabel("", "col-min"));

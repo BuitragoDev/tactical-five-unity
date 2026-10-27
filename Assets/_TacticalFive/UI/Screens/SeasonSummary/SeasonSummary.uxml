@@ -14,7 +14,7 @@
             <ui:VisualElement class="ss-header-right">
                 <ui:Label name="HeaderSeason" class="ss-header-season" text=""/>
                 <ui:Label name="HeaderDate" class="ss-header-date" text=""/>
-                <ui:Button name="BtnGoToAwards" class="ss-btn-awards" text="IR A PREMIOS"/>
+                <ui:Button name="BtnGoToAwards" class="ss-btn-awards" text="{loc:ui.season_summary.btn_go_to_awards}"/>
             </ui:VisualElement>
         </ui:VisualElement>
 
@@ -26,18 +26,18 @@
 
                 <!-- Season intro -->
                 <ui:VisualElement class="ss-season-intro">
-                    <ui:Label text="RESUMEN DE TEMPORADA" class="ss-intro-title"/>
+                    <ui:Label text="{loc:ui.season_summary.resumen_de_temporada}" class="ss-intro-title"/>
                     <ui:Label name="SeasonTag" text="" class="ss-intro-year"/>
-                    <ui:Label text="Repaso a los campeones y protagonistas de una temporada inolvidable." class="ss-intro-desc"/>
+                    <ui:Label text="{loc:ui.season_summary.repaso_a_los_campeones_y_protagonistas_d_fa5e409e}" class="ss-intro-desc"/>
                 </ui:VisualElement>
 
                 <!-- NBA Champions -->
                 <ui:VisualElement class="ss-champ-card ss-champ-card--nba">
                     <ui:VisualElement class="ss-champ-overlay"/>
-                    <ui:Label text="NBA" class="ss-champ-badge ss-champ-badge--nba"/>
+                    <ui:Label text="{loc:ui.season_summary.nba}" class="ss-champ-badge ss-champ-badge--nba"/>
                     <ui:VisualElement class="ss-champ-content">
                         <ui:VisualElement class="ss-champ-text-col">
-                            <ui:Label text="CAMPEONES NBA" class="ss-champ-subtitle"/>
+                            <ui:Label text="{loc:ui.season_summary.campeones_nba}" class="ss-champ-subtitle"/>
                             <ui:Label name="ChampionName" text="" class="ss-champ-name"/>
                             <ui:Label name="ChampionTitles" text="" class="ss-champ-titles"/>
                             <ui:VisualElement name="ChampionLogo" class="ss-champ-logo-large"/>
@@ -48,10 +48,10 @@
                 <!-- G-League Champions -->
                 <ui:VisualElement class="ss-champ-card ss-champ-card--gl">
                     <ui:VisualElement class="ss-champ-overlay"/>
-                    <ui:Label text="G-LEAGUE" class="ss-champ-badge ss-champ-badge--gl"/>
+                    <ui:Label text="{loc:ui.season_summary.g_league}" class="ss-champ-badge ss-champ-badge--gl"/>
                     <ui:VisualElement class="ss-champ-content">
                         <ui:VisualElement class="ss-champ-text-col">
-                            <ui:Label text="CAMPEONES G-LEAGUE" class="ss-champ-subtitle"/>
+                            <ui:Label text="{loc:ui.season_summary.campeones_g_league}" class="ss-champ-subtitle"/>
                             <ui:Label name="GLChampionName" text="" class="ss-champ-name"/>
                             <ui:Label name="GLChampionTitles" text="" class="ss-champ-titles"/>
                             <ui:VisualElement name="GLChampionLogo" class="ss-champ-logo-large"/>
@@ -68,7 +68,7 @@
                 <ui:VisualElement class="ss-mvp-card">
                     <ui:VisualElement class="ss-mvp-header">
                         <ui:VisualElement class="ss-mvp-bar ss-mvp-bar--gold"/>
-                        <ui:Label text="MVP DE LAS FINALES" class="ss-mvp-title"/>
+                        <ui:Label text="{loc:ui.season_summary.mvp_de_las_finales}" class="ss-mvp-title"/>
                     </ui:VisualElement>
                     <ui:VisualElement class="ss-mvp-body">
                         <ui:VisualElement name="MvpPhoto" class="ss-mvp-photo"/>
@@ -78,23 +78,23 @@
                             <ui:VisualElement class="ss-mvp-stats">
                                 <ui:VisualElement class="ss-stat-box">
                                     <ui:Label name="MvpPts" text="--" class="ss-stat-val"/>
-                                    <ui:Label text="PTS" class="ss-stat-label"/>
+                                    <ui:Label text="{loc:ui.season_summary.pts}" class="ss-stat-label"/>
                                 </ui:VisualElement>
                                 <ui:VisualElement class="ss-stat-box">
                                     <ui:Label name="MvpReb" text="--" class="ss-stat-val"/>
-                                    <ui:Label text="REB" class="ss-stat-label"/>
+                                    <ui:Label text="{loc:ui.season_summary.reb}" class="ss-stat-label"/>
                                 </ui:VisualElement>
                                 <ui:VisualElement class="ss-stat-box">
                                     <ui:Label name="MvpAst" text="--" class="ss-stat-val"/>
-                                    <ui:Label text="AST" class="ss-stat-label"/>
+                                    <ui:Label text="{loc:ui.season_summary.ast}" class="ss-stat-label"/>
                                 </ui:VisualElement>
                                 <ui:VisualElement class="ss-stat-box">
                                     <ui:Label name="MvpStl" text="--" class="ss-stat-val"/>
-                                    <ui:Label text="ROB" class="ss-stat-label"/>
+                                    <ui:Label text="{loc:ui.season_summary.rob}" class="ss-stat-label"/>
                                 </ui:VisualElement>
                                 <ui:VisualElement class="ss-stat-box">
                                     <ui:Label name="MvpBlk" text="--" class="ss-stat-val"/>
-                                    <ui:Label text="TAP" class="ss-stat-label"/>
+                                    <ui:Label text="{loc:ui.season_summary.tap}" class="ss-stat-label"/>
                                 </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>
@@ -105,7 +105,7 @@
                 <ui:VisualElement class="ss-mvp-card ss-mvp-card--gl">
                     <ui:VisualElement class="ss-mvp-header">
                         <ui:VisualElement class="ss-mvp-bar ss-mvp-bar--teal"/>
-                        <ui:Label text="MVP DE LA TEMPORADA (G-LEAGUE)" class="ss-mvp-title ss-mvp-title--teal"/>
+                        <ui:Label text="{loc:ui.season_summary.mvp_de_la_temporada_g_league}" class="ss-mvp-title ss-mvp-title--teal"/>
                     </ui:VisualElement>
                     <ui:VisualElement class="ss-mvp-body">
                         <ui:VisualElement name="GLMvpPhoto" class="ss-mvp-photo"/>
@@ -115,23 +115,23 @@
                             <ui:VisualElement class="ss-mvp-stats ss-mvp-stats--teal">
                                 <ui:VisualElement class="ss-stat-box ss-stat-box--teal">
                                     <ui:Label name="GLMvpPts" text="--" class="ss-stat-val"/>
-                                    <ui:Label text="PTS" class="ss-stat-label"/>
+                                    <ui:Label text="{loc:ui.season_summary.pts}" class="ss-stat-label"/>
                                 </ui:VisualElement>
                                 <ui:VisualElement class="ss-stat-box ss-stat-box--teal">
                                     <ui:Label name="GLMvpReb" text="--" class="ss-stat-val"/>
-                                    <ui:Label text="REB" class="ss-stat-label"/>
+                                    <ui:Label text="{loc:ui.season_summary.reb}" class="ss-stat-label"/>
                                 </ui:VisualElement>
                                 <ui:VisualElement class="ss-stat-box ss-stat-box--teal">
                                     <ui:Label name="GLMvpAst" text="--" class="ss-stat-val"/>
-                                    <ui:Label text="AST" class="ss-stat-label"/>
+                                    <ui:Label text="{loc:ui.season_summary.ast}" class="ss-stat-label"/>
                                 </ui:VisualElement>
                                 <ui:VisualElement class="ss-stat-box ss-stat-box--teal">
                                     <ui:Label name="GLMvpStl" text="--" class="ss-stat-val"/>
-                                    <ui:Label text="ROB" class="ss-stat-label"/>
+                                    <ui:Label text="{loc:ui.season_summary.rob}" class="ss-stat-label"/>
                                 </ui:VisualElement>
                                 <ui:VisualElement class="ss-stat-box ss-stat-box--teal">
                                     <ui:Label name="GLMvpBlk" text="--" class="ss-stat-val"/>
-                                    <ui:Label text="TAP" class="ss-stat-label"/>
+                                    <ui:Label text="{loc:ui.season_summary.tap}" class="ss-stat-label"/>
                                 </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>
@@ -144,22 +144,22 @@
             <ui:VisualElement class="ss-stats-section">
                 <ui:VisualElement class="ss-stats-header">
                     <ui:VisualElement class="ss-stats-bar"/>
-                    <ui:Label text="RESUMEN DE LA TEMPORADA" class="ss-stats-title"/>
+                    <ui:Label text="{loc:ui.season_summary.resumen_de_la_temporada}" class="ss-stats-title"/>
                 </ui:VisualElement>
                 <ui:VisualElement class="ss-stats-row">
                     <ui:VisualElement class="ss-stat-card">
                         <ui:VisualElement name="StatIconGames" class="ss-stat-card-icon"/>
                         <ui:VisualElement class="ss-stat-card-info">
                             <ui:Label name="StatGamesValue" text="--" class="ss-stat-card-value"/>
-                            <ui:Label text="PARTIDOS DISPUTADOS" class="ss-stat-card-label"/>
-                            <ui:Label name="StatGamesSub" text="Temporada regular + Playoffs" class="ss-stat-card-sub"/>
+                            <ui:Label text="{loc:ui.season_summary.partidos_disputados}" class="ss-stat-card-label"/>
+                            <ui:Label name="StatGamesSub" text="{loc:ui.season_summary.stat_games_sub}" class="ss-stat-card-sub"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement class="ss-stat-card">
                         <ui:VisualElement name="StatIconAttendance" class="ss-stat-card-icon"/>
                         <ui:VisualElement class="ss-stat-card-info">
                             <ui:Label name="StatAttendanceValue" text="--" class="ss-stat-card-value"/>
-                            <ui:Label text="ASISTENCIA TOTAL" class="ss-stat-card-label"/>
+                            <ui:Label text="{loc:ui.season_summary.asistencia_total}" class="ss-stat-card-label"/>
                             <ui:Label name="StatAttendanceSub" text="" class="ss-stat-card-sub"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
@@ -167,7 +167,7 @@
                         <ui:VisualElement name="StatIconOccupancy" class="ss-stat-card-icon"/>
                         <ui:VisualElement class="ss-stat-card-info">
                             <ui:Label name="StatOccupancyValue" text="--" class="ss-stat-card-value"/>
-                            <ui:Label text="OCUPACIÓN MEDIA" class="ss-stat-card-label"/>
+                            <ui:Label text="{loc:ui.season_summary.ocupacion_media}" class="ss-stat-card-label"/>
                             <ui:Label name="StatOccupancySub" text="" class="ss-stat-card-sub"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
@@ -175,8 +175,8 @@
                         <ui:VisualElement name="StatIconCountries" class="ss-stat-card-icon"/>
                         <ui:VisualElement class="ss-stat-card-info">
                             <ui:Label name="StatCountriesValue" text="--" class="ss-stat-card-value"/>
-                            <ui:Label text="PAÍSES REPRESENTADOS" class="ss-stat-card-label"/>
-                            <ui:Label name="StatCountriesSub" text="En jugadores de la NBA" class="ss-stat-card-sub"/>
+                            <ui:Label text="{loc:ui.season_summary.paises_representados}" class="ss-stat-card-label"/>
+                            <ui:Label name="StatCountriesSub" text="{loc:ui.season_summary.stat_countries_sub}" class="ss-stat-card-sub"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>

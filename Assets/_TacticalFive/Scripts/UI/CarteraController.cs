@@ -154,7 +154,7 @@ public class CarteraController : UIScreenController
             headerTeamLogo.style.backgroundImage = new StyleBackground(sprite);
 
         headerTeamName.text = _myTeam.name.ToUpper();
-        headerManagerName.text = $"Manager: {_manager.name}";
+        headerManagerName.text = LocalizationService.T("ui.common.manager", _manager.name);
 
         var players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
         long totalPayroll = players.Sum(p => p.salary);
@@ -183,11 +183,11 @@ public class CarteraController : UIScreenController
         headerMargin.RemoveFromClassList("header-stat-value--negative");
         if (margin < 0) headerMargin.AddToClassList("header-stat-value--negative");
 
-        _btnAction.text = "MENÚ PRINCIPAL";
+        _btnAction.text = LocalizationService.T("ui.code.cartera_controller.menu_principal");
 
         if (_season != null)
         {
-            headerSeason.text = $"Temporada {_season.year_start}-{_season.year_end}";
+            headerSeason.text = LocalizationService.T("ui.common.season", _season.year_start, _season.year_end);
             headerDate.text = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
         }
     }
@@ -212,12 +212,12 @@ public class CarteraController : UIScreenController
 
             var emptyLbl = new Label();
             emptyLbl.AddToClassList("fin-staff-empty-text");
-            emptyLbl.text = "No tienes Ojeador contratado.";
+            emptyLbl.text = LocalizationService.T("ui.code.cartera_controller.no_tienes_ojeador_contratado");
             emptyPanel.Add(emptyLbl);
 
             var hireBtn = new Button();
             hireBtn.AddToClassList("btn-hire");
-            hireBtn.text = "IR A EMPLEADOS";
+            hireBtn.text = LocalizationService.T("ui.code.cartera_controller.ir_a_empleados");
             hireBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Employees); });
             if (CursorManager.Instance != null) CursorManager.Instance.RegisterHandCursor(hireBtn);
             emptyPanel.Add(hireBtn);
@@ -314,11 +314,11 @@ public class CarteraController : UIScreenController
 
         if (_selectedTeam == null)
         {
-            _selectedTeamLabel.text = "Selecciona un equipo para ver sus jugadores";
+            _selectedTeamLabel.text = LocalizationService.T("ui.code.cartera_controller.selecciona_un_equipo_para_ver_sus_jugado_15b38775");
             return;
         }
 
-        _selectedTeamLabel.text = "SELECCIONA UN JUGADOR PARA OJEAR";
+        _selectedTeamLabel.text = LocalizationService.T("ui.code.cartera_controller.selecciona_un_jugador_para_ojear");
 
         var players = DatabaseManager.Instance.GetPlayersByTeam(_selectedTeam.id)
             .OrderByDescending(p => p.GetCalculatedAverage())
@@ -392,7 +392,7 @@ public class CarteraController : UIScreenController
         // Ver perfil button
         var viewBtn = new Button();
         viewBtn.AddToClassList("player-row-view");
-        viewBtn.text = "VER PERFIL";
+        viewBtn.text = LocalizationService.T("ui.code.cartera_controller.ver_perfil");
         var captured = p;
         viewBtn.RegisterCallback<ClickEvent>(evt =>
         {
@@ -418,16 +418,16 @@ public class CarteraController : UIScreenController
         if (alreadyScouting)
         {
             scoutBtn.AddToClassList("btn-scout--disabled");
-            scoutBtn.text = "OJEANDO";
+            scoutBtn.text = LocalizationService.T("ui.code.cartera_controller.ojeando");
         }
         else if (!hasOjeador)
         {
             scoutBtn.AddToClassList("btn-scout--disabled");
-            scoutBtn.text = "SIN OJEADOR";
+            scoutBtn.text = LocalizationService.T("ui.code.cartera_controller.sin_ojeador");
         }
         else
         {
-            scoutBtn.text = "OJEAR";
+            scoutBtn.text = LocalizationService.T("ui.code.cartera_controller.ojear");
             var captured = player;
             scoutBtn.RegisterCallback<ClickEvent>(evt =>
             {
@@ -490,7 +490,7 @@ public class CarteraController : UIScreenController
                 slot.AddToClassList("scout-slot--empty");
                 var emptyLbl = new Label();
                 emptyLbl.AddToClassList("scout-empty-text");
-                emptyLbl.text = "SLOT DISPONIBLE";
+                emptyLbl.text = LocalizationService.T("ui.code.cartera_controller.slot_disponible");
                 slot.Add(emptyLbl);
             }
             else
@@ -536,7 +536,7 @@ public class CarteraController : UIScreenController
 
                 var ageLbl = new Label();
                 ageLbl.AddToClassList("scout-slot-header-age");
-                ageLbl.text = $"{player.age} años";
+                ageLbl.text = LocalizationService.T("ui.common.years", player.age);
                 header.Add(ageLbl);
 
                 var sep2 = new Label();
@@ -595,7 +595,7 @@ public class CarteraController : UIScreenController
         var removeBtn = new Button();
         removeBtn.AddToClassList("scout-card-remove-btn");
         removeBtn.style.marginTop = 8;
-        removeBtn.text = "RETIRAR";
+        removeBtn.text = LocalizationService.T("ui.code.cartera_controller.retirar");
         var captured = scout;
         removeBtn.RegisterCallback<ClickEvent>(_ =>
         {
@@ -701,7 +701,7 @@ public class CarteraController : UIScreenController
         {
             var empty = new Label();
             empty.AddToClassList("cartera-empty");
-            empty.text = "Todavía no has ojeado a ningún jugador.";
+            empty.text = LocalizationService.T("ui.code.cartera_controller.todavia_no_has_ojeado_a_ningun_jugador");
             _informesTableBody.Add(empty);
         }
         else
@@ -776,7 +776,7 @@ public class CarteraController : UIScreenController
         var viewBtn = new Button();
         viewBtn.AddToClassList("cartera-col-action");
         viewBtn.AddToClassList("player-row-view");
-        viewBtn.text = "VER PERFIL";
+        viewBtn.text = LocalizationService.T("ui.code.cartera_controller.ver_perfil");
         var captured = p;
         viewBtn.RegisterCallback<ClickEvent>(evt =>
         {
@@ -832,17 +832,17 @@ public class CarteraController : UIScreenController
 
         var title = new Label();
         title.AddToClassList("cartera-modal-title");
-        title.text = "CARTERA LLENA";
+        title.text = LocalizationService.T("ui.code.cartera_controller.cartera_llena");
         box.Add(title);
 
         var msg = new Label();
         msg.AddToClassList("cartera-modal-text");
-        msg.text = "No hay más espacio para ojeadores.\nRetira algún jugador de la cartera para poder ojear a más.";
+        msg.text = LocalizationService.T("ui.code.cartera_controller.no_hay_mas_espacio_para_ojeadores_retira_4d038c2b");
         box.Add(msg);
 
         var okBtn = new Button();
         okBtn.AddToClassList("cartera-modal-btn");
-        okBtn.text = "ENTENDIDO";
+        okBtn.text = LocalizationService.T("ui.code.cartera_controller.entendido");
         okBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseScoutFullModal(); });
         if (CursorManager.Instance != null) CursorManager.Instance.RegisterHandCursor(okBtn);
         box.Add(okBtn);

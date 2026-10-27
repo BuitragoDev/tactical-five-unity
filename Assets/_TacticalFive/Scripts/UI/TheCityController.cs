@@ -234,7 +234,7 @@ public class TheCityController : UIScreenController
             }
             else
             {
-                _pulseNextGame.text = "Sin partidos";
+                _pulseNextGame.text = LocalizationService.T("ui.code.the_city_controller.sin_partidos");
             }
         }
 
@@ -242,11 +242,11 @@ public class TheCityController : UIScreenController
         {
             int active = _projects.Count(p => p.status == "active");
             if (_pendingEvent != null)
-                _pulseNotice.text = "Evento pendiente";
+                _pulseNotice.text = LocalizationService.T("ui.code.the_city_controller.evento_pendiente");
             else if (active > 0)
                 _pulseNotice.text = $"{active} obra(s) en curso";
             else
-                _pulseNotice.text = "Sin avisos";
+                _pulseNotice.text = LocalizationService.T("ui.code.the_city_controller.sin_avisos");
         }
 
         if (_pulseTeam != null)
@@ -406,9 +406,9 @@ public class TheCityController : UIScreenController
 
     void BuildProjects()
     {
-        if (_inspectorTitle != null) _inspectorTitle.text = "PROYECTOS DE CIUDAD";
+        if (_inspectorTitle != null) _inspectorTitle.text = LocalizationService.T("ui.code.the_city_controller.proyectos_de_ciudad");
         if (_inspectorSubtitle != null)
-            _inspectorSubtitle.text = "Inversión en infraestructura con efectos acotados";
+            _inspectorSubtitle.text = LocalizationService.T("ui.code.the_city_controller.inversion_en_infraestructura_con_efectos_72cc5c15");
 
         AddSectionTitle("OBRAS DISPONIBLES");
 
@@ -449,7 +449,7 @@ public class TheCityController : UIScreenController
             }
             else if (level >= definition.maxLevel)
             {
-                status.text = "COMPLETADO · " + CityCatalog.ProjectEffectSummary(definition.key, level);
+                status.text = LocalizationService.T("ui.code.the_city_controller.completado") + CityCatalog.ProjectEffectSummary(definition.key, level);
             }
             else
             {
@@ -477,9 +477,9 @@ public class TheCityController : UIScreenController
 
     void BuildEvents()
     {
-        if (_inspectorTitle != null) _inspectorTitle.text = "EVENTOS DE CIUDAD";
+        if (_inspectorTitle != null) _inspectorTitle.text = LocalizationService.T("ui.code.the_city_controller.eventos_de_ciudad");
         if (_inspectorSubtitle != null)
-            _inspectorSubtitle.text = "Decisiones puntuales de la franquicia";
+            _inspectorSubtitle.text = LocalizationService.T("ui.code.the_city_controller.decisiones_puntuales_de_la_franquicia");
 
         if (_pendingEvent == null)
         {

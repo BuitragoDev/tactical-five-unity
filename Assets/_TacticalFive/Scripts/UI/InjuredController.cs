@@ -208,7 +208,7 @@ public class InjuredController : UIScreenController
             _headerTeamLogo.style.backgroundImage = new StyleBackground(sprite);
 
         _headerTeamName.text = _myTeam.name.ToUpper();
-        _headerManagerName.text = $"Manager: {_manager.name}";
+        _headerManagerName.text = LocalizationService.T("ui.common.manager", _manager.name);
 
         _headerBudget.text = $"${_myTeam.budget / 1_000_000}M";
         _headerBudget.style.color = _myTeam.budget < 0
@@ -244,11 +244,11 @@ public class InjuredController : UIScreenController
 
         if (_season != null)
         {
-            _headerSeason.text = $"Temporada {_season.year_start}-{_season.year_end}";
+            _headerSeason.text = LocalizationService.T("ui.common.season", _season.year_start, _season.year_end);
             _headerDate.text = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
         }
 
-        _btnAction.text = "MENÚ PRINCIPAL";
+        _btnAction.text = LocalizationService.T("ui.code.injured_controller.menu_principal");
     }
 
     // ── MEDICAL STAFF ──
@@ -312,12 +312,12 @@ public class InjuredController : UIScreenController
 
             var emptyLbl = new Label();
             emptyLbl.AddToClassList("med-staff-empty-text");
-            emptyLbl.text = "A\u00fan no se ha contratado ning\u00fan jefe de servicios m\u00e9dicos.";
+            emptyLbl.text = LocalizationService.T("ui.code.injured_controller.aun_no_se_ha_contratado_ningun_jefe_de_s_d1251d7c");
             _medStaffEmpty.Add(emptyLbl);
 
             var hireBtn = new Button();
             hireBtn.AddToClassList("btn-hire");
-            hireBtn.text = "IR A EMPLEADOS";
+            hireBtn.text = LocalizationService.T("ui.code.injured_controller.ir_a_empleados");
             hireBtn.RegisterCallback<ClickEvent>(_ =>
             {
                 PlayClick();
@@ -360,7 +360,7 @@ public class InjuredController : UIScreenController
 
             var emptyLbl = new Label();
             emptyLbl.AddToClassList("injured-empty-text");
-            emptyLbl.text = "No hay m\u00e1s jugadores lesionados\nen la plantilla";
+            emptyLbl.text = LocalizationService.T("ui.code.injured_controller.no_hay_mas_jugadores_lesionados_en_la_pl_c4e6ff60");
             emptyInner.Add(emptyLbl);
 
             emptyWrapper.Add(emptyInner);
@@ -434,17 +434,17 @@ public class InjuredController : UIScreenController
             if (atRisk)
             {
                 statusLbl.AddToClassList("card-status--recovered");
-                statusLbl.text = "! ALTA FORZADA";
+                statusLbl.text = LocalizationService.T("ui.code.injured_controller.alta_forzada");
             }
             else if (isRecovered)
             {
                 statusLbl.AddToClassList("card-status--recovered");
-                statusLbl.text = "\u2713 RECUPERADO";
+                statusLbl.text = LocalizationService.T("ui.code.injured_controller.recuperado");
             }
             else
             {
                 statusLbl.AddToClassList("card-status--injured");
-                statusLbl.text = "+ LESIONADO";
+                statusLbl.text = LocalizationService.T("ui.code.injured_controller.lesionado");
             }
             header.Add(statusLbl);
 
@@ -601,7 +601,7 @@ public class InjuredController : UIScreenController
             {
                 var aptoBtn = new Button();
                 aptoBtn.AddToClassList("btn-card-apt");
-                aptoBtn.text = "APTO";
+                aptoBtn.text = LocalizationService.T("ui.code.injured_controller.apto");
                 aptoBtn.SetEnabled(false);
                 aptoBtn.AddToClassList("btn-card-no-apt--disabled");
                 buttons.Add(aptoBtn);
@@ -610,7 +610,7 @@ public class InjuredController : UIScreenController
             {
                 var noAptBtn = new Button();
                 noAptBtn.AddToClassList("btn-card-no-apt");
-                noAptBtn.text = "PONER NO APTO";
+                noAptBtn.text = LocalizationService.T("ui.code.injured_controller.poner_no_apto");
                 if (onIR)
                 {
                     int rosterCount = DatabaseManager.Instance.GetRosterCount(_myTeam.id);
@@ -618,7 +618,7 @@ public class InjuredController : UIScreenController
                     {
                         noAptBtn.AddToClassList("btn-card-no-apt--disabled");
                         noAptBtn.SetEnabled(false);
-                        noAptBtn.text = "LLENA";
+                        noAptBtn.text = LocalizationService.T("ui.code.injured_controller.llena");
                     }
                     else
                     {
@@ -639,7 +639,7 @@ public class InjuredController : UIScreenController
                     noAptBtn.RegisterCallback<MouseEnterEvent>(_ => CursorManager.Instance.SetHandCursor());
                     noAptBtn.RegisterCallback<MouseLeaveEvent>(_ => CursorManager.Instance.SetDefaultCursor());
                 }
-                if (onIR) noAptBtn.text = "PONER APTO";
+                if (onIR) noAptBtn.text = LocalizationService.T("ui.code.injured_controller.poner_apto");
                 buttons.Add(noAptBtn);
 
                 var treatBtn = new Button();
@@ -647,12 +647,12 @@ public class InjuredController : UIScreenController
                 if (alreadyTreated)
                 {
                     treatBtn.AddToClassList("btn-card-treat--done");
-                    treatBtn.text = "TRATADO";
+                    treatBtn.text = LocalizationService.T("ui.code.injured_controller.tratado");
                     treatBtn.SetEnabled(false);
                 }
                 else
                 {
-                    treatBtn.text = "TRATAR";
+                    treatBtn.text = LocalizationService.T("ui.code.injured_controller.tratar");
                     if (!hasMedico)
                     {
                         treatBtn.AddToClassList("btn-card-treat--disabled");
@@ -680,19 +680,19 @@ public class InjuredController : UIScreenController
                 bool canForce = InjuryHelper.CanForceReturn(player.injury_days);
                 if (forceBlocked)
                 {
-                    forceBtn.text = "PLANTILLA LLENA";
+                    forceBtn.text = LocalizationService.T("ui.code.injured_controller.plantilla_llena");
                     forceBtn.AddToClassList("btn-card-no-apt--disabled");
                     forceBtn.SetEnabled(false);
                 }
                 else if (!canForce)
                 {
-                    forceBtn.text = "SIN FORZAR";
+                    forceBtn.text = LocalizationService.T("ui.code.injured_controller.sin_forzar");
                     forceBtn.AddToClassList("btn-card-no-apt--disabled");
                     forceBtn.SetEnabled(false);
                 }
                 else
                 {
-                    forceBtn.text = "FORZAR ALTA";
+                    forceBtn.text = LocalizationService.T("ui.code.injured_controller.forzar_alta");
                     forceBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); OpenForceReturnModal(player); });
                     if (CursorManager.Instance != null)
                     {
@@ -990,7 +990,7 @@ public class InjuredController : UIScreenController
         {
             var emptyLbl = new Label();
             emptyLbl.AddToClassList("league-injured-empty");
-            emptyLbl.text = "No hay jugadores lesionados en la liga.";
+            emptyLbl.text = LocalizationService.T("ui.code.injured_controller.no_hay_jugadores_lesionados_en_la_liga");
             _leagueInjuredList.Add(emptyLbl);
             return;
         }

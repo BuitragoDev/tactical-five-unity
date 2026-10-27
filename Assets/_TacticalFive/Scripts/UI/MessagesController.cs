@@ -200,7 +200,7 @@ public class MessagesController : UIScreenController
             var icon = new Label("\U0001F4ED");
             icon.AddToClassList("messages-empty-icon");
             empty.Add(icon);
-            var lbl = new Label("No hay noticias disponibles.");
+            var lbl = new Label(LocalizationService.T("ui.code.messages_controller.no_hay_noticias_disponibles"));
             lbl.AddToClassList("messages-empty-text");
             empty.Add(lbl);
             _messagesBody.Add(empty);
@@ -362,13 +362,13 @@ public class MessagesController : UIScreenController
         box.style.position = Position.Relative;
         overlay.Add(box);
 
-        var title = new Label("¿ELIMINAR NOTICIA?");
+        var title = new Label(LocalizationService.T("ui.code.messages_controller.eliminar_noticia"));
         title.AddToClassList("modal-title");
         box.Add(title);
 
         var body = new VisualElement();
         body.AddToClassList("modal-body");
-        var text = new Label("Esta acción no se puede deshacer.");
+        var text = new Label(LocalizationService.T("ui.code.messages_controller.esta_accion_no_se_puede_deshacer"));
         text.AddToClassList("modal-paragraph");
         body.Add(text);
         box.Add(body);
@@ -381,14 +381,14 @@ public class MessagesController : UIScreenController
         actions.style.paddingRight = 24;
         actions.style.paddingBottom = 20;
 
-        var cancel = new Button { text = "CANCELAR" };
+        var cancel = new Button { text = LocalizationService.T("ui.code.messages_controller.cancelar") };
         cancel.AddToClassList("btn-modal-cancel");
         cancel.style.minWidth = 170;
         cancel.style.marginRight = 8;
         cancel.RegisterCallback<ClickEvent>(_ => { PlayClick(); overlay.RemoveFromHierarchy(); });
         actions.Add(cancel);
 
-        var confirm = new Button { text = "ELIMINAR" };
+        var confirm = new Button { text = LocalizationService.T("ui.code.messages_controller.eliminar") };
         confirm.AddToClassList("btn-modal-confirm");
         confirm.AddToClassList("btn-modal-confirm--danger");
         confirm.style.minWidth = 170;

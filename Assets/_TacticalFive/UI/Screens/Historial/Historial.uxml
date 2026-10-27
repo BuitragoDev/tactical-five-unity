@@ -17,7 +17,7 @@
             <ui:VisualElement class="screen-header panel--gold">
                 <ui:VisualElement class="screen-header-row">
                     <ui:VisualElement name="HistorialScreenIcon" class="screen-icon" />
-                    <ui:Label class="screen-title" text="HISTORIAL DE TRASPASOS" />
+                    <ui:Label class="screen-title" text="{loc:ui.historial.historial_de_traspasos}" />
                 </ui:VisualElement>
             </ui:VisualElement>
 
@@ -25,25 +25,25 @@
             <ui:VisualElement class="historial-content">
                 <!-- Filtros y orden -->
                 <ui:VisualElement class="historial-filter-bar">
-                    <ui:Button name="HistFilterAll"   class="historial-filter-btn historial-filter-btn--active" text="TODO" />
-                    <ui:Button name="HistFilterTrade" class="historial-filter-btn" text="TRASPASOS" />
-                    <ui:Button name="HistFilterFA"    class="historial-filter-btn" text="AGENTES LIBRES" />
-                    <ui:Button name="HistFilterSnT"   class="historial-filter-btn" text="SIGN &amp; TRADE" />
+                    <ui:Button name="HistFilterAll"   class="historial-filter-btn historial-filter-btn--active" text="{loc:ui.historial.hist_filter_all}" />
+                    <ui:Button name="HistFilterTrade" class="historial-filter-btn" text="{loc:ui.historial.hist_filter_trade}" />
+                    <ui:Button name="HistFilterFA"    class="historial-filter-btn" text="{loc:ui.historial.hist_filter_fa}" />
+                    <ui:Button name="HistFilterSnT"   class="historial-filter-btn" text="{loc:ui.historial.hist_filter_sn_t}" />
                     <ui:VisualElement class="historial-filter-spacer" />
-                    <ui:Button name="HistOrderBtn"    class="historial-filter-btn" text="MÁS RECIENTES ↓" />
+                    <ui:Button name="HistOrderBtn"    class="historial-filter-btn" text="{loc:ui.historial.hist_order_btn}" />
                 </ui:VisualElement>
 
                 <ui:VisualElement class="historial-table">
                     <ui:VisualElement class="historial-table-header">
-                        <ui:Label class="historial-table-header-label historial-col historial-col-first" text="FECHA" />
-                        <ui:Label class="historial-table-header-label historial-col historial-col-player historial-col-wide" text="JUGADOR" />
+                        <ui:Label class="historial-table-header-label historial-col historial-col-first" text="{loc:ui.historial.fecha}" />
+                        <ui:Label class="historial-table-header-label historial-col historial-col-player historial-col-wide" text="{loc:ui.historial.jugador}" />
                         <ui:Label class="historial-table-header-label historial-col-logo" text="" />
-                        <ui:Label class="historial-table-header-label historial-col historial-col-wide" text="ORIGEN" />
+                        <ui:Label class="historial-table-header-label historial-col historial-col-wide" text="{loc:ui.historial.origen}" />
                         <ui:Label class="historial-table-header-label historial-col-logo" text="" />
-                        <ui:Label class="historial-table-header-label historial-col historial-col-wide" text="DESTINO" />
-                        <ui:Label class="historial-table-header-label historial-col historial-col-center historial-col-bold historial-col-narrow" text="POS" />
-                        <ui:Label class="historial-table-header-label historial-col historial-col-center historial-col-bold historial-col-narrow" text="MED" />
-                        <ui:Label class="historial-table-header-label historial-col historial-col-center historial-col-bold historial-col-sal" text="SAL" />
+                        <ui:Label class="historial-table-header-label historial-col historial-col-wide" text="{loc:ui.historial.destino}" />
+                        <ui:Label class="historial-table-header-label historial-col historial-col-center historial-col-bold historial-col-narrow" text="{loc:ui.historial.pos}" />
+                        <ui:Label class="historial-table-header-label historial-col historial-col-center historial-col-bold historial-col-narrow" text="{loc:ui.historial.med}" />
+                        <ui:Label class="historial-table-header-label historial-col historial-col-center historial-col-bold historial-col-sal" text="{loc:ui.historial.sal}" />
                     </ui:VisualElement>
                     <ui:VisualElement class="historial-scroll-row">
                         <ui:VisualElement name="HistorialViewport" class="historial-viewport">
@@ -63,12 +63,12 @@
         <!-- ══ MODAL CONFIGURACIÓN ══ -->
         <ui:VisualElement name="ConfigModalOverlay" class="modal-overlay">
             <ui:VisualElement name="ConfigModalBox" class="modal-box">
-                <ui:Label class="modal-title" text="CONFIGURACIÓN" />
+                <ui:Label class="modal-title" text="{loc:ui.historial.configuracion}" />
                 <ui:VisualElement class="modal-body">
                     <ui:VisualElement class="settings-section">
-                        <ui:Label class="settings-section-title" text="AUDIO" />
+                        <ui:Label class="settings-section-title" text="{loc:ui.historial.audio}" />
                         <ui:VisualElement class="settings-row">
-                            <ui:Label class="settings-label" text="Volumen General" />
+                            <ui:Label class="settings-label" text="{loc:ui.historial.volumen_general}" />
                             <ui:VisualElement name="ConfigSliderMaster" class="custom-slider">
                                 <ui:VisualElement class="custom-slider-track" />
                                 <ui:VisualElement name="ConfigFillMaster" class="custom-slider-fill" />
@@ -77,7 +77,7 @@
                             <ui:Label name="ConfigLabelMaster" class="settings-value" text="100%" />
                         </ui:VisualElement>
                         <ui:VisualElement class="settings-row">
-                            <ui:Label class="settings-label" text="Música" />
+                            <ui:Label class="settings-label" text="{loc:ui.historial.musica}" />
                             <ui:VisualElement name="ConfigSliderMusic" class="custom-slider">
                                 <ui:VisualElement class="custom-slider-track" />
                                 <ui:VisualElement name="ConfigFillMusic" class="custom-slider-fill" />
@@ -86,7 +86,7 @@
                             <ui:Label name="ConfigLabelMusic" class="settings-value" text="100%" />
                         </ui:VisualElement>
                         <ui:VisualElement class="settings-row">
-                            <ui:Label class="settings-label" text="Efectos" />
+                            <ui:Label class="settings-label" text="{loc:ui.historial.efectos}" />
                             <ui:VisualElement name="ConfigSliderSFX" class="custom-slider">
                                 <ui:VisualElement class="custom-slider-track" />
                                 <ui:VisualElement name="ConfigFillSFX" class="custom-slider-fill" />
@@ -96,39 +96,39 @@
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement class="settings-section">
-                        <ui:Label class="settings-section-title" text="GRÁFICOS" />
+                        <ui:Label class="settings-section-title" text="{loc:ui.historial.graficos}" />
                         <ui:VisualElement class="settings-quality-row">
-                            <ui:Label class="settings-label" text="Calidad" />
+                            <ui:Label class="settings-label" text="{loc:ui.historial.calidad}" />
                             <ui:VisualElement class="settings-quality-options">
-                                <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="Baja" />
-                                <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="Media" />
-                                <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="Alta" />
-                                <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="Ultra" />
+                                <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="{loc:ui.historial.config_btn_quality_low}" />
+                                <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="{loc:ui.historial.config_btn_quality_medium}" />
+                                <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="{loc:ui.historial.config_btn_quality_high}" />
+                                <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="{loc:ui.historial.config_btn_quality_ultra}" />
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement class="settings-section">
-                        <ui:Label class="settings-section-title" text="JUEGO" />
-                        <ui:Button name="ConfigBtnMainMenu" class="settings-btn settings-btn--secondary" text="VOLVER AL MENÚ PRINCIPAL" />
-                        <ui:Button name="ConfigBtnExit" class="settings-btn settings-btn--danger" text="SALIR DEL JUEGO" />
+                        <ui:Label class="settings-section-title" text="{loc:ui.historial.juego}" />
+                        <ui:Button name="ConfigBtnMainMenu" class="settings-btn settings-btn--secondary" text="{loc:ui.historial.config_btn_main_menu}" />
+                        <ui:Button name="ConfigBtnExit" class="settings-btn settings-btn--danger" text="{loc:ui.historial.config_btn_exit}" />
                     </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:Button name="ConfigBtnCerrar" class="modal-close" text="CERRAR" />
+                <ui:Button name="ConfigBtnCerrar" class="modal-close" text="{loc:ui.historial.config_btn_cerrar}" />
             </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- ══ MODAL CONFIRMAR VOLVER AL MENÚ PRINCIPAL ══ -->
         <ui:VisualElement name="ConfigMainMenuConfirmOverlay" class="modal-overlay">
             <ui:VisualElement name="ConfigMainMenuConfirmBox" class="modal-box">
-                <ui:Label class="modal-title" text="VOLVER AL MENÚ PRINCIPAL" />
+                <ui:Label class="modal-title" text="{loc:ui.historial.volver_al_menu_principal}" />
                 <ui:VisualElement class="modal-body">
-                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres volver al menú principal?" />
-                    <ui:Label class="modal-paragraph" text="Se perderá el progreso no guardado de la partida actual. Asegúrate de haber guardado antes de continuar." />
+                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="{loc:ui.historial.estas_seguro_de_que_quieres_volver_al_me_6f548452}" />
+                    <ui:Label class="modal-paragraph" text="{loc:ui.historial.se_perdera_el_progreso_no_guardado_de_la_b10b7334}" />
                 </ui:VisualElement>
                 <ui:VisualElement class="modal-actions">
-                    <ui:Button name="ConfigBtnMainMenuNo" class="modal-btn modal-btn--secondary" text="NO, QUEDARME" />
+                    <ui:Button name="ConfigBtnMainMenuNo" class="modal-btn modal-btn--secondary" text="{loc:ui.historial.config_btn_main_menu_no}" />
                     <ui:VisualElement class="modal-spacer" />
-                    <ui:Button name="ConfigBtnMainMenuYes" class="modal-btn modal-btn--danger" text="SÍ, VOLVER" />
+                    <ui:Button name="ConfigBtnMainMenuYes" class="modal-btn modal-btn--danger" text="{loc:ui.historial.config_btn_main_menu_yes}" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
@@ -136,15 +136,15 @@
         <!-- ══ MODAL CONFIRMAR SALIR DEL JUEGO ══ -->
         <ui:VisualElement name="ConfigExitConfirmOverlay" class="modal-overlay">
             <ui:VisualElement name="ConfigExitConfirmBox" class="modal-box">
-                <ui:Label class="modal-title" text="SALIR DEL JUEGO" />
+                <ui:Label class="modal-title" text="{loc:ui.historial.salir_del_juego}" />
                 <ui:VisualElement class="modal-body">
-                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres salir del juego?" />
-                    <ui:Label class="modal-paragraph" text="Tu progreso se guarda automáticamente durante la partida. Al volver a cargarla continuarás desde el último estado guardado." />
+                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="{loc:ui.historial.estas_seguro_de_que_quieres_salir_del_ju_c65dd5f1}" />
+                    <ui:Label class="modal-paragraph" text="{loc:ui.historial.tu_progreso_se_guarda_automaticamente_du_10fb1edb}" />
                 </ui:VisualElement>
                 <ui:VisualElement class="modal-actions">
-                    <ui:Button name="ConfigBtnExitNo" class="modal-btn modal-btn--secondary" text="NO" />
+                    <ui:Button name="ConfigBtnExitNo" class="modal-btn modal-btn--secondary" text="{loc:ui.historial.config_btn_exit_no}" />
                     <ui:VisualElement class="modal-spacer" />
-                    <ui:Button name="ConfigBtnExitYes" class="modal-btn modal-btn--danger" text="SÍ, SALIR" />
+                    <ui:Button name="ConfigBtnExitYes" class="modal-btn modal-btn--danger" text="{loc:ui.historial.config_btn_exit_yes}" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>

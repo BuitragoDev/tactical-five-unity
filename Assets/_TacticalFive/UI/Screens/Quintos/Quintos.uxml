@@ -14,7 +14,7 @@
             <ui:VisualElement class="qt-header-right">
                 <ui:Label name="HeaderSeason" class="qt-header-season" text=""/>
                 <ui:Label name="HeaderDate" class="qt-header-date" text=""/>
-                <ui:Button name="BtnEndSeason" class="qt-btn-end" text="FIN DE TEMPORADA"/>
+                <ui:Button name="BtnEndSeason" class="qt-btn-end" text="{loc:ui.quintos.btn_end_season}"/>
             </ui:VisualElement>
         </ui:VisualElement>
 
@@ -22,10 +22,10 @@
         <ui:VisualElement class="qt-screen-header">
             <ui:VisualElement class="qt-screen-overlay"/>
             <ui:VisualElement class="qt-screen-title-group">
-                <ui:Label text="MEJORES QUINTETOS DE TEMPORADA" class="qt-screen-title"/>
+                <ui:Label text="{loc:ui.quintos.mejores_quintetos_de_temporada}" class="qt-screen-title"/>
                 <ui:VisualElement class="qt-quintet-toggle">
-                    <ui:Button name="BtnFirstQuintet" class="qt-toggle-btn qt-toggle-btn--active" text="PRIMER QUINTETO"/>
-                    <ui:Button name="BtnSecondQuintet" class="qt-toggle-btn" text="SEGUNDO QUINTETO"/>
+                    <ui:Button name="BtnFirstQuintet" class="qt-toggle-btn qt-toggle-btn--active" text="{loc:ui.quintos.btn_first_quintet}"/>
+                    <ui:Button name="BtnSecondQuintet" class="qt-toggle-btn" text="{loc:ui.quintos.btn_second_quintet}"/>
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
@@ -37,54 +37,54 @@
             <ui:VisualElement class="qt-panel qt-panel--gold">
                 <ui:VisualElement class="qt-panel-header">
                     <ui:VisualElement class="qt-panel-title-group">
-                        <ui:Label name="FivePanelTitle" text="MEJOR QUINTETO" class="qt-panel-title"/>
-                        <ui:Label name="FivePanelSubtitle" text="DE LA TEMPORADA" class="qt-panel-subtitle qt-panel-subtitle--gold"/>
+                        <ui:Label name="FivePanelTitle" text="{loc:ui.quintos.five_panel_title}" class="qt-panel-title"/>
+                        <ui:Label name="FivePanelSubtitle" text="{loc:ui.quintos.five_panel_subtitle}" class="qt-panel-subtitle qt-panel-subtitle--gold"/>
                     </ui:VisualElement>
                     <ui:VisualElement class="qt-trophy-badge qt-trophy-badge--gold">
-                        <ui:Label name="FivePanelBadge" text="ALL-NBA" class="qt-trophy-label"/>
+                        <ui:Label name="FivePanelBadge" text="{loc:ui.quintos.five_panel_badge}" class="qt-trophy-label"/>
                     </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:Label text="Los cinco mejores jugadores de la temporada regular." class="qt-panel-desc"/>
+                <ui:Label text="{loc:ui.quintos.los_cinco_mejores_jugadores_de_la_tempor_f0734546}" class="qt-panel-desc"/>
 
                 <!-- TOP ROW: P + AP -->
                 <ui:VisualElement class="qt-row qt-row--top">
                     <ui:VisualElement class="qt-player-card qt-player-card--gold">
-                        <ui:Label name="FivePos_P" text="P" class="qt-pos-badge qt-pos-badge--gold"/>
+                        <ui:Label name="FivePos_P" text="{loc:ui.quintos.five_pos_p}" class="qt-pos-badge qt-pos-badge--gold"/>
                         <ui:VisualElement name="FivePhoto_P" class="qt-player-photo"/>
                         <ui:Label name="FiveName_P" text="" class="qt-player-name"/>
                         <ui:Label name="FiveTeam_P" text="" class="qt-player-team"/>
                         <ui:VisualElement class="qt-stats-row">
                             <ui:VisualElement class="qt-stat-box">
                                 <ui:Label name="FivePts_P" text="--" class="qt-stat-val"/>
-                                <ui:Label text="PTS" class="qt-stat-lbl"/>
+                                <ui:Label text="{loc:ui.quintos.pts}" class="qt-stat-lbl"/>
                             </ui:VisualElement>
                             <ui:VisualElement class="qt-stat-box">
                                 <ui:Label name="FiveReb_P" text="--" class="qt-stat-val"/>
-                                <ui:Label text="REB" class="qt-stat-lbl"/>
+                                <ui:Label text="{loc:ui.quintos.reb}" class="qt-stat-lbl"/>
                             </ui:VisualElement>
                             <ui:VisualElement class="qt-stat-box">
                                 <ui:Label name="FiveAst_P" text="--" class="qt-stat-val"/>
-                                <ui:Label text="AST" class="qt-stat-lbl"/>
+                                <ui:Label text="{loc:ui.quintos.ast}" class="qt-stat-lbl"/>
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement class="qt-player-card qt-player-card--gold">
-                        <ui:Label name="FivePos_AP" text="AP" class="qt-pos-badge qt-pos-badge--gold"/>
+                        <ui:Label name="FivePos_AP" text="{loc:ui.quintos.five_pos_ap}" class="qt-pos-badge qt-pos-badge--gold"/>
                         <ui:VisualElement name="FivePhoto_AP" class="qt-player-photo"/>
                         <ui:Label name="FiveName_AP" text="" class="qt-player-name"/>
                         <ui:Label name="FiveTeam_AP" text="" class="qt-player-team"/>
                         <ui:VisualElement class="qt-stats-row">
                             <ui:VisualElement class="qt-stat-box">
                                 <ui:Label name="FivePts_AP" text="--" class="qt-stat-val"/>
-                                <ui:Label text="PTS" class="qt-stat-lbl"/>
+                                <ui:Label text="{loc:ui.quintos.pts}" class="qt-stat-lbl"/>
                             </ui:VisualElement>
                             <ui:VisualElement class="qt-stat-box">
                                 <ui:Label name="FiveReb_AP" text="--" class="qt-stat-val"/>
-                                <ui:Label text="REB" class="qt-stat-lbl"/>
+                                <ui:Label text="{loc:ui.quintos.reb}" class="qt-stat-lbl"/>
                             </ui:VisualElement>
                             <ui:VisualElement class="qt-stat-box">
                                 <ui:Label name="FiveAst_AP" text="--" class="qt-stat-val"/>
-                                <ui:Label text="AST" class="qt-stat-lbl"/>
+                                <ui:Label text="{loc:ui.quintos.ast}" class="qt-stat-lbl"/>
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
@@ -93,62 +93,62 @@
                 <!-- BOTTOM ROW: AL + B + E -->
                 <ui:VisualElement class="qt-row qt-row--bottom">
                     <ui:VisualElement class="qt-player-card qt-player-card--gold">
-                        <ui:Label name="FivePos_AL" text="AL" class="qt-pos-badge qt-pos-badge--gold"/>
+                        <ui:Label name="FivePos_AL" text="{loc:ui.quintos.five_pos_al}" class="qt-pos-badge qt-pos-badge--gold"/>
                         <ui:VisualElement name="FivePhoto_AL" class="qt-player-photo"/>
                         <ui:Label name="FiveName_AL" text="" class="qt-player-name"/>
                         <ui:Label name="FiveTeam_AL" text="" class="qt-player-team"/>
                         <ui:VisualElement class="qt-stats-row">
                             <ui:VisualElement class="qt-stat-box">
                                 <ui:Label name="FivePts_AL" text="--" class="qt-stat-val"/>
-                                <ui:Label text="PTS" class="qt-stat-lbl"/>
+                                <ui:Label text="{loc:ui.quintos.pts}" class="qt-stat-lbl"/>
                             </ui:VisualElement>
                             <ui:VisualElement class="qt-stat-box">
                                 <ui:Label name="FiveReb_AL" text="--" class="qt-stat-val"/>
-                                <ui:Label text="REB" class="qt-stat-lbl"/>
+                                <ui:Label text="{loc:ui.quintos.reb}" class="qt-stat-lbl"/>
                             </ui:VisualElement>
                             <ui:VisualElement class="qt-stat-box">
                                 <ui:Label name="FiveAst_AL" text="--" class="qt-stat-val"/>
-                                <ui:Label text="AST" class="qt-stat-lbl"/>
+                                <ui:Label text="{loc:ui.quintos.ast}" class="qt-stat-lbl"/>
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement class="qt-player-card qt-player-card--gold">
-                        <ui:Label name="FivePos_B" text="B" class="qt-pos-badge qt-pos-badge--gold"/>
+                        <ui:Label name="FivePos_B" text="{loc:ui.quintos.five_pos_b}" class="qt-pos-badge qt-pos-badge--gold"/>
                         <ui:VisualElement name="FivePhoto_B" class="qt-player-photo"/>
                         <ui:Label name="FiveName_B" text="" class="qt-player-name"/>
                         <ui:Label name="FiveTeam_B" text="" class="qt-player-team"/>
                         <ui:VisualElement class="qt-stats-row">
                             <ui:VisualElement class="qt-stat-box">
                                 <ui:Label name="FivePts_B" text="--" class="qt-stat-val"/>
-                                <ui:Label text="PTS" class="qt-stat-lbl"/>
+                                <ui:Label text="{loc:ui.quintos.pts}" class="qt-stat-lbl"/>
                             </ui:VisualElement>
                             <ui:VisualElement class="qt-stat-box">
                                 <ui:Label name="FiveReb_B" text="--" class="qt-stat-val"/>
-                                <ui:Label text="REB" class="qt-stat-lbl"/>
+                                <ui:Label text="{loc:ui.quintos.reb}" class="qt-stat-lbl"/>
                             </ui:VisualElement>
                             <ui:VisualElement class="qt-stat-box">
                                 <ui:Label name="FiveAst_B" text="--" class="qt-stat-val"/>
-                                <ui:Label text="AST" class="qt-stat-lbl"/>
+                                <ui:Label text="{loc:ui.quintos.ast}" class="qt-stat-lbl"/>
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement class="qt-player-card qt-player-card--gold">
-                        <ui:Label name="FivePos_E" text="E" class="qt-pos-badge qt-pos-badge--gold"/>
+                        <ui:Label name="FivePos_E" text="{loc:ui.quintos.five_pos_e}" class="qt-pos-badge qt-pos-badge--gold"/>
                         <ui:VisualElement name="FivePhoto_E" class="qt-player-photo"/>
                         <ui:Label name="FiveName_E" text="" class="qt-player-name"/>
                         <ui:Label name="FiveTeam_E" text="" class="qt-player-team"/>
                         <ui:VisualElement class="qt-stats-row">
                             <ui:VisualElement class="qt-stat-box">
                                 <ui:Label name="FivePts_E" text="--" class="qt-stat-val"/>
-                                <ui:Label text="PTS" class="qt-stat-lbl"/>
+                                <ui:Label text="{loc:ui.quintos.pts}" class="qt-stat-lbl"/>
                             </ui:VisualElement>
                             <ui:VisualElement class="qt-stat-box">
                                 <ui:Label name="FiveReb_E" text="--" class="qt-stat-val"/>
-                                <ui:Label text="REB" class="qt-stat-lbl"/>
+                                <ui:Label text="{loc:ui.quintos.reb}" class="qt-stat-lbl"/>
                             </ui:VisualElement>
                             <ui:VisualElement class="qt-stat-box">
                                 <ui:Label name="FiveAst_E" text="--" class="qt-stat-val"/>
-                                <ui:Label text="AST" class="qt-stat-lbl"/>
+                                <ui:Label text="{loc:ui.quintos.ast}" class="qt-stat-lbl"/>
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
@@ -159,54 +159,54 @@
             <ui:VisualElement class="qt-panel qt-panel--blue">
                 <ui:VisualElement class="qt-panel-header">
                     <ui:VisualElement class="qt-panel-title-group">
-                        <ui:Label name="RookPanelTitle" text="MEJOR QUINTETO" class="qt-panel-title"/>
-                        <ui:Label name="RookPanelSubtitle" text="DE ROOKIES" class="qt-panel-subtitle qt-panel-subtitle--blue"/>
+                        <ui:Label name="RookPanelTitle" text="{loc:ui.quintos.rook_panel_title}" class="qt-panel-title"/>
+                        <ui:Label name="RookPanelSubtitle" text="{loc:ui.quintos.rook_panel_subtitle}" class="qt-panel-subtitle qt-panel-subtitle--blue"/>
                     </ui:VisualElement>
                     <ui:VisualElement class="qt-trophy-badge qt-trophy-badge--blue">
-                        <ui:Label name="RookPanelBadge" text="ROOKIE TEAM" class="qt-trophy-label"/>
+                        <ui:Label name="RookPanelBadge" text="{loc:ui.quintos.rook_panel_badge}" class="qt-trophy-label"/>
                     </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:Label text="Los cinco mejores jugadores novatos de la temporada." class="qt-panel-desc"/>
+                <ui:Label text="{loc:ui.quintos.los_cinco_mejores_jugadores_novatos_de_l_a66b3488}" class="qt-panel-desc"/>
 
                 <!-- TOP ROW: P + AP -->
                 <ui:VisualElement class="qt-row qt-row--top">
                     <ui:VisualElement class="qt-player-card qt-player-card--blue">
-                        <ui:Label name="RookPos_P" text="P" class="qt-pos-badge qt-pos-badge--blue"/>
+                        <ui:Label name="RookPos_P" text="{loc:ui.quintos.rook_pos_p}" class="qt-pos-badge qt-pos-badge--blue"/>
                         <ui:VisualElement name="RookPhoto_P" class="qt-player-photo"/>
                         <ui:Label name="RookName_P" text="" class="qt-player-name"/>
                         <ui:Label name="RookTeam_P" text="" class="qt-player-team"/>
                         <ui:VisualElement class="qt-stats-row">
                             <ui:VisualElement class="qt-stat-box">
                                 <ui:Label name="RookPts_P" text="--" class="qt-stat-val"/>
-                                <ui:Label text="PTS" class="qt-stat-lbl"/>
+                                <ui:Label text="{loc:ui.quintos.pts}" class="qt-stat-lbl"/>
                             </ui:VisualElement>
                             <ui:VisualElement class="qt-stat-box">
                                 <ui:Label name="RookReb_P" text="--" class="qt-stat-val"/>
-                                <ui:Label text="REB" class="qt-stat-lbl"/>
+                                <ui:Label text="{loc:ui.quintos.reb}" class="qt-stat-lbl"/>
                             </ui:VisualElement>
                             <ui:VisualElement class="qt-stat-box">
                                 <ui:Label name="RookAst_P" text="--" class="qt-stat-val"/>
-                                <ui:Label text="AST" class="qt-stat-lbl"/>
+                                <ui:Label text="{loc:ui.quintos.ast}" class="qt-stat-lbl"/>
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement class="qt-player-card qt-player-card--blue">
-                        <ui:Label name="RookPos_AP" text="AP" class="qt-pos-badge qt-pos-badge--blue"/>
+                        <ui:Label name="RookPos_AP" text="{loc:ui.quintos.rook_pos_ap}" class="qt-pos-badge qt-pos-badge--blue"/>
                         <ui:VisualElement name="RookPhoto_AP" class="qt-player-photo"/>
                         <ui:Label name="RookName_AP" text="" class="qt-player-name"/>
                         <ui:Label name="RookTeam_AP" text="" class="qt-player-team"/>
                         <ui:VisualElement class="qt-stats-row">
                             <ui:VisualElement class="qt-stat-box">
                                 <ui:Label name="RookPts_AP" text="--" class="qt-stat-val"/>
-                                <ui:Label text="PTS" class="qt-stat-lbl"/>
+                                <ui:Label text="{loc:ui.quintos.pts}" class="qt-stat-lbl"/>
                             </ui:VisualElement>
                             <ui:VisualElement class="qt-stat-box">
                                 <ui:Label name="RookReb_AP" text="--" class="qt-stat-val"/>
-                                <ui:Label text="REB" class="qt-stat-lbl"/>
+                                <ui:Label text="{loc:ui.quintos.reb}" class="qt-stat-lbl"/>
                             </ui:VisualElement>
                             <ui:VisualElement class="qt-stat-box">
                                 <ui:Label name="RookAst_AP" text="--" class="qt-stat-val"/>
-                                <ui:Label text="AST" class="qt-stat-lbl"/>
+                                <ui:Label text="{loc:ui.quintos.ast}" class="qt-stat-lbl"/>
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
@@ -215,62 +215,62 @@
                 <!-- BOTTOM ROW: AL + B + E -->
                 <ui:VisualElement class="qt-row qt-row--bottom">
                     <ui:VisualElement class="qt-player-card qt-player-card--blue">
-                        <ui:Label name="RookPos_AL" text="AL" class="qt-pos-badge qt-pos-badge--blue"/>
+                        <ui:Label name="RookPos_AL" text="{loc:ui.quintos.rook_pos_al}" class="qt-pos-badge qt-pos-badge--blue"/>
                         <ui:VisualElement name="RookPhoto_AL" class="qt-player-photo"/>
                         <ui:Label name="RookName_AL" text="" class="qt-player-name"/>
                         <ui:Label name="RookTeam_AL" text="" class="qt-player-team"/>
                         <ui:VisualElement class="qt-stats-row">
                             <ui:VisualElement class="qt-stat-box">
                                 <ui:Label name="RookPts_AL" text="--" class="qt-stat-val"/>
-                                <ui:Label text="PTS" class="qt-stat-lbl"/>
+                                <ui:Label text="{loc:ui.quintos.pts}" class="qt-stat-lbl"/>
                             </ui:VisualElement>
                             <ui:VisualElement class="qt-stat-box">
                                 <ui:Label name="RookReb_AL" text="--" class="qt-stat-val"/>
-                                <ui:Label text="REB" class="qt-stat-lbl"/>
+                                <ui:Label text="{loc:ui.quintos.reb}" class="qt-stat-lbl"/>
                             </ui:VisualElement>
                             <ui:VisualElement class="qt-stat-box">
                                 <ui:Label name="RookAst_AL" text="--" class="qt-stat-val"/>
-                                <ui:Label text="AST" class="qt-stat-lbl"/>
+                                <ui:Label text="{loc:ui.quintos.ast}" class="qt-stat-lbl"/>
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement class="qt-player-card qt-player-card--blue">
-                        <ui:Label name="RookPos_B" text="B" class="qt-pos-badge qt-pos-badge--blue"/>
+                        <ui:Label name="RookPos_B" text="{loc:ui.quintos.rook_pos_b}" class="qt-pos-badge qt-pos-badge--blue"/>
                         <ui:VisualElement name="RookPhoto_B" class="qt-player-photo"/>
                         <ui:Label name="RookName_B" text="" class="qt-player-name"/>
                         <ui:Label name="RookTeam_B" text="" class="qt-player-team"/>
                         <ui:VisualElement class="qt-stats-row">
                             <ui:VisualElement class="qt-stat-box">
                                 <ui:Label name="RookPts_B" text="--" class="qt-stat-val"/>
-                                <ui:Label text="PTS" class="qt-stat-lbl"/>
+                                <ui:Label text="{loc:ui.quintos.pts}" class="qt-stat-lbl"/>
                             </ui:VisualElement>
                             <ui:VisualElement class="qt-stat-box">
                                 <ui:Label name="RookReb_B" text="--" class="qt-stat-val"/>
-                                <ui:Label text="REB" class="qt-stat-lbl"/>
+                                <ui:Label text="{loc:ui.quintos.reb}" class="qt-stat-lbl"/>
                             </ui:VisualElement>
                             <ui:VisualElement class="qt-stat-box">
                                 <ui:Label name="RookAst_B" text="--" class="qt-stat-val"/>
-                                <ui:Label text="AST" class="qt-stat-lbl"/>
+                                <ui:Label text="{loc:ui.quintos.ast}" class="qt-stat-lbl"/>
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement class="qt-player-card qt-player-card--blue">
-                        <ui:Label name="RookPos_E" text="E" class="qt-pos-badge qt-pos-badge--blue"/>
+                        <ui:Label name="RookPos_E" text="{loc:ui.quintos.rook_pos_e}" class="qt-pos-badge qt-pos-badge--blue"/>
                         <ui:VisualElement name="RookPhoto_E" class="qt-player-photo"/>
                         <ui:Label name="RookName_E" text="" class="qt-player-name"/>
                         <ui:Label name="RookTeam_E" text="" class="qt-player-team"/>
                         <ui:VisualElement class="qt-stats-row">
                             <ui:VisualElement class="qt-stat-box">
                                 <ui:Label name="RookPts_E" text="--" class="qt-stat-val"/>
-                                <ui:Label text="PTS" class="qt-stat-lbl"/>
+                                <ui:Label text="{loc:ui.quintos.pts}" class="qt-stat-lbl"/>
                             </ui:VisualElement>
                             <ui:VisualElement class="qt-stat-box">
                                 <ui:Label name="RookReb_E" text="--" class="qt-stat-val"/>
-                                <ui:Label text="REB" class="qt-stat-lbl"/>
+                                <ui:Label text="{loc:ui.quintos.reb}" class="qt-stat-lbl"/>
                             </ui:VisualElement>
                             <ui:VisualElement class="qt-stat-box">
                                 <ui:Label name="RookAst_E" text="--" class="qt-stat-val"/>
-                                <ui:Label text="AST" class="qt-stat-lbl"/>
+                                <ui:Label text="{loc:ui.quintos.ast}" class="qt-stat-lbl"/>
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>

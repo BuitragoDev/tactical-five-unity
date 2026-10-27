@@ -292,7 +292,7 @@ using System.Linq;
         var history = DatabaseManager.Instance.GetInjuryHistory(_player.id, 6);
         if (history.Count == 0)
         {
-            var empty = new Label("Sin lesiones registradas.");
+            var empty = new Label(LocalizationService.T("ui.code.player_profile_controller.sin_lesiones_registradas"));
             empty.AddToClassList("playerprofile-injury-empty");
             _profileInjuriesBody.Add(empty);
             return;
@@ -431,7 +431,7 @@ using System.Linq;
         var block = new VisualElement();
         block.AddToClassList("playerprofile-trends");
 
-        var title = new Label("EVOLUCIÓN POR TEMPORADA");
+        var title = new Label(LocalizationService.T("ui.code.player_profile_controller.evolucion_por_temporada"));
         title.AddToClassList("playerprofile-trends-title");
         block.Add(title);
 

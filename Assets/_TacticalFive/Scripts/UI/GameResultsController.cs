@@ -207,13 +207,13 @@ public class GameResultsController : UIScreenController
         SetLogo(_root.Q<VisualElement>("HeaderTeamLogo"), _myTeam.logo, "64x64");
 
         _root.Q<Label>("HeaderTeamName").text = _myTeam.name.ToUpper();
-        _root.Q<Label>("HeaderManagerName").text = $"Manager: {_manager.name}";
+        _root.Q<Label>("HeaderManagerName").text = LocalizationService.T("ui.common.manager", _manager.name);
 
         int displayDay = GameResultCache.LastGameDay > 0 ? GameResultCache.LastGameDay : _season?.current_game_day ?? 0;
 
         if (_season != null)
         {
-            _root.Q<Label>("HeaderSeason").text = $"Temporada {_season.year_start}-{_season.year_end}";
+            _root.Q<Label>("HeaderSeason").text = LocalizationService.T("ui.common.season", _season.year_start, _season.year_end);
             _headerGameDay.text = displayDay < 0 ? "AMISTOSO" : $"Jornada {displayDay}";
             var gamesOnDay = DatabaseManager.Instance.GetAllGamesByGameDay(_manager.id, displayDay);
             var firstGame = gamesOnDay.FirstOrDefault();

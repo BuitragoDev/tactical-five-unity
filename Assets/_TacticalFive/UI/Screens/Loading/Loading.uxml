@@ -7,7 +7,7 @@
     <ui:VisualElement name="LoadingRoot" class="loading-root">
         <ui:VisualElement class="loading-spacer" />
         <ui:VisualElement name="LoadingLogo" class="loading-logo" />
-        <ui:Label class="loading-prompt" text="Pulsa cualquier tecla o haz clic para continuar" />
+        <ui:Label class="loading-prompt" text="{loc:ui.loading.pulsa_cualquier_tecla_o_haz_clic_para_co_896f17c7}" />
         <ui:VisualElement class="loading-spacer" />
         <ui:Label name="LoadingTip" class="loading-tip" text="" />
     </ui:VisualElement>

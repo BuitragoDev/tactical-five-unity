@@ -17,7 +17,7 @@
             <ui:VisualElement class="screen-header panel--gold">
                 <ui:VisualElement class="screen-header-row">
                     <ui:VisualElement name="ScreenIcon" class="screen-icon" />
-                    <ui:Label class="screen-title" text="GESTIÓN DE JUGADORES LESIONADOS" />
+                    <ui:Label class="screen-title" text="{loc:ui.injured.gestion_de_jugadores_lesionados}" />
                 </ui:VisualElement>
                 <ui:Label name="ScreenSubtitle" class="screen-subtitle" text="" />
             </ui:VisualElement>
@@ -32,7 +32,7 @@
 
                     <!-- MEDICAL STAFF -->
                     <ui:VisualElement name="MedicalStaffSection" class="med-staff-section">
-                        <ui:Label class="section-title" text="JEFE DE SERVICIOS MÉDICOS" />
+                        <ui:Label class="section-title" text="{loc:ui.injured.jefe_de_servicios_medicos}" />
                         <ui:VisualElement name="MedStaffBody" class="med-staff-body">
                             <ui:VisualElement name="MedStaffCard" class="med-staff-card" />
                             <ui:VisualElement name="MedStaffEmpty" class="med-staff-empty" style="display: none;" />
@@ -41,7 +41,7 @@
 
                     <!-- INJURED PLAYERS -->
                     <ui:VisualElement name="InjuredSection" class="injured-section">
-                        <ui:Label class="section-title" text="JUGADORES LESIONADOS" />
+                        <ui:Label class="section-title" text="{loc:ui.injured.jugadores_lesionados}" />
                         <ui:VisualElement class="injured-scroll-row">
                             <ui:VisualElement name="InjuredViewport" class="injured-viewport">
                                 <ui:VisualElement name="InjuredCards" class="injured-cards" />
@@ -54,7 +54,7 @@
 
                 </ui:VisualElement>
 
-                <ui:Button name="BtnLeagueInjured" class="btn-league-injured" text="VER LESIONADOS DE LA LIGA" />
+                <ui:Button name="BtnLeagueInjured" class="btn-league-injured" text="{loc:ui.injured.btn_league_injured}" />
 
             </ui:VisualElement>
 
@@ -66,7 +66,7 @@
                 <ui:Label name="TreatmentResultTitle" class="injured-modal-title" text="" />
                 <ui:Label name="TreatmentResultText" class="injured-modal-text" text="" />
                 <ui:VisualElement class="injured-modal-buttons">
-                    <ui:Button name="BtnTreatmentOk" class="btn-action" text="CERRAR" />
+                    <ui:Button name="BtnTreatmentOk" class="btn-action" text="{loc:ui.injured.btn_treatment_ok}" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
@@ -76,13 +76,13 @@
         <!-- ══ LEAGUE INJURED MODAL ══ -->
          <ui:VisualElement name="LeagueInjuredOverlay" class="modal-overlay">
             <ui:VisualElement name="LeagueInjuredBox" class="modal-box" style="width: 1100px; height: 675px;">
-                <ui:Label class="modal-title" text="LESIONADOS DE LA LIGA" />
+                <ui:Label class="modal-title" text="{loc:ui.injured.lesionados_de_la_liga}" />
                 <ui:VisualElement class="league-injured-header">
                     <ui:Label class="league-injured-col-logo" text="" />
-                    <ui:Label class="league-injured-col-team" text="EQUIPO" />
-                    <ui:Label class="league-injured-col-name" text="JUGADOR" />
-                    <ui:Label class="league-injured-col-injury" text="LESIÓN" />
-                    <ui:Label class="league-injured-col-days" text="DÍAS" />
+                    <ui:Label class="league-injured-col-team" text="{loc:ui.injured.equipo}" />
+                    <ui:Label class="league-injured-col-name" text="{loc:ui.injured.jugador}" />
+                    <ui:Label class="league-injured-col-injury" text="{loc:ui.injured.lesion}" />
+                    <ui:Label class="league-injured-col-days" text="{loc:ui.injured.dias}" />
                 </ui:VisualElement>
                 <ui:VisualElement class="league-injured-list-row">
                     <ui:VisualElement name="LeagueInjuredScrollWrapper" class="league-injured-scroll-wrapper">
@@ -92,24 +92,24 @@
                         <ui:VisualElement name="LeagueInjuredScrollThumb" class="league-injured-scrollbar-thumb" />
                     </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:Button name="BtnLeagueInjuredClose" class="modal-close" text="CERRAR" />
+                <ui:Button name="BtnLeagueInjuredClose" class="modal-close" text="{loc:ui.injured.btn_league_injured_close}" />
             </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- ══ MODAL CONFIRMAR ALTA FORZADA (E2) ══ -->
         <ui:VisualElement name="ForceReturnOverlay" class="modal-overlay">
             <ui:VisualElement name="ForceReturnBox" class="modal-box" style="width: 640px;">
-                <ui:Label class="modal-title" text="ALTA FORZADA" />
+                <ui:Label class="modal-title" text="{loc:ui.injured.alta_forzada}" />
                 <ui:VisualElement class="modal-body">
                     <ui:Label name="ForceReturnWho" class="modal-paragraph modal-paragraph--highlight" text="" />
                     <ui:Label name="ForceReturnDiag" class="modal-paragraph" text="" />
                     <ui:Label name="ForceReturnRisk" class="modal-paragraph modal-paragraph--highlight" text="" />
-                    <ui:Label class="modal-paragraph" text="Al forzar el alta el jugador queda disponible de inmediato, pero arrastra un riesgo de recaída: si se lesiona antes de que desaparezca, la nueva lesión será más grave. Descansar reduce el riesgo; jugar lo mantiene." />
+                    <ui:Label class="modal-paragraph" text="{loc:ui.injured.al_forzar_el_alta_el_jugador_queda_dispo_9f3ab028}" />
                 </ui:VisualElement>
                 <ui:VisualElement class="modal-actions">
-                    <ui:Button name="BtnForceReturnCancel" class="modal-btn modal-btn--secondary" text="CANCELAR" />
+                    <ui:Button name="BtnForceReturnCancel" class="modal-btn modal-btn--secondary" text="{loc:ui.injured.btn_force_return_cancel}" />
                     <ui:VisualElement class="modal-spacer" />
-                    <ui:Button name="BtnForceReturnConfirm" class="modal-btn modal-btn--danger" text="FORZAR ALTA" />
+                    <ui:Button name="BtnForceReturnConfirm" class="modal-btn modal-btn--danger" text="{loc:ui.injured.btn_force_return_confirm}" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
@@ -117,12 +117,12 @@
         <!-- ══ MODAL CONFIGURACIÓN ══ -->
         <ui:VisualElement name="ConfigModalOverlay" class="modal-overlay">
             <ui:VisualElement name="ConfigModalBox" class="modal-box">
-                <ui:Label class="modal-title" text="CONFIGURACIÓN" />
+                <ui:Label class="modal-title" text="{loc:ui.injured.configuracion}" />
                 <ui:VisualElement class="modal-body">
                     <ui:VisualElement class="settings-section">
-                        <ui:Label class="settings-section-title" text="AUDIO" />
+                        <ui:Label class="settings-section-title" text="{loc:ui.injured.audio}" />
                         <ui:VisualElement class="settings-row">
-                            <ui:Label class="settings-label" text="Volumen General" />
+                            <ui:Label class="settings-label" text="{loc:ui.injured.volumen_general}" />
                             <ui:VisualElement name="ConfigSliderMaster" class="custom-slider">
                                 <ui:VisualElement class="custom-slider-track" />
                                 <ui:VisualElement name="ConfigFillMaster" class="custom-slider-fill" />
@@ -131,7 +131,7 @@
                             <ui:Label name="ConfigLabelMaster" class="settings-value" text="100%" />
                         </ui:VisualElement>
                         <ui:VisualElement class="settings-row">
-                            <ui:Label class="settings-label" text="Música" />
+                            <ui:Label class="settings-label" text="{loc:ui.injured.musica}" />
                             <ui:VisualElement name="ConfigSliderMusic" class="custom-slider">
                                 <ui:VisualElement class="custom-slider-track" />
                                 <ui:VisualElement name="ConfigFillMusic" class="custom-slider-fill" />
@@ -140,7 +140,7 @@
                             <ui:Label name="ConfigLabelMusic" class="settings-value" text="100%" />
                         </ui:VisualElement>
                         <ui:VisualElement class="settings-row">
-                            <ui:Label class="settings-label" text="Efectos" />
+                            <ui:Label class="settings-label" text="{loc:ui.injured.efectos}" />
                             <ui:VisualElement name="ConfigSliderSFX" class="custom-slider">
                                 <ui:VisualElement class="custom-slider-track" />
                                 <ui:VisualElement name="ConfigFillSFX" class="custom-slider-fill" />
@@ -150,39 +150,39 @@
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement class="settings-section">
-                        <ui:Label class="settings-section-title" text="GRÁFICOS" />
+                        <ui:Label class="settings-section-title" text="{loc:ui.injured.graficos}" />
                         <ui:VisualElement class="settings-quality-row">
-                            <ui:Label class="settings-label" text="Calidad" />
+                            <ui:Label class="settings-label" text="{loc:ui.injured.calidad}" />
                             <ui:VisualElement class="settings-quality-options">
-                                <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="Baja" />
-                                <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="Media" />
-                                <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="Alta" />
-                                <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="Ultra" />
+                                <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="{loc:ui.injured.config_btn_quality_low}" />
+                                <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="{loc:ui.injured.config_btn_quality_medium}" />
+                                <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="{loc:ui.injured.config_btn_quality_high}" />
+                                <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="{loc:ui.injured.config_btn_quality_ultra}" />
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement class="settings-section">
-                        <ui:Label class="settings-section-title" text="JUEGO" />
-                        <ui:Button name="ConfigBtnMainMenu" class="settings-btn settings-btn--secondary" text="VOLVER AL MENÚ PRINCIPAL" />
-                        <ui:Button name="ConfigBtnExit" class="settings-btn settings-btn--danger" text="SALIR DEL JUEGO" />
+                        <ui:Label class="settings-section-title" text="{loc:ui.injured.juego}" />
+                        <ui:Button name="ConfigBtnMainMenu" class="settings-btn settings-btn--secondary" text="{loc:ui.injured.config_btn_main_menu}" />
+                        <ui:Button name="ConfigBtnExit" class="settings-btn settings-btn--danger" text="{loc:ui.injured.config_btn_exit}" />
                     </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:Button name="ConfigBtnCerrar" class="modal-close" text="CERRAR" />
+                <ui:Button name="ConfigBtnCerrar" class="modal-close" text="{loc:ui.injured.config_btn_cerrar}" />
             </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- ══ MODAL CONFIRMAR VOLVER AL MENÚ PRINCIPAL ══ -->
         <ui:VisualElement name="ConfigMainMenuConfirmOverlay" class="modal-overlay">
             <ui:VisualElement name="ConfigMainMenuConfirmBox" class="modal-box">
-                <ui:Label class="modal-title" text="VOLVER AL MENÚ PRINCIPAL" />
+                <ui:Label class="modal-title" text="{loc:ui.injured.volver_al_menu_principal}" />
                 <ui:VisualElement class="modal-body">
-                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres volver al menú principal?" />
-                    <ui:Label class="modal-paragraph" text="Se perderá el progreso no guardado de la partida actual. Asegúrate de haber guardado antes de continuar." />
+                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="{loc:ui.injured.estas_seguro_de_que_quieres_volver_al_me_6f548452}" />
+                    <ui:Label class="modal-paragraph" text="{loc:ui.injured.se_perdera_el_progreso_no_guardado_de_la_b10b7334}" />
                 </ui:VisualElement>
                 <ui:VisualElement class="modal-actions">
-                    <ui:Button name="ConfigBtnMainMenuNo" class="modal-btn modal-btn--secondary" text="NO, QUEDARME" />
+                    <ui:Button name="ConfigBtnMainMenuNo" class="modal-btn modal-btn--secondary" text="{loc:ui.injured.config_btn_main_menu_no}" />
                     <ui:VisualElement class="modal-spacer" />
-                    <ui:Button name="ConfigBtnMainMenuYes" class="modal-btn modal-btn--danger" text="SÍ, VOLVER" />
+                    <ui:Button name="ConfigBtnMainMenuYes" class="modal-btn modal-btn--danger" text="{loc:ui.injured.config_btn_main_menu_yes}" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
@@ -190,15 +190,15 @@
         <!-- ══ MODAL CONFIRMAR SALIR DEL JUEGO ══ -->
         <ui:VisualElement name="ConfigExitConfirmOverlay" class="modal-overlay">
             <ui:VisualElement name="ConfigExitConfirmBox" class="modal-box">
-                <ui:Label class="modal-title" text="SALIR DEL JUEGO" />
+                <ui:Label class="modal-title" text="{loc:ui.injured.salir_del_juego}" />
                 <ui:VisualElement class="modal-body">
-                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres salir del juego?" />
-                    <ui:Label class="modal-paragraph" text="Tu progreso se guarda automáticamente durante la partida. Al volver a cargarla continuarás desde el último estado guardado." />
+                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="{loc:ui.injured.estas_seguro_de_que_quieres_salir_del_ju_c65dd5f1}" />
+                    <ui:Label class="modal-paragraph" text="{loc:ui.injured.tu_progreso_se_guarda_automaticamente_du_10fb1edb}" />
                 </ui:VisualElement>
                 <ui:VisualElement class="modal-actions">
-                    <ui:Button name="ConfigBtnExitNo" class="modal-btn modal-btn--secondary" text="NO" />
+                    <ui:Button name="ConfigBtnExitNo" class="modal-btn modal-btn--secondary" text="{loc:ui.injured.config_btn_exit_no}" />
                     <ui:VisualElement class="modal-spacer" />
-                    <ui:Button name="ConfigBtnExitYes" class="modal-btn modal-btn--danger" text="SÍ, SALIR" />
+                    <ui:Button name="ConfigBtnExitYes" class="modal-btn modal-btn--danger" text="{loc:ui.injured.config_btn_exit_yes}" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>

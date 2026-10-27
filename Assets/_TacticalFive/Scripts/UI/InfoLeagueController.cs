@@ -170,14 +170,14 @@ public class InfoLeagueController : UIScreenController
             long payroll = payrolls.TryGetValue(team.id, out long p) ? p : 0;
             long margin = salaryCap - payroll;
 
-            var budgetLabel = new Label("PRESUPUESTO");
+            var budgetLabel = new Label(LocalizationService.T("ui.code.info_league_controller.presupuesto"));
             budgetLabel.AddToClassList("infoleague-team-stat-label");
 
             var budget = new Label($"{team.budget:N0} $");
             budget.AddToClassList("infoleague-team-stat");
             budget.AddToClassList("infoleague-team-budget");
 
-            var marginLabelText = new Label("MARGEN SALARIAL");
+            var marginLabelText = new Label(LocalizationService.T("ui.code.info_league_controller.margen_salarial"));
             marginLabelText.AddToClassList("infoleague-team-stat-label");
             marginLabelText.AddToClassList("infoleague-team-stat-label--spaced");
 

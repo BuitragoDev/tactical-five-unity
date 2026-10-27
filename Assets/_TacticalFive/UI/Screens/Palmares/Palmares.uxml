@@ -10,24 +10,24 @@
             <ui:VisualElement class="screen-header panel--gold">
                 <ui:VisualElement class="screen-header-row">
                     <ui:VisualElement name="PalmaresScreenIcon" class="screen-icon" />
-                    <ui:Label class="screen-title" text="PALMARES DE JUGADORES Y EQUIPOS" />
+                    <ui:Label class="screen-title" text="{loc:ui.palmares.palmares_de_jugadores_y_equipos}" />
                 </ui:VisualElement>
             </ui:VisualElement>
 
             <ui:VisualElement class="palmares-content">
                 <ui:VisualElement class="palmares-tabs" style="border-left-width: 17px; border-top-width: 10px;">
-                    <ui:Button name="TabEquipos" text="EQUIPOS" class="palmares-tab"/>
-                    <ui:Button name="TabJugadores" text="JUGADORES" class="palmares-tab"/>
-                    <ui:Button name="TabQuintetos" text="QUINTETOS" class="palmares-tab"/>
-                    <ui:Button name="TabAllStar" text="ALL-STAR" class="palmares-tab"/>
-                    <ui:Button name="TabSalonFama" text="SALÓN DE LA FAMA" class="palmares-tab"/>
+                    <ui:Button name="TabEquipos" text="{loc:ui.palmares.tab_equipos}" class="palmares-tab"/>
+                    <ui:Button name="TabJugadores" text="{loc:ui.palmares.tab_jugadores}" class="palmares-tab"/>
+                    <ui:Button name="TabQuintetos" text="{loc:ui.palmares.tab_quintetos}" class="palmares-tab"/>
+                    <ui:Button name="TabAllStar" text="{loc:ui.palmares.tab_all_star}" class="palmares-tab"/>
+                    <ui:Button name="TabSalonFama" text="{loc:ui.palmares.tab_salon_fama}" class="palmares-tab"/>
                 </ui:VisualElement>
 
                 <!-- ══ TAB: EQUIPOS ══ -->
                 <ui:VisualElement name="TabContentEquipos" class="palmares-tab-content">
                     <ui:VisualElement class="palmares-split">
                         <ui:VisualElement class="palmares-left">
-                            <ui:Label class="palmares-section-title" text="CLASIFICACIÓN POR TÍTULOS" />
+                            <ui:Label class="palmares-section-title" text="{loc:ui.palmares.clasificacion_por_titulos}" />
                             <ui:VisualElement class="palmares-scroll-row">
                                 <ui:VisualElement name="TitlesRankingViewport" class="palmares-viewport">
                                     <ui:VisualElement name="TitlesRankingBody" class="champs-list" />
@@ -38,13 +38,13 @@
                             </ui:VisualElement>
                         </ui:VisualElement>
                         <ui:VisualElement class="palmares-right">
-                            <ui:Label class="palmares-section-title" text="HISTORIAL DE FINALES" />
+                            <ui:Label class="palmares-section-title" text="{loc:ui.palmares.historial_de_finales}" />
                             <ui:VisualElement class="palmares-table-header">
-                                <ui:Label class="th-season" text="TEMPORADA" />
-                                <ui:Label class="th-champ" text="CAMPEÓN" />
-                                <ui:Label class="th-finalist" text="FINALISTA" />
-                                <ui:Label class="th-result" text="RESULTADO" />
-                                <ui:Label class="th-mvp" text="MVP FINALES" />
+                                <ui:Label class="th-season" text="{loc:ui.palmares.temporada}" />
+                                <ui:Label class="th-champ" text="{loc:ui.palmares.campeon}" />
+                                <ui:Label class="th-finalist" text="{loc:ui.palmares.finalista}" />
+                                <ui:Label class="th-result" text="{loc:ui.palmares.resultado}" />
+                                <ui:Label class="th-mvp" text="{loc:ui.palmares.mvp_finales}" />
                             </ui:VisualElement>
                             <ui:VisualElement class="palmares-scroll-row">
                                 <ui:VisualElement name="FinalsHistoryViewport" class="palmares-viewport">
@@ -62,7 +62,7 @@
                 <ui:VisualElement name="TabContentJugadores" class="palmares-tab-content" style="display: none;">
                     <ui:VisualElement class="palmares-split">
                         <ui:VisualElement class="palmares-left">
-                            <ui:Label class="palmares-section-title" text="CLASIFICACIÓN MVP" />
+                            <ui:Label class="palmares-section-title" text="{loc:ui.palmares.clasificacion_mvp}" />
                             <ui:VisualElement class="palmares-scroll-row">
                                 <ui:VisualElement name="MVPRankingViewport" class="palmares-viewport">
                                     <ui:VisualElement name="MVPRankingBody" class="champs-list" />
@@ -73,13 +73,13 @@
                             </ui:VisualElement>
                         </ui:VisualElement>
                         <ui:VisualElement class="palmares-right">
-                            <ui:Label class="palmares-section-title" text="HISTORIAL DE PREMIOS" />
+                            <ui:Label class="palmares-section-title" text="{loc:ui.palmares.historial_de_premios}" />
                             <ui:VisualElement class="palmares-table-header">
-                                <ui:Label class="th-season" text="TEMPORADA" />
-                                <ui:Label class="th-mvp" text="MVP TEMPORADA" />
-                                <ui:Label class="th-rating" text="VAL. MEDIA" />
-                                <ui:Label class="th-rookie" text="ROOKIE DEL AÑO" />
-                                <ui:Label class="th-rating" text="VAL. MEDIA" />
+                                <ui:Label class="th-season" text="{loc:ui.palmares.temporada}" />
+                                <ui:Label class="th-mvp" text="{loc:ui.palmares.mvp_temporada}" />
+                                <ui:Label class="th-rating" text="{loc:ui.palmares.val_media}" />
+                                <ui:Label class="th-rookie" text="{loc:ui.palmares.rookie_del_ano}" />
+                                <ui:Label class="th-rating" text="{loc:ui.palmares.val_media}" />
                             </ui:VisualElement>
                             <ui:VisualElement class="palmares-scroll-row">
                                 <ui:VisualElement name="AwardsHistoryViewport" class="palmares-viewport">
@@ -97,7 +97,7 @@
                 <ui:VisualElement name="TabContentQuintetos" class="palmares-tab-content" style="display: none;">
                     <ui:VisualElement class="palmares-split">
                         <ui:VisualElement class="palmares-left">
-                            <ui:Label class="palmares-section-title" text="APARICIONES EN QUINTETO" />
+                            <ui:Label class="palmares-section-title" text="{loc:ui.palmares.apariciones_en_quinteto}" />
                             <ui:VisualElement class="palmares-scroll-row">
                                 <ui:VisualElement name="QuintetAppearancesViewport" class="palmares-viewport">
                                     <ui:VisualElement name="QuintetAppearancesBody" class="champs-list" />
@@ -108,14 +108,14 @@
                             </ui:VisualElement>
                         </ui:VisualElement>
                         <ui:VisualElement class="palmares-right">
-                            <ui:Label class="palmares-section-title" text="HISTORIAL DE QUINTETOS" />
+                            <ui:Label class="palmares-section-title" text="{loc:ui.palmares.historial_de_quintetos}" />
                             <ui:VisualElement class="palmares-table-header">
-                                <ui:Label class="th-season" text="TEMPORADA" />
-                                <ui:Label class="th-quintet-pos" text="BASE" />
-                                <ui:Label class="th-quintet-pos" text="ESCOLTA" />
-                                <ui:Label class="th-quintet-pos" text="ALERO" />
-                                <ui:Label class="th-quintet-pos" text="ALA-PIVOT" />
-                                <ui:Label class="th-quintet-pos" text="PIVOT" />
+                                <ui:Label class="th-season" text="{loc:ui.palmares.temporada}" />
+                                <ui:Label class="th-quintet-pos" text="{loc:ui.palmares.base}" />
+                                <ui:Label class="th-quintet-pos" text="{loc:ui.palmares.escolta}" />
+                                <ui:Label class="th-quintet-pos" text="{loc:ui.palmares.alero}" />
+                                <ui:Label class="th-quintet-pos" text="{loc:ui.palmares.ala_pivot}" />
+                                <ui:Label class="th-quintet-pos" text="{loc:ui.palmares.pivot}" />
                             </ui:VisualElement>
                             <ui:VisualElement class="palmares-scroll-row">
                                 <ui:VisualElement name="QuintetHistoryViewport" class="palmares-viewport">
@@ -133,7 +133,7 @@
                 <ui:VisualElement name="TabContentAllStar" class="palmares-tab-content" style="display: none;">
                     <ui:VisualElement class="palmares-split">
                         <ui:VisualElement class="palmares-left">
-                            <ui:Label class="palmares-section-title" text="APARICIONES EN ALL-STAR" />
+                            <ui:Label class="palmares-section-title" text="{loc:ui.palmares.apariciones_en_all_star}" />
                             <ui:VisualElement class="palmares-scroll-row">
                                 <ui:VisualElement name="AllStarAppearancesViewport" class="palmares-viewport">
                                     <ui:VisualElement name="AllStarAppearancesBody" class="champs-list" />
@@ -144,13 +144,13 @@
                             </ui:VisualElement>
                         </ui:VisualElement>
                         <ui:VisualElement class="palmares-right">
-                            <ui:Label class="palmares-section-title" text="HISTORIAL DE ALL-STAR" />
+                            <ui:Label class="palmares-section-title" text="{loc:ui.palmares.historial_de_all_star}" />
                             <ui:VisualElement class="palmares-table-header">
-                                <ui:Label class="th-season" text="AÑO" />
-                                <ui:Label class="th-winner" text="GANADOR" />
-                                <ui:Label class="th-loser" text="PERDEDOR" />
-                                <ui:Label class="th-result" text="RESULTADO" />
-                                <ui:Label class="th-mvp" text="MVP" />
+                                <ui:Label class="th-season" text="{loc:ui.palmares.ano}" />
+                                <ui:Label class="th-winner" text="{loc:ui.palmares.ganador}" />
+                                <ui:Label class="th-loser" text="{loc:ui.palmares.perdedor}" />
+                                <ui:Label class="th-result" text="{loc:ui.palmares.resultado}" />
+                                <ui:Label class="th-mvp" text="{loc:ui.palmares.mvp}" />
                             </ui:VisualElement>
                             <ui:VisualElement class="palmares-scroll-row">
                                 <ui:VisualElement name="AllStarHistoryViewport" class="palmares-viewport">
@@ -168,18 +168,18 @@
                 <ui:VisualElement name="TabContentSalonFama" class="palmares-tab-content" style="display: none;">
                     <ui:VisualElement class="palmares-split">
                         <ui:VisualElement class="palmares-full">
-                            <ui:Label class="palmares-section-title" text="SALÓN DE LA FAMA" />
+                            <ui:Label class="palmares-section-title" text="{loc:ui.palmares.salon_de_la_fama}" />
                             <ui:VisualElement class="palmares-table-header">
                                 <ui:Label class="th-hof-rank" text="#" />
-                                <ui:Label class="th-hof-name" text="JUGADOR" />
-                                <ui:Label class="th-hof-pos" text="POS" />
-                                <ui:Label class="th-hof-team" text="EQUIPO" />
-                                <ui:Label class="th-hof-rings" text="ANILLOS" />
-                                <ui:Label class="th-hof-fmvp" text="MVP FINALES" />
-                                <ui:Label class="th-hof-points" text="PUNTOS" />
-                                <ui:Label class="th-hof-rebounds" text="REBOTES" />
-                                <ui:Label class="th-hof-assists" text="AST." />
-                                <ui:Label class="th-hof-season" text="INDUCCIÓN" />
+                                <ui:Label class="th-hof-name" text="{loc:ui.palmares.jugador}" />
+                                <ui:Label class="th-hof-pos" text="{loc:ui.palmares.pos}" />
+                                <ui:Label class="th-hof-team" text="{loc:ui.palmares.equipo}" />
+                                <ui:Label class="th-hof-rings" text="{loc:ui.palmares.anillos}" />
+                                <ui:Label class="th-hof-fmvp" text="{loc:ui.palmares.mvp_finales}" />
+                                <ui:Label class="th-hof-points" text="{loc:ui.palmares.puntos}" />
+                                <ui:Label class="th-hof-rebounds" text="{loc:ui.palmares.rebotes}" />
+                                <ui:Label class="th-hof-assists" text="{loc:ui.palmares.ast}" />
+                                <ui:Label class="th-hof-season" text="{loc:ui.palmares.induccion}" />
                             </ui:VisualElement>
                             <ui:VisualElement class="palmares-scroll-row">
                                 <ui:VisualElement name="HallOfFameViewport" class="palmares-viewport">
@@ -200,12 +200,12 @@
         <!-- ══ MODAL CONFIGURACIÓN ══ -->
         <ui:VisualElement name="ConfigModalOverlay" class="modal-overlay">
             <ui:VisualElement name="ConfigModalBox" class="modal-box">
-                <ui:Label class="modal-title" text="CONFIGURACIÓN" />
+                <ui:Label class="modal-title" text="{loc:ui.palmares.configuracion}" />
                 <ui:VisualElement class="modal-body">
                     <ui:VisualElement class="settings-section">
-                        <ui:Label class="settings-section-title" text="AUDIO" />
+                        <ui:Label class="settings-section-title" text="{loc:ui.palmares.audio}" />
                         <ui:VisualElement class="settings-row">
-                            <ui:Label class="settings-label" text="Volumen General" />
+                            <ui:Label class="settings-label" text="{loc:ui.palmares.volumen_general}" />
                             <ui:VisualElement name="ConfigSliderMaster" class="custom-slider">
                                 <ui:VisualElement class="custom-slider-track" />
                                 <ui:VisualElement name="ConfigFillMaster" class="custom-slider-fill" />
@@ -214,7 +214,7 @@
                             <ui:Label name="ConfigLabelMaster" class="settings-value" text="100%" />
                         </ui:VisualElement>
                         <ui:VisualElement class="settings-row">
-                            <ui:Label class="settings-label" text="Música" />
+                            <ui:Label class="settings-label" text="{loc:ui.palmares.musica}" />
                             <ui:VisualElement name="ConfigSliderMusic" class="custom-slider">
                                 <ui:VisualElement class="custom-slider-track" />
                                 <ui:VisualElement name="ConfigFillMusic" class="custom-slider-fill" />
@@ -223,7 +223,7 @@
                             <ui:Label name="ConfigLabelMusic" class="settings-value" text="100%" />
                         </ui:VisualElement>
                         <ui:VisualElement class="settings-row">
-                            <ui:Label class="settings-label" text="Efectos" />
+                            <ui:Label class="settings-label" text="{loc:ui.palmares.efectos}" />
                             <ui:VisualElement name="ConfigSliderSFX" class="custom-slider">
                                 <ui:VisualElement class="custom-slider-track" />
                                 <ui:VisualElement name="ConfigFillSFX" class="custom-slider-fill" />
@@ -233,39 +233,39 @@
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement class="settings-section">
-                        <ui:Label class="settings-section-title" text="GRÁFICOS" />
+                        <ui:Label class="settings-section-title" text="{loc:ui.palmares.graficos}" />
                         <ui:VisualElement class="settings-quality-row">
-                            <ui:Label class="settings-label" text="Calidad" />
+                            <ui:Label class="settings-label" text="{loc:ui.palmares.calidad}" />
                             <ui:VisualElement class="settings-quality-options">
-                                <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="Baja" />
-                                <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="Media" />
-                                <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="Alta" />
-                                <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="Ultra" />
+                                <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="{loc:ui.palmares.config_btn_quality_low}" />
+                                <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="{loc:ui.palmares.config_btn_quality_medium}" />
+                                <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="{loc:ui.palmares.config_btn_quality_high}" />
+                                <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="{loc:ui.palmares.config_btn_quality_ultra}" />
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement class="settings-section">
-                        <ui:Label class="settings-section-title" text="JUEGO" />
-                        <ui:Button name="ConfigBtnMainMenu" class="settings-btn settings-btn--secondary" text="VOLVER AL MENÚ PRINCIPAL" />
-                        <ui:Button name="ConfigBtnExit" class="settings-btn settings-btn--danger" text="SALIR DEL JUEGO" />
+                        <ui:Label class="settings-section-title" text="{loc:ui.palmares.juego}" />
+                        <ui:Button name="ConfigBtnMainMenu" class="settings-btn settings-btn--secondary" text="{loc:ui.palmares.config_btn_main_menu}" />
+                        <ui:Button name="ConfigBtnExit" class="settings-btn settings-btn--danger" text="{loc:ui.palmares.config_btn_exit}" />
                     </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:Button name="ConfigBtnCerrar" class="modal-close" text="CERRAR" />
+                <ui:Button name="ConfigBtnCerrar" class="modal-close" text="{loc:ui.palmares.config_btn_cerrar}" />
             </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- ══ MODAL CONFIRMAR VOLVER AL MENÚ PRINCIPAL ══ -->
         <ui:VisualElement name="ConfigMainMenuConfirmOverlay" class="modal-overlay">
             <ui:VisualElement name="ConfigMainMenuConfirmBox" class="modal-box">
-                <ui:Label class="modal-title" text="VOLVER AL MENÚ PRINCIPAL" />
+                <ui:Label class="modal-title" text="{loc:ui.palmares.volver_al_menu_principal}" />
                 <ui:VisualElement class="modal-body">
-                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres volver al menú principal?" />
-                    <ui:Label class="modal-paragraph" text="Se perderá el progreso no guardado de la partida actual. Asegúrate de haber guardado antes de continuar." />
+                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="{loc:ui.palmares.estas_seguro_de_que_quieres_volver_al_me_6f548452}" />
+                    <ui:Label class="modal-paragraph" text="{loc:ui.palmares.se_perdera_el_progreso_no_guardado_de_la_b10b7334}" />
                 </ui:VisualElement>
                 <ui:VisualElement class="modal-actions">
-                    <ui:Button name="ConfigBtnMainMenuNo" class="modal-btn modal-btn--secondary" text="NO, QUEDARME" />
+                    <ui:Button name="ConfigBtnMainMenuNo" class="modal-btn modal-btn--secondary" text="{loc:ui.palmares.config_btn_main_menu_no}" />
                     <ui:VisualElement class="modal-spacer" />
-                    <ui:Button name="ConfigBtnMainMenuYes" class="modal-btn modal-btn--danger" text="SÍ, VOLVER" />
+                    <ui:Button name="ConfigBtnMainMenuYes" class="modal-btn modal-btn--danger" text="{loc:ui.palmares.config_btn_main_menu_yes}" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
@@ -273,15 +273,15 @@
         <!-- ══ MODAL CONFIRMAR SALIR DEL JUEGO ══ -->
         <ui:VisualElement name="ConfigExitConfirmOverlay" class="modal-overlay">
             <ui:VisualElement name="ConfigExitConfirmBox" class="modal-box">
-                <ui:Label class="modal-title" text="SALIR DEL JUEGO" />
+                <ui:Label class="modal-title" text="{loc:ui.palmares.salir_del_juego}" />
                 <ui:VisualElement class="modal-body">
-                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres salir del juego?" />
-                    <ui:Label class="modal-paragraph" text="Tu progreso se guarda automáticamente durante la partida. Al volver a cargarla continuarás desde el último estado guardado." />
+                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="{loc:ui.palmares.estas_seguro_de_que_quieres_salir_del_ju_c65dd5f1}" />
+                    <ui:Label class="modal-paragraph" text="{loc:ui.palmares.tu_progreso_se_guarda_automaticamente_du_10fb1edb}" />
                 </ui:VisualElement>
                 <ui:VisualElement class="modal-actions">
-                    <ui:Button name="ConfigBtnExitNo" class="modal-btn modal-btn--secondary" text="NO" />
+                    <ui:Button name="ConfigBtnExitNo" class="modal-btn modal-btn--secondary" text="{loc:ui.palmares.config_btn_exit_no}" />
                     <ui:VisualElement class="modal-spacer" />
-                    <ui:Button name="ConfigBtnExitYes" class="modal-btn modal-btn--danger" text="SÍ, SALIR" />
+                    <ui:Button name="ConfigBtnExitYes" class="modal-btn modal-btn--danger" text="{loc:ui.palmares.config_btn_exit_yes}" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>

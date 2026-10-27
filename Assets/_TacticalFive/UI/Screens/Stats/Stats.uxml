@@ -17,7 +17,7 @@
             <ui:VisualElement class="stats-screen-header panel--gold">
                 <ui:VisualElement class="stats-screen-header-row">
                     <ui:VisualElement name="StatsScreenIcon" class="stats-screen-icon" />
-                    <ui:Label text="ESTADÍSTICAS DE JUGADORES" class="stats-screen-title" />
+                    <ui:Label text="{loc:ui.stats.estadisticas_de_jugadores}" class="stats-screen-title" />
                 </ui:VisualElement>
                 <ui:Label name="StatsSubtitle" text="" class="stats-screen-subtitle" />
             </ui:VisualElement>
@@ -27,35 +27,35 @@
 
                 <!-- Stat type tabs (16) -->
                 <ui:VisualElement name="StatTabs" class="stats-tabs">
-                    <ui:Button name="TabPuntos" class="stats-tab stats-tab--active" text="PUNTOS" />
-                    <ui:Button name="TabRebotes" class="stats-tab" text="REBOTES" />
-                    <ui:Button name="TabAsistencias" class="stats-tab" text="ASISTENCIAS" />
-                    <ui:Button name="TabRobos" class="stats-tab" text="ROBOS" />
-                    <ui:Button name="TabTapones" class="stats-tab" text="TAPONES" />
-                    <ui:Button name="TabPctTC" class="stats-tab" text="% TC" />
-                    <ui:Button name="TabPct3P" class="stats-tab" text="% 3P" />
-                    <ui:Button name="TabPctTL" class="stats-tab" text="% TL" />
-                    <ui:Button name="TabEFG" class="stats-tab" text="% EFG" />
-                    <ui:Button name="TabTS" class="stats-tab" text="TS%" />
-                    <ui:Button name="TabEfi48" class="stats-tab" text="EFI/48" />
-                    <ui:Button name="TabVal" class="stats-tab" text="VAL" />
-                    <ui:Button name="TabPerdidas" class="stats-tab" text="PÉRDIDAS" />
-                    <ui:Button name="TabMinutos" class="stats-tab" text="MINUTOS" />
-                    <ui:Button name="TabDD" class="stats-tab" text="DD" />
-                    <ui:Button name="TabTD" class="stats-tab" text="TD" />
+                    <ui:Button name="TabPuntos" class="stats-tab stats-tab--active" text="{loc:ui.stats.tab_puntos}" />
+                    <ui:Button name="TabRebotes" class="stats-tab" text="{loc:ui.stats.tab_rebotes}" />
+                    <ui:Button name="TabAsistencias" class="stats-tab" text="{loc:ui.stats.tab_asistencias}" />
+                    <ui:Button name="TabRobos" class="stats-tab" text="{loc:ui.stats.tab_robos}" />
+                    <ui:Button name="TabTapones" class="stats-tab" text="{loc:ui.stats.tab_tapones}" />
+                    <ui:Button name="TabPctTC" class="stats-tab" text="{loc:ui.stats.tab_pct_tc}" />
+                    <ui:Button name="TabPct3P" class="stats-tab" text="{loc:ui.stats.tab_pct3_p}" />
+                    <ui:Button name="TabPctTL" class="stats-tab" text="{loc:ui.stats.tab_pct_tl}" />
+                    <ui:Button name="TabEFG" class="stats-tab" text="{loc:ui.stats.tab_efg}" />
+                    <ui:Button name="TabTS" class="stats-tab" text="{loc:ui.stats.tab_ts}" />
+                    <ui:Button name="TabEfi48" class="stats-tab" text="{loc:ui.stats.tab_efi48}" />
+                    <ui:Button name="TabVal" class="stats-tab" text="{loc:ui.stats.tab_val}" />
+                    <ui:Button name="TabPerdidas" class="stats-tab" text="{loc:ui.stats.tab_perdidas}" />
+                    <ui:Button name="TabMinutos" class="stats-tab" text="{loc:ui.stats.tab_minutos}" />
+                    <ui:Button name="TabDD" class="stats-tab" text="{loc:ui.stats.tab_dd}" />
+                    <ui:Button name="TabTD" class="stats-tab" text="{loc:ui.stats.tab_td}" />
                 </ui:VisualElement>
 
                 <!-- Filter row -->
                 <ui:VisualElement name="FilterRow" class="filter-row">
                     <ui:VisualElement class="filter-group">
-                        <ui:Button name="BtnSeason" class="filter-btn filter-btn--active" text="TEMPORADA" />
-                        <ui:Button name="BtnHistorical" class="filter-btn" text="HISTÓRICO" />
-                        <ui:Button name="BtnMyTeam" class="filter-btn" text="MI EQUIPO" />
-                        <ui:Button name="BtnRookies" class="filter-btn" text="ROOKIES" />
+                        <ui:Button name="BtnSeason" class="filter-btn filter-btn--active" text="{loc:ui.stats.btn_season}" />
+                        <ui:Button name="BtnHistorical" class="filter-btn" text="{loc:ui.stats.btn_historical}" />
+                        <ui:Button name="BtnMyTeam" class="filter-btn" text="{loc:ui.stats.btn_my_team}" />
+                        <ui:Button name="BtnRookies" class="filter-btn" text="{loc:ui.stats.btn_rookies}" />
                     </ui:VisualElement>
                     <ui:VisualElement class="filter-group">
-                        <ui:Button name="BtnTotals" class="filter-btn mode-btn--active" text="TOTALES" />
-                        <ui:Button name="BtnAverages" class="filter-btn" text="PROMEDIOS" />
+                        <ui:Button name="BtnTotals" class="filter-btn mode-btn--active" text="{loc:ui.stats.btn_totals}" />
+                        <ui:Button name="BtnAverages" class="filter-btn" text="{loc:ui.stats.btn_averages}" />
                     </ui:VisualElement>
                 </ui:VisualElement>
 
@@ -65,7 +65,7 @@
                 <!-- Stats table -->
                 <ui:VisualElement class="stats-panel">
                     <ui:VisualElement name="StatsHeader" class="stats-panel-header">
-                        <ui:Label name="PanelTitle" class="stats-title" text="PUNTOS — LÍDERES DE LA LIGA" />
+                        <ui:Label name="PanelTitle" class="stats-title" text="{loc:ui.stats.panel_title}" />
                     </ui:VisualElement>
                     <ui:VisualElement class="stats-table-wrapper">
                         <!-- Fixed header (outside scroll) — populated dynamically from C# -->
@@ -91,12 +91,12 @@
         <!-- ══ MODAL CONFIGURACIÓN ══ -->
         <ui:VisualElement name="ConfigModalOverlay" class="modal-overlay">
             <ui:VisualElement name="ConfigModalBox" class="modal-box">
-                <ui:Label class="modal-title" text="CONFIGURACIÓN" />
+                <ui:Label class="modal-title" text="{loc:ui.stats.configuracion}" />
                 <ui:VisualElement class="modal-body">
                     <ui:VisualElement class="settings-section">
-                        <ui:Label class="settings-section-title" text="AUDIO" />
+                        <ui:Label class="settings-section-title" text="{loc:ui.stats.audio}" />
                         <ui:VisualElement class="settings-row">
-                            <ui:Label class="settings-label" text="Volumen General" />
+                            <ui:Label class="settings-label" text="{loc:ui.stats.volumen_general}" />
                             <ui:VisualElement name="ConfigSliderMaster" class="custom-slider">
                                 <ui:VisualElement class="custom-slider-track" />
                                 <ui:VisualElement name="ConfigFillMaster" class="custom-slider-fill" />
@@ -105,7 +105,7 @@
                             <ui:Label name="ConfigLabelMaster" class="settings-value" text="100%" />
                         </ui:VisualElement>
                         <ui:VisualElement class="settings-row">
-                            <ui:Label class="settings-label" text="Música" />
+                            <ui:Label class="settings-label" text="{loc:ui.stats.musica}" />
                             <ui:VisualElement name="ConfigSliderMusic" class="custom-slider">
                                 <ui:VisualElement class="custom-slider-track" />
                                 <ui:VisualElement name="ConfigFillMusic" class="custom-slider-fill" />
@@ -114,7 +114,7 @@
                             <ui:Label name="ConfigLabelMusic" class="settings-value" text="100%" />
                         </ui:VisualElement>
                         <ui:VisualElement class="settings-row">
-                            <ui:Label class="settings-label" text="Efectos" />
+                            <ui:Label class="settings-label" text="{loc:ui.stats.efectos}" />
                             <ui:VisualElement name="ConfigSliderSFX" class="custom-slider">
                                 <ui:VisualElement class="custom-slider-track" />
                                 <ui:VisualElement name="ConfigFillSFX" class="custom-slider-fill" />
@@ -124,39 +124,39 @@
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement class="settings-section">
-                        <ui:Label class="settings-section-title" text="GRÁFICOS" />
+                        <ui:Label class="settings-section-title" text="{loc:ui.stats.graficos}" />
                         <ui:VisualElement class="settings-quality-row">
-                            <ui:Label class="settings-label" text="Calidad" />
+                            <ui:Label class="settings-label" text="{loc:ui.stats.calidad}" />
                             <ui:VisualElement class="settings-quality-options">
-                                <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="Baja" />
-                                <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="Media" />
-                                <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="Alta" />
-                                <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="Ultra" />
+                                <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="{loc:ui.stats.config_btn_quality_low}" />
+                                <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="{loc:ui.stats.config_btn_quality_medium}" />
+                                <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="{loc:ui.stats.config_btn_quality_high}" />
+                                <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="{loc:ui.stats.config_btn_quality_ultra}" />
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement class="settings-section">
-                        <ui:Label class="settings-section-title" text="JUEGO" />
-                        <ui:Button name="ConfigBtnMainMenu" class="settings-btn settings-btn--secondary" text="VOLVER AL MENÚ PRINCIPAL" />
-                        <ui:Button name="ConfigBtnExit" class="settings-btn settings-btn--danger" text="SALIR DEL JUEGO" />
+                        <ui:Label class="settings-section-title" text="{loc:ui.stats.juego}" />
+                        <ui:Button name="ConfigBtnMainMenu" class="settings-btn settings-btn--secondary" text="{loc:ui.stats.config_btn_main_menu}" />
+                        <ui:Button name="ConfigBtnExit" class="settings-btn settings-btn--danger" text="{loc:ui.stats.config_btn_exit}" />
                     </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:Button name="ConfigBtnCerrar" class="modal-close" text="CERRAR" />
+                <ui:Button name="ConfigBtnCerrar" class="modal-close" text="{loc:ui.stats.config_btn_cerrar}" />
             </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- ══ MODAL CONFIRMAR VOLVER AL MENÚ PRINCIPAL ══ -->
         <ui:VisualElement name="ConfigMainMenuConfirmOverlay" class="modal-overlay">
             <ui:VisualElement name="ConfigMainMenuConfirmBox" class="modal-box">
-                <ui:Label class="modal-title" text="VOLVER AL MENÚ PRINCIPAL" />
+                <ui:Label class="modal-title" text="{loc:ui.stats.volver_al_menu_principal}" />
                 <ui:VisualElement class="modal-body">
-                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres volver al menú principal?" />
-                    <ui:Label class="modal-paragraph" text="Se perderá el progreso no guardado de la partida actual. Asegúrate de haber guardado antes de continuar." />
+                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="{loc:ui.stats.estas_seguro_de_que_quieres_volver_al_me_6f548452}" />
+                    <ui:Label class="modal-paragraph" text="{loc:ui.stats.se_perdera_el_progreso_no_guardado_de_la_b10b7334}" />
                 </ui:VisualElement>
                 <ui:VisualElement class="modal-actions">
-                    <ui:Button name="ConfigBtnMainMenuNo" class="modal-btn modal-btn--secondary" text="NO, QUEDARME" />
+                    <ui:Button name="ConfigBtnMainMenuNo" class="modal-btn modal-btn--secondary" text="{loc:ui.stats.config_btn_main_menu_no}" />
                     <ui:VisualElement class="modal-spacer" />
-                    <ui:Button name="ConfigBtnMainMenuYes" class="modal-btn modal-btn--danger" text="SÍ, VOLVER" />
+                    <ui:Button name="ConfigBtnMainMenuYes" class="modal-btn modal-btn--danger" text="{loc:ui.stats.config_btn_main_menu_yes}" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
@@ -164,15 +164,15 @@
         <!-- ══ MODAL CONFIRMAR SALIR DEL JUEGO ══ -->
         <ui:VisualElement name="ConfigExitConfirmOverlay" class="modal-overlay">
             <ui:VisualElement name="ConfigExitConfirmBox" class="modal-box">
-                <ui:Label class="modal-title" text="SALIR DEL JUEGO" />
+                <ui:Label class="modal-title" text="{loc:ui.stats.salir_del_juego}" />
                 <ui:VisualElement class="modal-body">
-                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres salir del juego?" />
-                    <ui:Label class="modal-paragraph" text="Tu progreso se guarda automáticamente durante la partida. Al volver a cargarla continuarás desde el último estado guardado." />
+                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="{loc:ui.stats.estas_seguro_de_que_quieres_salir_del_ju_c65dd5f1}" />
+                    <ui:Label class="modal-paragraph" text="{loc:ui.stats.tu_progreso_se_guarda_automaticamente_du_10fb1edb}" />
                 </ui:VisualElement>
                 <ui:VisualElement class="modal-actions">
-                    <ui:Button name="ConfigBtnExitNo" class="modal-btn modal-btn--secondary" text="NO" />
+                    <ui:Button name="ConfigBtnExitNo" class="modal-btn modal-btn--secondary" text="{loc:ui.stats.config_btn_exit_no}" />
                     <ui:VisualElement class="modal-spacer" />
-                    <ui:Button name="ConfigBtnExitYes" class="modal-btn modal-btn--danger" text="SÍ, SALIR" />
+                    <ui:Button name="ConfigBtnExitYes" class="modal-btn modal-btn--danger" text="{loc:ui.stats.config_btn_exit_yes}" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>

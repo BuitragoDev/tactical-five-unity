@@ -73,7 +73,7 @@ using System.Linq;
 
         if (_availableChannels == null || _availableChannels.Count == 0)
         {
-            var emptyLbl = new Label("No hay cadenas de televisión disponibles.");
+            var emptyLbl = new Label(LocalizationService.T("ui.code.tvcontroller.no_hay_cadenas_de_television_disponibles"));
             emptyLbl.AddToClassList("tv-info-message");
             _cardsContainer.Add(emptyLbl);
             return;
@@ -128,25 +128,25 @@ using System.Linq;
 
         if (isContracted)
         {
-            btn.text = "CONTRATADO";
+            btn.text = LocalizationService.T("ui.code.tvcontroller.contratado");
             btn.AddToClassList("tv-card-btn--disabled");
             btn.SetEnabled(false);
         }
         else if (hasCurrent)
         {
-            btn.text = "CONTRATADO";
+            btn.text = LocalizationService.T("ui.code.tvcontroller.contratado");
             btn.AddToClassList("tv-card-btn--disabled");
             btn.SetEnabled(false);
         }
         else if (!IsOctober())
         {
-            btn.text = "SOLO OCTUBRE";
+            btn.text = LocalizationService.T("ui.code.tvcontroller.solo_octubre");
             btn.AddToClassList("tv-card-btn--disabled");
             btn.SetEnabled(false);
         }
         else
         {
-            btn.text = "CONTRATAR";
+            btn.text = LocalizationService.T("ui.code.tvcontroller.contratar");
             var channelCopy = channel;
             btn.clicked += () => { PlayClick(); SignTV(channelCopy); };
         }

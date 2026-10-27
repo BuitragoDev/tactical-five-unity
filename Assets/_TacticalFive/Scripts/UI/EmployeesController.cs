@@ -346,7 +346,7 @@ public class EmployeesController : UIScreenController
             _headerTeamLogo.style.backgroundImage = new StyleBackground(sprite);
 
         _headerTeamName.text = _myTeam.name.ToUpper();
-        _headerManagerName.text = $"Manager: {_manager.name}";
+        _headerManagerName.text = LocalizationService.T("ui.common.manager", _manager.name);
         _headerBudget.text = $"${_myTeam.budget / 1_000_000}M";
         _headerBudget.style.color = _myTeam.budget < 0
             ? new StyleColor(new Color32(192, 57, 43, 255))
@@ -385,11 +385,11 @@ public class EmployeesController : UIScreenController
 
         if (_season != null)
         {
-            _headerSeason.text = $"Temporada {_season.year_start}-{_season.year_end}";
+            _headerSeason.text = LocalizationService.T("ui.common.season", _season.year_start, _season.year_end);
             _headerDate.text = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
         }
 
-        _btnAction.text = "MENÚ PRINCIPAL";
+        _btnAction.text = LocalizationService.T("ui.code.employees_controller.menu_principal");
     }
 
     // ── TAB MANAGEMENT ──
@@ -566,7 +566,7 @@ public class EmployeesController : UIScreenController
             {
                 var fireBtn = new Button();
                 fireBtn.AddToClassList("btn-fire-table");
-                fireBtn.text = "DESPEDIR";
+                fireBtn.text = LocalizationService.T("ui.code.employees_controller.despedir");
                 var captured = emp;
                 fireBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnFireClicked(captured); });
                 if (CursorManager.Instance != null)
@@ -702,7 +702,7 @@ public class EmployeesController : UIScreenController
             var emptyRow = new VisualElement();
             emptyRow.AddToClassList("emp-table-row");
             var emptyLabel = new Label();
-            emptyLabel.text = "No hay candidatos disponibles para este puesto.";
+            emptyLabel.text = LocalizationService.T("ui.code.employees_controller.no_hay_candidatos_disponibles_para_este_6dd7c1a0");
             emptyLabel.AddToClassList("emp-empty-text");
             emptyRow.Add(emptyLabel);
             _marketTableBody.Add(emptyRow);
@@ -725,14 +725,14 @@ public class EmployeesController : UIScreenController
         if (existing != null)
         {
             long penalty = (long)(existing.salary * existing.contract_years * 0.5f);
-            _hireTitle.text = "REEMPLAZAR EMPLEADO";
+            _hireTitle.text = LocalizationService.T("ui.code.employees_controller.reemplazar_empleado");
             _hireText1.text = $"Ya tienes un {posLabel}: {existing.first_name} {existing.last_name}.";
             _hireText2.text = $"¿Deseas reemplazarlo por {name}?";
             _hireText3.text = $"Indemnización: {FormatSalary(penalty)} · Salario: {salaryText} · Duración: {yearsText}";
         }
         else
         {
-            _hireTitle.text = "CONTRATAR EMPLEADO";
+            _hireTitle.text = LocalizationService.T("ui.code.employees_controller.contratar_empleado");
             _hireText1.text = $"Vas a contratar a {name} como {posLabel}.";
             _hireText2.text = "";
             _hireText3.text = $"Salario: {salaryText} · Duración: {yearsText}";
@@ -795,7 +795,7 @@ public class EmployeesController : UIScreenController
         string yearsText = $"{emp.contract_years} año{yearPlural}";
         long penalty = (long)(emp.salary * emp.contract_years * 0.5f);
 
-        _hireTitle.text = "DESPEDIR EMPLEADO";
+        _hireTitle.text = LocalizationService.T("ui.code.employees_controller.despedir_empleado");
         _hireText1.text = $"¿Estás seguro de que quieres despedir a {name}?";
         _hireText2.text = $"Puesto: {posLabel}";
         _hireText3.text = $"Salario: {salaryText} · Contrato: {yearsText} · Indemnización: {FormatSalary(penalty)}";
@@ -804,7 +804,7 @@ public class EmployeesController : UIScreenController
         if (modalStars != null)
             modalStars.RemoveFromHierarchy();
 
-        _btnHireConfirm.text = "DESPEDIR";
+        _btnHireConfirm.text = LocalizationService.T("ui.code.employees_controller.despedir");
         _btnHireConfirm.RemoveFromClassList("btn-modal-confirm");
         _btnHireConfirm.RemoveFromClassList("btn-modal-confirm--gold");
         _btnHireConfirm.AddToClassList("btn-modal-confirm--danger");
@@ -824,7 +824,7 @@ public class EmployeesController : UIScreenController
         _selectedFireEmployee = null;
         _isFiring = false;
         _isReplacing = false;
-        _btnHireConfirm.text = "CONTRATAR";
+        _btnHireConfirm.text = LocalizationService.T("ui.code.employees_controller.contratar");
         _btnHireConfirm.RemoveFromClassList("btn-modal-confirm--danger");
         _btnHireConfirm.RemoveFromClassList("btn-modal-confirm--gold");
         _btnHireConfirm.AddToClassList("btn-modal-confirm");
@@ -966,12 +966,12 @@ public class EmployeesController : UIScreenController
         Debug.Log($"[Employees] {name} despedido. Indemnización: {FormatSalary(penalty)}.");
 
         _isFiring = false;
-        _btnHireConfirm.text = "CONTRATAR";
+        _btnHireConfirm.text = LocalizationService.T("ui.code.employees_controller.contratar");
         _selectedFireEmployee = null;
 
         Refresh();
 
-        _hireResultTitle.text = "EMPLEADO DESPEDIDO";
+        _hireResultTitle.text = LocalizationService.T("ui.code.employees_controller.empleado_despedido");
         _hireResultText.text = $"{name} ya no trabaja para tu equipo. Indemnización pagada: {FormatSalary(penalty)}.";
         _hireResultBox.RemoveFromClassList("hire-modal-box--negative");
         _hireResultBox.AddToClassList("hire-modal-box--negative");
@@ -979,7 +979,7 @@ public class EmployeesController : UIScreenController
         _btnHireResultOk.RemoveFromClassList("btn-modal-cancel");
         _btnHireResultOk.AddToClassList("btn-modal-confirm");
         _btnHireResultOk.AddToClassList("btn-modal-confirm--danger");
-        _btnHireResultOk.text = "CERRAR";
+        _btnHireResultOk.text = LocalizationService.T("ui.code.employees_controller.cerrar");
         _hireResultOverlay.style.display = DisplayStyle.Flex;
     }
 
@@ -1071,7 +1071,7 @@ public class EmployeesController : UIScreenController
         _hireResultBox.RemoveFromClassList("hire-modal-box--negative");
         if (success)
         {
-            _hireResultTitle.text = "CONTRATACIÓN COMPLETADA";
+            _hireResultTitle.text = LocalizationService.T("ui.code.employees_controller.contratacion_completada");
             _hireResultText.text = $"{name} se ha unido a tu equipo como {positionLabel}.";
             _btnHireResultOk.RemoveFromClassList("btn-modal-cancel");
             _btnHireResultOk.RemoveFromClassList("btn-modal-confirm--danger");
@@ -1079,13 +1079,13 @@ public class EmployeesController : UIScreenController
         }
         else
         {
-            _hireResultTitle.text = "CONTRATACIÓN FALLIDA";
-            _hireResultText.text = "No se ha podido completar la contratación.";
+            _hireResultTitle.text = LocalizationService.T("ui.code.employees_controller.contratacion_fallida");
+            _hireResultText.text = LocalizationService.T("ui.code.employees_controller.no_se_ha_podido_completar_la_contratacio_1305d168");
             _btnHireResultOk.RemoveFromClassList("btn-modal-confirm");
             _btnHireResultOk.RemoveFromClassList("btn-modal-confirm--danger");
             _btnHireResultOk.AddToClassList("btn-modal-cancel");
         }
-        _btnHireResultOk.text = "CERRAR";
+        _btnHireResultOk.text = LocalizationService.T("ui.code.employees_controller.cerrar");
         _hireResultOverlay.style.display = DisplayStyle.Flex;
     }
 

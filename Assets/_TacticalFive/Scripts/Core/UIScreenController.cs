@@ -62,6 +62,9 @@ public class UIScreenController : MonoBehaviour
         RegisterCallbacks();
         InitConfigModal();
         Refresh();
+        // F7-06: resuelve los tokens {loc:...} de UXML y de los textos que hayan
+        // fijado los controllers durante Refresh (header/sidebar incluidos).
+        LocalizationService.Apply(_root);
         if (CursorManager.Instance != null) CursorManager.Instance.SetDefaultCursor();
     }
 
@@ -364,7 +367,7 @@ public class UIScreenController : MonoBehaviour
         }
 
         if (_btnAction != null)
-            _btnAction.text = "MENÚ PRINCIPAL";
+            _btnAction.text = LocalizationService.T("ui.code.uiscreen_controller.menu_principal");
     }
 
     protected void PlayClick()

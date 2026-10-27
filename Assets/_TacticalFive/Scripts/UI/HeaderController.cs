@@ -121,7 +121,7 @@ public static class HeaderController
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
 
         SafeSetText(header, "HeaderTeamName", myTeam.name.ToUpper());
-        SafeSetText(header, "HeaderManagerName", $"Manager: {manager.name}");
+        SafeSetText(header, "HeaderManagerName", LocalizationService.T("ui.common.manager", manager.name));
 
         long totalPayroll = DatabaseManager.Instance.GetEffectiveTeamPayroll(myTeam.id);
 
@@ -157,7 +157,7 @@ public static class HeaderController
             else if (chemistry < 70) chemLabel.AddToClassList("header-stat-value--gold");
         }
 
-        SafeSetText(header, "HeaderSeason", $"Temporada {season.year_start}-{season.year_end}");
+        SafeSetText(header, "HeaderSeason", LocalizationService.T("ui.common.season", season.year_start, season.year_end));
         SafeSetText(header, "HeaderDate", DatabaseManager.Instance.GetCurrentDateString(manager.id));
     }
 

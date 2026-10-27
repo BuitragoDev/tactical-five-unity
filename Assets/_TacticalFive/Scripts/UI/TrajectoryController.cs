@@ -544,7 +544,7 @@ using System.Linq;
                 _headerChemistry.AddToClassList("header-stat-value--gold");
         }
         if (_headerSeason != null)
-            _headerSeason.text = $"Temporada {_season.year_start}-{_season.year_end}";
+            _headerSeason.text = LocalizationService.T("ui.common.season", _season.year_start, _season.year_end);
         if (_headerDate != null)
             _headerDate.text = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
     }

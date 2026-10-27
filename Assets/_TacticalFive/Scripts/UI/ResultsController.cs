@@ -180,7 +180,7 @@ public class ResultsController : UIScreenController
             _root.Q<VisualElement>("HeaderTeamLogo").style.backgroundImage = new StyleBackground(sprite);
 
         _root.Q<Label>("HeaderTeamName").text = _myTeam.name.ToUpper();
-        _root.Q<Label>("HeaderManagerName").text = $"Manager: {_manager.name}";
+        _root.Q<Label>("HeaderManagerName").text = LocalizationService.T("ui.common.manager", _manager.name);
         var budgetLabel = _root.Q<Label>("HeaderBudget");
         budgetLabel.text = $"${_myTeam.budget / 1_000_000}M";
         budgetLabel.style.color = _myTeam.budget < 0
@@ -214,11 +214,11 @@ public class ResultsController : UIScreenController
 
         if (_season != null)
         {
-            _root.Q<Label>("HeaderSeason").text = $"Temporada {_season.year_start}-{_season.year_end}";
+            _root.Q<Label>("HeaderSeason").text = LocalizationService.T("ui.common.season", _season.year_start, _season.year_end);
             _root.Q<Label>("HeaderDate").text = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
         }
 
-        _btnAction.text = "MENÚ PRINCIPAL";
+        _btnAction.text = LocalizationService.T("ui.code.results_controller.menu_principal");
     }
 
     // ── NAVIGATION ──
@@ -275,7 +275,7 @@ public class ResultsController : UIScreenController
 
         if (_gameDates.Count == 0)
         {
-            _currentDateLabel.text = "SIN PARTIDOS";
+            _currentDateLabel.text = LocalizationService.T("ui.code.results_controller.sin_partidos");
             SetNavEnabled(false, false);
             return;
         }
@@ -516,7 +516,7 @@ public class ResultsController : UIScreenController
         {
             var empty = new Label();
             empty.AddToClassList("match-modal-leader-empty");
-            empty.text = "Sin datos";
+            empty.text = LocalizationService.T("ui.code.results_controller.sin_datos");
             section.Add(empty);
         }
         else
@@ -610,12 +610,12 @@ public class ResultsController : UIScreenController
         if (isPlayed)
         {
             statusLbl.AddToClassList("results-card-status--played");
-            statusLbl.text = "FINALIZADO";
+            statusLbl.text = LocalizationService.T("ui.code.results_controller.finalizado");
         }
         else
         {
             statusLbl.AddToClassList("results-card-status--scheduled");
-            statusLbl.text = "PROGRAMADO";
+            statusLbl.text = LocalizationService.T("ui.code.results_controller.programado");
         }
         top.Add(statusLbl);
 

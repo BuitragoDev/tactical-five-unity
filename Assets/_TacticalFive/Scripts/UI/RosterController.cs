@@ -368,7 +368,7 @@ using System.Linq;
         teamName.text = _myTeam.name.ToUpper();
         if (_rosterTeamName != null)
             _rosterTeamName.text = _myTeam.name.ToUpper();
-        managerName.text = $"Manager: {_manager.name}";
+        managerName.text = LocalizationService.T("ui.common.manager", _manager.name);
         budget.text = $"${_myTeam.budget / 1_000_000}M";
         budget.style.color = _myTeam.budget < 0
             ? new StyleColor(new Color32(192, 57, 43, 255))
@@ -403,11 +403,11 @@ using System.Linq;
 
         if (_season != null)
         {
-            season.text = $"Temporada {_season.year_start}-{_season.year_end}";
+            season.text = LocalizationService.T("ui.common.season", _season.year_start, _season.year_end);
             date.text = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
         }
 
-        _btnAction.text = "MENÚ PRINCIPAL";
+        _btnAction.text = LocalizationService.T("ui.code.roster_controller.menu_principal");
     }
 
     // ── SUMMARY ──────────────────────────────────────────
@@ -541,7 +541,7 @@ using System.Linq;
             dotColor = new Color32(192, 57, 43, 255);
         moraleDot.style.backgroundColor = new StyleColor(dotColor);
 
-        var moLabel = new Label("MO");
+        var moLabel = new Label(LocalizationService.T("ui.code.roster_controller.mo"));
         moLabel.AddToClassList("dot-label");
 
         // Fisico dot
@@ -556,7 +556,7 @@ using System.Linq;
             fisicoColor = new Color32(192, 57, 43, 255);
         fisicoDot.style.backgroundColor = new StyleColor(fisicoColor);
 
-        var fiLabel = new Label("FI");
+        var fiLabel = new Label(LocalizationService.T("ui.code.roster_controller.fi"));
         fiLabel.AddToClassList("dot-label");
 
         var posLbl = new Label();
@@ -571,28 +571,28 @@ using System.Linq;
         row.Add(nameLbl);
         if (player.injury_days > 0)
         {
-            var lesBadge = new Label("LES");
+            var lesBadge = new Label(LocalizationService.T("ui.code.roster_controller.les"));
             lesBadge.AddToClassList("player-badge");
             lesBadge.AddToClassList("player-badge--les");
             row.Add(lesBadge);
         }
         if (player.is_two_way == 1)
         {
-            var twBadge = new Label("TW");
+            var twBadge = new Label(LocalizationService.T("ui.code.roster_controller.tw"));
             twBadge.AddToClassList("player-badge");
             twBadge.AddToClassList("player-badge--tw");
             row.Add(twBadge);
         }
         if (player.g_league_assigned == 1)
         {
-            var glBadge = new Label("GL");
+            var glBadge = new Label(LocalizationService.T("ui.code.roster_controller.gl"));
             glBadge.AddToClassList("player-badge");
             glBadge.AddToClassList("player-badge--gl");
             row.Add(glBadge);
         }
         if (player.is_on_ir == 1)
         {
-            var irBadge = new Label("IR");
+            var irBadge = new Label(LocalizationService.T("ui.code.roster_controller.ir"));
             irBadge.AddToClassList("player-badge");
             irBadge.AddToClassList("player-badge--ir");
             row.Add(irBadge);
@@ -637,7 +637,7 @@ using System.Linq;
             && GLeagueHelper.HasEnoughActive(_players);
         if (player.g_league_assigned == 1)
         {
-            glLbl.text = "G-LEAGUE";
+            glLbl.text = LocalizationService.T("ui.code.roster_controller.g_league");
             glLbl.AddToClassList("gleague-label--on");
             glLbl.RegisterCallback<ClickEvent>(_ =>
             {
@@ -648,7 +648,7 @@ using System.Linq;
         }
         else if (canAssign)
         {
-            glLbl.text = "ASIGNAR G";
+            glLbl.text = LocalizationService.T("ui.code.roster_controller.asignar_g");
             glLbl.RegisterCallback<ClickEvent>(_ =>
             {
                 PlayClick();
@@ -740,7 +740,7 @@ using System.Linq;
         }
         else
         {
-            _detailHealth.text = "✓  DISPONIBLE";
+            _detailHealth.text = LocalizationService.T("ui.code.roster_controller.disponible");
             _detailHealth.RemoveFromClassList("detail-health-injured");
             _detailHealth.AddToClassList("detail-health-ok");
         }
@@ -816,7 +816,7 @@ using System.Linq;
             bool pending = !deadlinePassed && DatabaseManager.Instance.HasPendingRenewalOffer(_manager.id, p.id);
             if (deadlinePassed)
             {
-                _btnRenew.text = "PLAZO CERRADO";
+                _btnRenew.text = LocalizationService.T("ui.code.roster_controller.plazo_cerrado");
                 _btnRenew.SetEnabled(false);
                 _btnRenew.EnableInClassList("btn-renew--pending", false);
             }
@@ -981,7 +981,7 @@ using System.Linq;
         if (_btnRenewConfirm != null)
         {
             _btnRenewConfirm.SetEnabled(true);
-            _btnRenewConfirm.text = "ENVIAR OFERTA";
+            _btnRenewConfirm.text = LocalizationService.T("ui.code.roster_controller.enviar_oferta");
         }
 
         // Poner valores por defecto
@@ -1353,7 +1353,7 @@ using System.Linq;
         if (_btnRenewConfirm != null)
         {
             _btnRenewConfirm.SetEnabled(false);
-            _btnRenewConfirm.text = "ENVIADA";
+            _btnRenewConfirm.text = LocalizationService.T("ui.code.roster_controller.enviada");
         }
     }
 
@@ -1559,7 +1559,7 @@ using System.Linq;
 
     void OpenRenewDeadlineModal()
     {
-        _renewBlockText.text = "La fecha límite de renovaciones ha pasado (12 de febrero). No podrás ofrecer contratos a tus jugadores hasta la próxima temporada.";
+        _renewBlockText.text = LocalizationService.T("ui.code.roster_controller.la_fecha_limite_de_renovaciones_ha_pasad_6a25c751");
 
         _renewBlockOverlay.style.display = DisplayStyle.Flex;
         _renewBlockBox.style.display = DisplayStyle.Flex;

@@ -61,6 +61,7 @@ Docs/  .agent/            ← this knowledge base (keep it in sync!)
 - Money: `$"{value:N0}"`; dates as `"yyyy-MM-dd"` strings.
 - Logos via `Resources.LoadAll<Sprite>("Teams/Logos/{size}x{size}")` → dictionary.
 - Modals: overlay+box elements, `DisplayStyle.Flex/None`.
+- UI text (F7-06): UXML uses `{loc:key}` tokens; C# uses `LocalizationService.T("key", args)`. The Spanish table is `Resources/Localization/es.json`; run `python3 Tools/localization_extract.py --check` and keep `LocalizationTests` green. No new visible literals in UXML/controllers.
 - Messages to the player via `DatabaseManager.AddMessage`.
 
 ## 6. How to add a new UI screen (checklist)

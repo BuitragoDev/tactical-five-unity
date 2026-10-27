@@ -63,6 +63,7 @@ protected virtual void OnEnable()
     RegisterCallbacks();       // sidebar+header attach, BtnAction, RegisterNavButtons, cursors, ConfigIcon
     InitConfigModal();         // config modal wiring
     Refresh();                 // default: RefreshHeader
+    LocalizationService.Apply(_root); // F7-06: resuelve {loc:...} tras el Refresh
 }
 ```
 
@@ -74,6 +75,7 @@ protected virtual void OnEnable()
 - **Config modal:** `InitConfigModal`/`OpenConfigModal`/`CloseConfigModal` — 3 `CustomSlider`s (Master/Music/SFX), quality Low/Medium/High/Ultra, **sim-mode toggle** (Directa / Play-by-play, `TF_SimMode`), main-menu confirm overlay, exit confirm overlay. **This replaced the old per-screen copy-paste duplication.**
 - `PlayClick()` → `AudioManager.Instance?.PlaySFX("click")`.
 - `Refresh()` → default cursor + `RefreshHeader()` (rebuilds the header stat blocks) in try/catch.
+- **Localización (F7-06):** `LocalizationService.Apply(_root)` resuelve tokens `{loc:clave}` en textos, tooltips y placeholders después de `Refresh`; así también cubre el header/sidebar inyectados. Los controllers usan `LocalizationService.T("clave", args)` para texto dinámico. Detalle: [`Docs/LOCALIZATION.md`](LOCALIZATION.md).
 
 **Inheritance quirks (verified):**
 - 17 controllers call `base.RegisterCallbacks()`; **12 override `RegisterCallbacks()` WITHOUT base** (Editor, EndSeason, GameResults, LoadGame, MainMenu, MatchDay, NewSeason, PlayerAwards, Preseason, Quintos, SeasonSummary, SelectTeam) — those screens build their own chrome/nav or are standalone (boot/menu/slot screens). The remaining 12 don't override it (base behavior).

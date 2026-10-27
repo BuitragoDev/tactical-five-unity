@@ -73,7 +73,7 @@ using System.Linq;
 
         if (_availableSponsors == null || _availableSponsors.Count == 0)
         {
-            var emptyLbl = new Label("No hay patrocinadores disponibles.");
+            var emptyLbl = new Label(LocalizationService.T("ui.code.sponsors_controller.no_hay_patrocinadores_disponibles"));
             emptyLbl.AddToClassList("sponsors-info-message");
             _cardsContainer.Add(emptyLbl);
             return;
@@ -129,25 +129,25 @@ using System.Linq;
 
         if (isContracted)
         {
-            btn.text = "CONTRATADO";
+            btn.text = LocalizationService.T("ui.code.sponsors_controller.contratado");
             btn.AddToClassList("sponsor-card-btn--disabled");
             btn.SetEnabled(false);
         }
         else if (hasCurrent)
         {
-            btn.text = "CONTRATADO";
+            btn.text = LocalizationService.T("ui.code.sponsors_controller.contratado");
             btn.AddToClassList("sponsor-card-btn--disabled");
             btn.SetEnabled(false);
         }
         else if (!IsOctober())
         {
-            btn.text = "SOLO OCTUBRE";
+            btn.text = LocalizationService.T("ui.code.sponsors_controller.solo_octubre");
             btn.AddToClassList("sponsor-card-btn--disabled");
             btn.SetEnabled(false);
         }
         else
         {
-            btn.text = "CONTRATAR";
+            btn.text = LocalizationService.T("ui.code.sponsors_controller.contratar");
             var sponsorCopy = sponsor;
             btn.clicked += () => { PlayClick(); SignSponsor(sponsorCopy); };
         }

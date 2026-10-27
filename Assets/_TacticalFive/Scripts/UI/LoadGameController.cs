@@ -258,7 +258,7 @@ public class LoadGameController : UIScreenController
         teamNameLbl.AddToClassList("slot-team-name");
         teamInfo.Add(teamNameLbl);
 
-        var teamSeasonLbl = new Label { text = $"Temporada {slot.seasonYear}" };
+        var teamSeasonLbl = new Label { text = LocalizationService.T("ui.common.season_one", slot.seasonYear) };
         teamSeasonLbl.AddToClassList("slot-team-season");
         teamInfo.Add(teamSeasonLbl);
         teamSection.Add(teamInfo);
@@ -301,7 +301,7 @@ public class LoadGameController : UIScreenController
         var actions = new VisualElement();
         actions.AddToClassList("slot-actions");
 
-        var loadBtn = new Button { text = "CARGAR" };
+        var loadBtn = new Button { text = LocalizationService.T("ui.code.load_game_controller.cargar") };
         loadBtn.AddToClassList("btn-load");
         int slotNum = slot.slotNumber;
         if (isFired)
@@ -320,7 +320,7 @@ public class LoadGameController : UIScreenController
         }
         actions.Add(loadBtn);
 
-        var deleteBtn = new Button { text = "BORRAR" };
+        var deleteBtn = new Button { text = LocalizationService.T("ui.code.load_game_controller.borrar") };
         deleteBtn.AddToClassList("btn-delete");
         deleteBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnDeleteSlot(slotNum); });
         if (CursorManager.Instance != null)
@@ -484,14 +484,14 @@ public class LoadGameController : UIScreenController
         row.style.justifyContent = Justify.Center;
         row.style.marginBottom = 10;
 
-        var saveBtn = new Button { text = "GUARDAR COPIA" };
+        var saveBtn = new Button { text = LocalizationService.T("ui.code.load_game_controller.guardar_copia") };
         saveBtn.AddToClassList("modal-btn");
         saveBtn.AddToClassList("modal-btn--primary");
         saveBtn.style.marginRight = 8;
         saveBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowExportModal(); });
         row.Add(saveBtn);
 
-        var restoreBtn = new Button { text = "RESTAURAR COPIA" };
+        var restoreBtn = new Button { text = LocalizationService.T("ui.code.load_game_controller.restaurar_copia") };
         restoreBtn.AddToClassList("modal-btn");
         restoreBtn.AddToClassList("modal-btn--secondary");
         restoreBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowImportModal(); });
@@ -753,7 +753,7 @@ public class LoadGameController : UIScreenController
             }
         }
 
-        var close = new Button { text = "CERRAR" };
+        var close = new Button { text = LocalizationService.T("ui.code.load_game_controller.cerrar") };
         close.AddToClassList("modal-btn");
         close.AddToClassList("modal-btn--secondary");
         close.RegisterCallback<ClickEvent>(_ => { PlayClick(); overlay.RemoveFromHierarchy(); });

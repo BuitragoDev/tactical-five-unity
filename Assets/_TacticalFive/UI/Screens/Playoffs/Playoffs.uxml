@@ -8,7 +8,7 @@
             <ui:VisualElement class="playoffs-screen-header panel--gold">
                 <ui:VisualElement class="playoffs-screen-header-row">
                     <ui:VisualElement name="PlayoffsScreenIcon" class="playoffs-screen-icon" />
-                    <ui:Label text="ELIMINATORIAS DE PLAY-IN Y PLAYOFF" class="playoffs-screen-title" />
+                    <ui:Label text="{loc:ui.playoffs.eliminatorias_de_play_in_y_playoff}" class="playoffs-screen-title" />
                 </ui:VisualElement>
                 <ui:Label name="PlayoffsSubtitle" text="" class="playoffs-screen-subtitle" />
             </ui:VisualElement>
@@ -18,38 +18,38 @@
                         <ui:VisualElement name="PlayoffsContent" class="playoffs-content">
                         <ui:VisualElement name="RegularSeasonEmpty" class="bracket-empty" style="display: none;">
                             <ui:Label text="🏀" class="bracket-empty-icon"/>
-                            <ui:Label text="TEMPORADA REGULAR EN CURSO" class="bracket-empty-title"/>
-                            <ui:Label text="El bracket de Playoffs y Play-In estará disponible cuando termine la temporada regular." class="bracket-empty-subtitle"/>
+                            <ui:Label text="{loc:ui.playoffs.temporada_regular_en_curso}" class="bracket-empty-title"/>
+                            <ui:Label text="{loc:ui.playoffs.el_bracket_de_playoffs_y_play_in_estara_fb0b45f0}" class="bracket-empty-subtitle"/>
                         </ui:VisualElement>
                         <ui:VisualElement name="PlayInPanel" class="panel panel-playoffs">
                             <ui:VisualElement class="panel-header" style="background-color: rgb(157, 114, 3);">
-                                <ui:Label text="PLAY-IN TOURNAMENT" class="panel-title"/>
+                                <ui:Label text="{loc:ui.playoffs.play_in_tournament}" class="panel-title"/>
                                 <ui:Label text="▼" class="panel-toggle-arrow"/>
                             </ui:VisualElement>
                             <ui:VisualElement name="PlayInBody" class="playoffs-bracket"/>
-                            <ui:Label name="NoPlayInText" text="PLAY-IN NO DISPONIBLE AÚN" class="no-data-text"/>
+                            <ui:Label name="NoPlayInText" text="{loc:ui.playoffs.no_play_in_text}" class="no-data-text"/>
                         </ui:VisualElement>
                         <ui:VisualElement class="panel panel-playoffs">
                             <ui:VisualElement class="panel-header" style="background-color: rgb(8, 134, 138);">
-                                <ui:Label text="PLAYOFFS — CONFERENCIA ESTE" class="panel-title"/>
+                                <ui:Label text="{loc:ui.playoffs.playoffs_conferencia_este}" class="panel-title"/>
                                 <ui:Label text="▼" class="panel-toggle-arrow"/>
                             </ui:VisualElement>
                             <ui:VisualElement name="EastBracket" class="playoffs-bracket"/>
                         </ui:VisualElement>
                         <ui:VisualElement class="panel panel-playoffs">
                             <ui:VisualElement class="panel-header" style="background-color: rgb(8, 138, 82);">
-                                <ui:Label text="PLAYOFFS — CONFERENCIA OESTE" class="panel-title"/>
+                                <ui:Label text="{loc:ui.playoffs.playoffs_conferencia_oeste}" class="panel-title"/>
                                 <ui:Label text="▼" class="panel-toggle-arrow"/>
                             </ui:VisualElement>
                             <ui:VisualElement name="WestBracket" class="playoffs-bracket"/>
                         </ui:VisualElement>
                         <ui:VisualElement name="FinalsPanel" class="panel panel-playoffs panel-finals">
                             <ui:VisualElement class="panel-header" style="background-color: rgb(157, 114, 3);">
-                                <ui:Label text="FINALES NBA" class="panel-title"/>
+                                <ui:Label text="{loc:ui.playoffs.finales_nba}" class="panel-title"/>
                                 <ui:Label text="▼" class="panel-toggle-arrow"/>
                             </ui:VisualElement>
                             <ui:VisualElement name="FinalsBody" class="playoffs-bracket"/>
-                            <ui:Label name="NoFinalsText" text="FINALES NO DISPONIBLES AÚN" class="no-data-text"/>
+                            <ui:Label name="NoFinalsText" text="{loc:ui.playoffs.no_finals_text}" class="no-data-text"/>
                         </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
@@ -64,12 +64,12 @@
         <!-- ══ MODAL CONFIGURACIÓN ══ -->
         <ui:VisualElement name="ConfigModalOverlay" class="modal-overlay">
             <ui:VisualElement name="ConfigModalBox" class="modal-box">
-                <ui:Label class="modal-title" text="CONFIGURACIÓN" />
+                <ui:Label class="modal-title" text="{loc:ui.playoffs.configuracion}" />
                 <ui:VisualElement class="modal-body">
                     <ui:VisualElement class="settings-section">
-                        <ui:Label class="settings-section-title" text="AUDIO" />
+                        <ui:Label class="settings-section-title" text="{loc:ui.playoffs.audio}" />
                         <ui:VisualElement class="settings-row">
-                            <ui:Label class="settings-label" text="Volumen General" />
+                            <ui:Label class="settings-label" text="{loc:ui.playoffs.volumen_general}" />
                             <ui:VisualElement name="ConfigSliderMaster" class="custom-slider">
                                 <ui:VisualElement class="custom-slider-track" />
                                 <ui:VisualElement name="ConfigFillMaster" class="custom-slider-fill" />
@@ -78,7 +78,7 @@
                             <ui:Label name="ConfigLabelMaster" class="settings-value" text="100%" />
                         </ui:VisualElement>
                         <ui:VisualElement class="settings-row">
-                            <ui:Label class="settings-label" text="Música" />
+                            <ui:Label class="settings-label" text="{loc:ui.playoffs.musica}" />
                             <ui:VisualElement name="ConfigSliderMusic" class="custom-slider">
                                 <ui:VisualElement class="custom-slider-track" />
                                 <ui:VisualElement name="ConfigFillMusic" class="custom-slider-fill" />
@@ -87,7 +87,7 @@
                             <ui:Label name="ConfigLabelMusic" class="settings-value" text="100%" />
                         </ui:VisualElement>
                         <ui:VisualElement class="settings-row">
-                            <ui:Label class="settings-label" text="Efectos" />
+                            <ui:Label class="settings-label" text="{loc:ui.playoffs.efectos}" />
                             <ui:VisualElement name="ConfigSliderSFX" class="custom-slider">
                                 <ui:VisualElement class="custom-slider-track" />
                                 <ui:VisualElement name="ConfigFillSFX" class="custom-slider-fill" />
@@ -97,39 +97,39 @@
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement class="settings-section">
-                        <ui:Label class="settings-section-title" text="GRÁFICOS" />
+                        <ui:Label class="settings-section-title" text="{loc:ui.playoffs.graficos}" />
                         <ui:VisualElement class="settings-quality-row">
-                            <ui:Label class="settings-label" text="Calidad" />
+                            <ui:Label class="settings-label" text="{loc:ui.playoffs.calidad}" />
                             <ui:VisualElement class="settings-quality-options">
-                                <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="Baja" />
-                                <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="Media" />
-                                <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="Alta" />
-                                <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="Ultra" />
+                                <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="{loc:ui.playoffs.config_btn_quality_low}" />
+                                <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="{loc:ui.playoffs.config_btn_quality_medium}" />
+                                <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="{loc:ui.playoffs.config_btn_quality_high}" />
+                                <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="{loc:ui.playoffs.config_btn_quality_ultra}" />
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement class="settings-section">
-                        <ui:Label class="settings-section-title" text="JUEGO" />
-                        <ui:Button name="ConfigBtnMainMenu" class="settings-btn settings-btn--secondary" text="VOLVER AL MENÚ PRINCIPAL" />
-                        <ui:Button name="ConfigBtnExit" class="settings-btn settings-btn--danger" text="SALIR DEL JUEGO" />
+                        <ui:Label class="settings-section-title" text="{loc:ui.playoffs.juego}" />
+                        <ui:Button name="ConfigBtnMainMenu" class="settings-btn settings-btn--secondary" text="{loc:ui.playoffs.config_btn_main_menu}" />
+                        <ui:Button name="ConfigBtnExit" class="settings-btn settings-btn--danger" text="{loc:ui.playoffs.config_btn_exit}" />
                     </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:Button name="ConfigBtnCerrar" class="modal-close" text="CERRAR" />
+                <ui:Button name="ConfigBtnCerrar" class="modal-close" text="{loc:ui.playoffs.config_btn_cerrar}" />
             </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- ══ MODAL CONFIRMAR VOLVER AL MENÚ PRINCIPAL ══ -->
         <ui:VisualElement name="ConfigMainMenuConfirmOverlay" class="modal-overlay">
             <ui:VisualElement name="ConfigMainMenuConfirmBox" class="modal-box">
-                <ui:Label class="modal-title" text="VOLVER AL MENÚ PRINCIPAL" />
+                <ui:Label class="modal-title" text="{loc:ui.playoffs.volver_al_menu_principal}" />
                 <ui:VisualElement class="modal-body">
-                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres volver al menú principal?" />
-                    <ui:Label class="modal-paragraph" text="Se perderá el progreso no guardado de la partida actual. Asegúrate de haber guardado antes de continuar." />
+                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="{loc:ui.playoffs.estas_seguro_de_que_quieres_volver_al_me_6f548452}" />
+                    <ui:Label class="modal-paragraph" text="{loc:ui.playoffs.se_perdera_el_progreso_no_guardado_de_la_b10b7334}" />
                 </ui:VisualElement>
                 <ui:VisualElement class="modal-actions">
-                    <ui:Button name="ConfigBtnMainMenuNo" class="modal-btn modal-btn--secondary" text="NO, QUEDARME" />
+                    <ui:Button name="ConfigBtnMainMenuNo" class="modal-btn modal-btn--secondary" text="{loc:ui.playoffs.config_btn_main_menu_no}" />
                     <ui:VisualElement class="modal-spacer" />
-                    <ui:Button name="ConfigBtnMainMenuYes" class="modal-btn modal-btn--danger" text="SÍ, VOLVER" />
+                    <ui:Button name="ConfigBtnMainMenuYes" class="modal-btn modal-btn--danger" text="{loc:ui.playoffs.config_btn_main_menu_yes}" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
@@ -137,15 +137,15 @@
         <!-- ══ MODAL CONFIRMAR SALIR DEL JUEGO ══ -->
         <ui:VisualElement name="ConfigExitConfirmOverlay" class="modal-overlay">
             <ui:VisualElement name="ConfigExitConfirmBox" class="modal-box">
-                <ui:Label class="modal-title" text="SALIR DEL JUEGO" />
+                <ui:Label class="modal-title" text="{loc:ui.playoffs.salir_del_juego}" />
                 <ui:VisualElement class="modal-body">
-                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres salir del juego?" />
-                    <ui:Label class="modal-paragraph" text="Tu progreso se guarda automáticamente durante la partida. Al volver a cargarla continuarás desde el último estado guardado." />
+                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="{loc:ui.playoffs.estas_seguro_de_que_quieres_salir_del_ju_c65dd5f1}" />
+                    <ui:Label class="modal-paragraph" text="{loc:ui.playoffs.tu_progreso_se_guarda_automaticamente_du_10fb1edb}" />
                 </ui:VisualElement>
                 <ui:VisualElement class="modal-actions">
-                    <ui:Button name="ConfigBtnExitNo" class="modal-btn modal-btn--secondary" text="NO" />
+                    <ui:Button name="ConfigBtnExitNo" class="modal-btn modal-btn--secondary" text="{loc:ui.playoffs.config_btn_exit_no}" />
                     <ui:VisualElement class="modal-spacer" />
-                    <ui:Button name="ConfigBtnExitYes" class="modal-btn modal-btn--danger" text="SÍ, SALIR" />
+                    <ui:Button name="ConfigBtnExitYes" class="modal-btn modal-btn--danger" text="{loc:ui.playoffs.config_btn_exit_yes}" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>

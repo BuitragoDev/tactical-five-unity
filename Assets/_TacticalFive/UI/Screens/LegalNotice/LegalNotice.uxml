@@ -11,27 +11,27 @@
         <ui:VisualElement name="ModalBox" class="modal-box">
 
             <!-- Título -->
-            <ui:Label class="modal-title" text="AVISO LEGAL" />
+            <ui:Label class="modal-title" text="{loc:ui.legal_notice.aviso_legal}" />
 
             <!-- Cuerpo -->
             <ui:VisualElement class="modal-body">
 
                 <ui:Label class="modal-paragraph"
-                    text="Tactical Five es un videojuego de simulación deportiva desarrollado con fines educativos y de entretenimiento personal." />
+                    text="{loc:ui.legal_notice.tactical_five_es_un_videojuego_de_simula_f4a8b719}" />
 
                 <ui:Label class="modal-paragraph"
-                    text="Los nombres de equipos, jugadores y logotipos de la NBA son propiedad de sus respectivos dueños. Tactical Five no está afiliado, patrocinado ni respaldado por la NBA, sus equipos ni sus jugadores." />
+                    text="{loc:ui.legal_notice.los_nombres_de_equipos_jugadores_y_logot_bcf4bdee}" />
 
                 <ui:Label class="modal-paragraph"
-                    text="Este proyecto es de uso privado y no tiene carácter comercial. Todos los datos utilizados son de dominio público o uso educativo bajo el principio de fair use." />
+                    text="{loc:ui.legal_notice.este_proyecto_es_de_uso_privado_y_no_tie_117d9e54}" />
 
                 <ui:Label class="modal-copyright"
-                    text="© 2026 Tactical Five  ·  Todos los derechos reservados" />
+                    text="{loc:ui.legal_notice.2026_tactical_five_todos_los_derechos_re_7e789423}" />
 
             </ui:VisualElement>
 
             <!-- Botón cerrar -->
-            <ui:Button name="BtnCerrar" class="modal-close" text="CERRAR" />
+            <ui:Button name="BtnCerrar" class="modal-close" text="{loc:ui.legal_notice.btn_cerrar}" />
 
         </ui:VisualElement>
 

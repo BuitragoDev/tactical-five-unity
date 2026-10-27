@@ -185,7 +185,7 @@ using System.Linq;
 
             var unitLbl = new Label();
             unitLbl.AddToClassList("stat-card-unit");
-            unitLbl.text = "PTS/P.";
+            unitLbl.text = LocalizationService.T("ui.code.standings_controller.pts_p");
 
             rowContainer.Add(valueLbl);
             rowContainer.Add(unitLbl);
@@ -227,7 +227,7 @@ using System.Linq;
             _root.Q<VisualElement>("HeaderTeamLogo").style.backgroundImage = new StyleBackground(sprite);
 
         _root.Q<Label>("HeaderTeamName").text = _myTeam.name.ToUpper();
-        _root.Q<Label>("HeaderManagerName").text = $"Manager: {_manager.name}";
+        _root.Q<Label>("HeaderManagerName").text = LocalizationService.T("ui.common.manager", _manager.name);
         var budgetLabel = _root.Q<Label>("HeaderBudget");
         budgetLabel.text = $"${_myTeam.budget / 1_000_000}M";
         budgetLabel.style.color = _myTeam.budget < 0
@@ -261,11 +261,11 @@ using System.Linq;
 
         if (_season != null)
         {
-            _root.Q<Label>("HeaderSeason").text = $"Temporada {_season.year_start}-{_season.year_end}";
+            _root.Q<Label>("HeaderSeason").text = LocalizationService.T("ui.common.season", _season.year_start, _season.year_end);
             _root.Q<Label>("HeaderDate").text = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
         }
 
-        _btnAction.text = "MENÚ PRINCIPAL";
+        _btnAction.text = LocalizationService.T("ui.code.standings_controller.menu_principal");
     }
 
     void ShowStandings(string filter)
@@ -308,15 +308,15 @@ using System.Linq;
         var subtitle = _root.Q<Label>("StandingsSubtitle");
         if (_season == null)
         {
-            _standingsBody.Add(new Label("NBA Cup no disponible."));
+            _standingsBody.Add(new Label(LocalizationService.T("ui.code.standings_controller.nba_cup_no_disponible")));
             return;
         }
 
         var edition = DatabaseManager.Instance.GetCupEdition(_season.id);
         if (edition == null)
         {
-            if (subtitle != null) subtitle.text = "NBA CUP · AÚN NO GENERADA";
-            _standingsBody.Add(new Label("La NBA Cup se genera al crear el calendario de la temporada."));
+            if (subtitle != null) subtitle.text = LocalizationService.T("ui.code.standings_controller.nba_cup_aun_no_generada");
+            _standingsBody.Add(new Label(LocalizationService.T("ui.code.standings_controller.la_nba_cup_se_genera_al_crear_el_calenda_268b289e")));
             return;
         }
 

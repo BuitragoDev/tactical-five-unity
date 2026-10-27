@@ -105,7 +105,7 @@ public class LogrosController : UIScreenController
 
         if (total == 0)
         {
-            var empty = new Label("Sin logros en esta categoría.");
+            var empty = new Label(LocalizationService.T("ui.code.logros_controller.sin_logros_en_esta_categoria"));
             empty.AddToClassList("logros-empty");
             _body.Add(empty);
             return;
@@ -151,7 +151,7 @@ public class LogrosController : UIScreenController
         else
         {
             status.AddToClassList("logros-card-status--locked");
-            status.text = "BLOQUEADO";
+            status.text = LocalizationService.T("ui.code.logros_controller.bloqueado");
         }
         card.Add(status);
 
