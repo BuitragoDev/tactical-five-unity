@@ -171,6 +171,8 @@
 
 ## 9. Audit warnings that must remain visible
 
+- **F8 gate cuantitativa (B47):** los ítems F8 están implementados y con tests/build verdes, pero `DashboardController.cs` sigue en ~8.079 líneas frente al objetivo ~3.000 y falta la medición final antes/después de un día de 15 partidos. No presentar F8 como cerrada en su puerta cuantitativa hasta resolver B47.
+
 - ~~`FastSimRoutine` yields while the day transaction is open~~ — **resuelto (B38):** la fase simulación + bookkeeping ya no contiene `yield return` entre `BeginTransaction` y `Commit`; vive en una transacción de un solo frame (el respiro de la UI en fast sim se da antes de abrirla).
 - `BuildTemplateDatabaseInBackground` temporarily swaps the shared `_dbField` from a worker thread; isolate template generation before allowing concurrent editor/save operations.
 - ~~`StartNewSeason` currently skips rookies in its progression loop~~ — **resuelto (B41):** los rookies de primer año envejecen y progresan; solo se saltan el decremento de contrato (`RolloverRules.ShouldDecrementContract`).

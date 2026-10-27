@@ -158,6 +158,12 @@ _(none open — see resolved B1 below)_
 - **Detail [F]:** base `Refresh()` → `RefreshHeader()` plus `HeaderController.Attach` populate the same header blocks; both run per screen load.
 - **Fix:** make `RefreshHeader` idempotent or call once.
 
+### B47. F8 quantitative gate — **OPEN**
+- **Type:** architecture/performance debt.
+- **Detail [F]:** F8-01..F8-08 están implementados y con tests/build verdes, pero la puerta cuantitativa de F8 no se cumple: `DashboardController.cs` sigue en ~8.079 líneas (objetivo ~3.000) y no se ha registrado la medición final antes/después de un día de 15 partidos.
+- **Impact:** el controller sigue siendo el mayor punto de acoplamiento; la mejora funcional existe, pero el objetivo de tamaño no está cerrado.
+- **Fix:** extraer más pasos/UI del Dashboard a partials/servicios y medir un día de 15 partidos con el pipeline actual. No cerrar F8 como gate cuantitativo hasta entonces.
+
 ---
 
 ## P3 — Low / Nice-to-have

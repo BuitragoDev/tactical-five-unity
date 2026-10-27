@@ -28,9 +28,9 @@
 | **6** | Histórico y estadísticas | 4 | 4 |
 | **7** | UX/UI, resoluciones e idioma | 6 | 6 |
 | **8** | Arquitectura y rendimiento | 8 | 8 |
-| **9** | Proceso y documentación | 2 | 1 |
+| **9** | Proceso y documentación | 2 | 2 |
 | **NF** | Apuestas de producto (sin fecha) | 4 | 0 |
-| | **TOTAL** | **70** | **61** |
+| | **TOTAL** | **70** | **62** |
 
 ### Grafo de dependencias
 
@@ -587,7 +587,7 @@ flowchart LR
   - *Implementación:* `ReferentialIntegrity` declara las relaciones entre tablas (equipos, jugadores, partidos, stats, finanzas, ofertas, draft, lineup, mensajes, premios, ciudad, torneos y G-League) y las valida con `LEFT JOIN`; `DatabaseManager.ValidateReferentialIntegrity()` expone el resultado. Las reglas admiten los valores centinela (`team_id=0`, leyendas `-1`, partidos G-League/All-Star) y omiten tablas no presentes en una base parcial. `GameSaveManager.DeleteSave` elimina el `.db`, el metadata y los artefactos del scope sin dejar el slot visible. No se añadieron FKs físicas al esquema legado (SQLite-net no las genera y romperían el clonado); el validador es la vía equivalente.
   - *Pruebas:* `ReferentialIntegrityTests` (slot sembrado sin huérfanos, detección de jugador con equipo inexistente y borrado de slot sin DB/metadata residual) + suite completa.
 
-**Puerta de salida F8:** `DashboardController` por debajo de ~3.000 líneas, día y economía con tests propios, y un día de 15 partidos medido antes/después.
+**Puerta de salida F8:** `DashboardController` por debajo de ~3.000 líneas, día y economía con tests propios, y un día de 15 partidos medido antes/después. **Estado al cierre:** día/economía con tests y build verdes; la puerta cuantitativa de tamaño del controller y la medición final de 15 partidos quedan documentadas como deuda B47.
 
 ---
 
@@ -602,11 +602,13 @@ flowchart LR
   - *Implementación:* se eliminaron los snapshots de HEAD/tests/pantallas de los documentos vivos y se enlazó `Tools/project_status.py` como fuente canónica. Actualizados: 23 sistemas, `UIScreenController` 609 ln, 64 modelos de tabla, 16 partials de `DatabaseManager`, 50 carpetas de pantalla (49 pantallas + LegalNotice huérfano), `PlayoffsGenerator` 569 ln, `StartNewSeason` en `.Rollover`, pipeline F8-03 y features F8. `AUDITORIA_FINAL.md` queda marcado como histórico con enlace a la base viva. `PROJECT_OVERVIEW` ya no presenta el delta de `8460d21` como actual.
   - *Pruebas:* `python3 Tools/project_status.py` (575 tests, 49 pantallas, HEAD/rama actuales) + revisión de cifras contra `find`/`wc` y suite completa.
 
-- [ ] **F9-02 · Ritual de cierre de fase**
+- [x] **F9-02 · Ritual de cierre de fase**
   - *Ref:* proceso · *Esfuerzo:* S · *Depende:* —
   - *Criterio:* cada fase cerrada deja: ítems marcados, entrada en la §12 con fecha y commit, puerta de salida verificada y docs actualizados en el mismo commit.
+  - *Implementación:* añadido el ritual en `§15`: checklist, verificación con `Tools/project_status.py` + `Tools/ci_unity.sh`, registro de desviaciones y entrada en la bitácora. Fase 9 cerrada con F9-01/F9-02; F8 se cierra funcionalmente con la deuda cuantitativa B47 registrada en `TODO_TECHNICAL_DEBT.md`.
+  - *Pruebas:* build Linux + suite EditMode completa + `project_status.py`.
 
-**Puerta de salida F9:** una fase completa cerrada siguiendo el ritual, con su entrada en la bitácora.
+**Puerta de salida F9:** una fase completa cerrada siguiendo el ritual, con su entrada en la bitácora. **Cumplida:** F9-01 y F9-02 cerrados con entrada de cierre en la §14.
 
 ---
 
@@ -712,6 +714,7 @@ Recogido de las invariantes del proyecto y de los errores que esta auditoría ha
 | 2026-10-26 | F4 | `F4-04` | `d5aad586` | Separación de 15 plazas estándar, 2 contratos two-way e IR. `GetRosterCount` excluye two-way e IR; contratos two-way persisten en traspasos y se validan por separado; fichajes pendientes, renovaciones, recuperación IR y rollover respetan cada cupo. La simulación sigue incluyendo two-way elegibles. D4 resuelta: conservar máximo 2. Pipeline local: build Linux + **471/471 EditMode**. |
 | 2026-10-26 | F4 | `F4-05` | `46f4bba8` | Service time, derechos RFA/UFA simplificados, QO, tabla `team_cap_holds`, nómina efectiva (cap holds + contratos estándar; two-way excluidos), matching IA, renuncia desde Finanzas y proyección cap sheet. Estimación legacy editable en Editor; baseline seed excluye campos de carrera no estáticos. Build Linux + **482/482 EditMode**. |
 | 2026-10-26 | F4 | `F4-06` | `46f4bba8` | `RookieScale` sustituye el salario aleatorio del draft por una tabla determinista por pick y temporada (base 2025-26, crecimiento por el cap de `CbaTable`): primera ronda 1–30, segunda 31–60 cercana al mínimo y two-way por temporada. `DraftPickSlot.DraftYear` fija la temporada del debut; desaparece el plus salarial de generacionales (conserva OVR/potencial). Tests de monotonía, determinismo, crecimiento, clamp y redondeo. Build Linux + **490/490 EditMode**. |
+| 2026-10-27 | F9 | `F9-02` | — | Ritual de cierre documentado y aplicado: checklist, verificación con `project_status.py` + CI Unity, desviaciones registradas y bitácora. Fase 9 cerrada. Queda B47 (tamaño del Dashboard y medición de 15 partidos) como deuda F8 documentada. **575/575 EditMode**; build Linux correcto. |
 | 2026-10-27 | F9 | `F9-01` | — | Base de conocimiento sincronizada: 23 sistemas, 609 ln de `UIScreenController`, 64 modelos, 16 partials, 50 carpetas de pantalla, 569 ln de `PlayoffsGenerator`. Documentos vivos enlazan `project_status.py`; `AUDITORIA_FINAL` queda como histórico y `PROJECT_OVERVIEW` retira el delta como actual. **575/575 EditMode**; build Linux correcto. |
 | 2026-10-27 | F8 | `F8-08` | — | Validador `ReferentialIntegrity` para las relaciones declaradas + `ValidateReferentialIntegrity`; reglas para centinelas (`team_id=0`, leyendas, G-League/All-Star). Test de slot sembrado sin huérfanos, detección de huérfano y borrado de slot sin DB/metadata. **575/575 EditMode**; build Linux correcto. |
 | 2026-10-27 | F8 | `F8-07` | — | `WaitForBackgroundBatch` devuelve `NoBatch/Completed/Faulted/TimedOut`; `InitSaveSlot` aborta con error visible y `CloseActiveSlot`/borrado no continúan si el lote sigue escribiendo. Los `RunInBackground*` devuelven tarea fallida en vez de abrir una segunda conexión. Tests de timeout/fallo. **572/572 EditMode**; build Linux correcto. |
@@ -738,3 +741,17 @@ Recogido de las invariantes del proyecto y de los errores que esta auditoría ha
 | 2026-10-26 | F5 | `F5-02` | `44382363` | Scheduler fail-fast: cada partido se sigue individualmente (sin `scheduledPairs`), se registran los no colocados, el respaldo intenta meterlos y, antes de guardar, se validan 1.230 partidos/82 por equipo/41-41. Si falla, `GenerateSchedule` devuelve -1 y la temporada no se marca como generada. Test de liga incompleta (29 equipos): devuelve -1 y no guarda partidos. **502/502 EditMode**. |
 | 2026-10-26 | F4 | `F4-08` | `8ac3a4b9` | Mínimo salarial por experiencia: `CbaTable` publica bandas 0/1/2/3+ (`MinimumFor`) y `TradeHelper.MinimumSalary(settings, years)` es la consulta única. Se aplica a ofertas, maduración, QO/cap holds, buyout, IA y máximo sobre el 2.º apron; los agentes libres reciben service time estimado. `minimum_salary` guarda solo 0 años; migración `minimum_salary_by_experience`. Los 14 contratos bajo 2 M se corrigieron en F1-04; los 56 contratos de 2 M se conservan como legacy informativos y se regularizan al renovar. Tests de bandas, `ApplyTo`, `CanAISignExternal` y seed. **501/501 EditMode**. |
 | 2026-10-26 | F4 | `F4-07` | `cc69b10c` | `CbaTable` parametriza cap, luxury tax, aprons, NT-MLE, T-MLE, bi-anual, mínimo y two-way por temporada: 2024-25..2026-27 con cifras oficiales de NBA.com, 2027-28..2034-35 con proyecciones RealGM marcadas `Verified=false` y +5 % anual solo después de la tabla. `CbaTable.ApplyTo` alimenta `league_settings` (`season_start_year`, `cba_projected`, `cba_source`) en el seed y en `StartNewSeason`; la migración `cba_table_by_season` sincroniza partidas antiguas. Se retira el offset interno de +20 M y el +5 % ciego; `TradeHelper` queda como fallback 2026-27. `RookieScale` escala con el cap y el two-way usa el importe de su temporada. Cap sheet y pantalla de reglas muestran temporada/fuente. **Repeater tax no modelado** (impuesto estándar). Tests de cifras oficiales, orden, monotonía, proyecciones, `ApplyTo`, seed, rookie scale y fallback. Build Linux + **499/499 EditMode**. |
+
+---
+
+## 15. Ritual de cierre de fase (F9-02)
+
+Cada fase se cierra con este checklist, en el mismo commit:
+
+1. **Ítems:** marcar `[x]` los ítems terminados y actualizar el tablero de progreso.
+2. **Puerta de salida:** verificar el criterio de la fase. Si no se cumple, registrar la desviación en `TODO_TECHNICAL_DEBT.md` y en la bitácora; no ocultarla como si estuviera cumplida.
+3. **Datos dinámicos:** ejecutar `python3 Tools/project_status.py` y usar su salida para versión, HEAD, tests y pantallas. No copiar esos valores a documentos vivos.
+4. **Verificación:** `bash Tools/ci_unity.sh` con `UNITY_EDITOR_PATH` (build Linux + EditMode completo) y `python3 Tools/localization_extract.py --check` si se tocó UI.
+5. **Docs:** actualizar los documentos afectados (`SYSTEMS`, `DATA_MODEL`, `SAVE_SYSTEM`, `UI_TOOLKIT`, `GAMEPLAY`, `CODE_GUIDELINES`, `AGENTS`, `MEMORY`).
+6. **Bitácora:** añadir fecha, fase, ítem(s), commit (o `—` hasta commitear) y resultado verificado.
+7. **Commit:** un único commit de cierre; no push si el usuario no lo pide.
