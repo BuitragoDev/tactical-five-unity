@@ -163,7 +163,7 @@ Basado en `TODO_TECHNICAL_DEBT.md` y el estado actual del proyecto (HEAD `81d9e4
 | **P1** | Enums para `phase`/`game_type`/`trade_type` (B12) | B12 | Técnico |
 | **P2** | Caché de logos estáticos (`Resources.LoadAll` en cada `OnEnable`) | B13 | Performance |
 | **P2** | Tests para `DatabaseManager` migrations y `GameSimulator.SimulateGame` | B34 | Testing |
-| **P2** | Split `DatabaseManager.Records.cs` (3586 ln) | B3 | Refactor |
+| **P2** | Split `DatabaseManager.Records.cs` (hecho en F8-04; queda `.Seeding.cs`) | B3 | Refactor |
 | **P2** | Reconciliar 12 controllers sin `base.RegisterCallbacks()` | B4 note | Consistencia |
 | **P3** | Sync o delete `PLAN.md` | B36 | Limpieza |
 | **P3** | Limpiar código muerto (`PreseasonGameData`, `LegalNotice/`, `.meta` huérfano) | — | Limpieza |

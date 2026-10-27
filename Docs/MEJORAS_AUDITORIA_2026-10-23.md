@@ -27,10 +27,10 @@
 | **5** | Calendario y competiciones | 5 | 5 |
 | **6** | Histórico y estadísticas | 4 | 4 |
 | **7** | UX/UI, resoluciones e idioma | 6 | 6 |
-| **8** | Arquitectura y rendimiento | 8 | 3 |
+| **8** | Arquitectura y rendimiento | 8 | 4 |
 | **9** | Proceso y documentación | 2 | 0 |
 | **NF** | Apuestas de producto (sin fecha) | 4 | 0 |
-| | **TOTAL** | **70** | **55** |
+| | **TOTAL** | **70** | **56** |
 
 ### Grafo de dependencias
 
@@ -552,10 +552,12 @@ flowchart LR
   - *Implementación:* `GameDayPipeline` define el orden explícito `PreBatch → LineupValidation → PreGameGate → SimulationBookkeeping → PostDay` y los subpasos de la transacción (`Simulation → Bookkeeping → PhaseTransitions → Calendar`). `ProcessGameDayRoutine` queda como orquestador: crea `GameDayRunState`, construye los pasos y los ejecuta; el código pesado vive en `RunPreBatch`, `RunLineupValidation`, `RunPreGameGate`, `RunSimulationBookkeeping`, `RunPhaseTransitions`, `RunCalendarAndAwards` y `RunPostDay`. Un flag `_dayAborted` corta el pipeline tras cualquier modal, navegación o error. `FastSimRoutine` sigue siendo el bucle externo que reutiliza `ProcessGameDayRoutine(fastSim:true)`.
   - *Pruebas:* `GameDayPipelineTests` verifica el orden del día, el orden de los subpasos y que el runner se detenga al abortar un paso + suite completa.
 
-- [ ] **F8-04 · Dividir `DatabaseManager.Records.cs`**
+- [x] **F8-04 · Dividir `DatabaseManager.Records.cs`**
   - *Ref:* `ARC-01` · *Esfuerzo:* M · *Depende:* F3-07
   - *Criterio:* rollover, premios, histórico y progresión quedan en partials separadas por dominio sin cambiar firmas públicas; los tests siguen en verde.
   - *Punto de partida:* 4.448 líneas en un archivo.
+  - *Implementación:* `DatabaseManager.Records.cs` pasa de **4.654 a 1.166 líneas**. Se crean cuatro partials por dominio: `DatabaseManager.Rollover.cs` (draft state, `StartNewSeason`, `TrimRostersToMaxSize`), `DatabaseManager.Awards.cs` (palmarés, All-Star, premios, récords y premios mensuales), `DatabaseManager.History.cs` (hitos, histórico por jugador, HOF/dorsales y cierre de temporada) y `DatabaseManager.Progression.cs` (personalidades, relaciones, quintetos/rotación, opciones y mentoring). No se cambió ninguna firma pública; el resto (mensajes, ofertas, finanzas, stats de partido y seed histórico) permanece en `.Records`. `SQLite` y `GameSaveManager` no se tocan.
+  - *Pruebas:* suite EditMode completa (mismas firmas y comportamiento) + build Linux.
 
 - [ ] **F8-05 · Índices según consultas reales**
   - *Ref:* `DB-02` · *Esfuerzo:* M · *Depende:* —
@@ -700,6 +702,7 @@ Recogido de las invariantes del proyecto y de los errores que esta auditoría ha
 | 2026-10-26 | F4 | `F4-04` | `d5aad586` | Separación de 15 plazas estándar, 2 contratos two-way e IR. `GetRosterCount` excluye two-way e IR; contratos two-way persisten en traspasos y se validan por separado; fichajes pendientes, renovaciones, recuperación IR y rollover respetan cada cupo. La simulación sigue incluyendo two-way elegibles. D4 resuelta: conservar máximo 2. Pipeline local: build Linux + **471/471 EditMode**. |
 | 2026-10-26 | F4 | `F4-05` | `46f4bba8` | Service time, derechos RFA/UFA simplificados, QO, tabla `team_cap_holds`, nómina efectiva (cap holds + contratos estándar; two-way excluidos), matching IA, renuncia desde Finanzas y proyección cap sheet. Estimación legacy editable en Editor; baseline seed excluye campos de carrera no estáticos. Build Linux + **482/482 EditMode**. |
 | 2026-10-26 | F4 | `F4-06` | `46f4bba8` | `RookieScale` sustituye el salario aleatorio del draft por una tabla determinista por pick y temporada (base 2025-26, crecimiento por el cap de `CbaTable`): primera ronda 1–30, segunda 31–60 cercana al mínimo y two-way por temporada. `DraftPickSlot.DraftYear` fija la temporada del debut; desaparece el plus salarial de generacionales (conserva OVR/potencial). Tests de monotonía, determinismo, crecimiento, clamp y redondeo. Build Linux + **490/490 EditMode**. |
+| 2026-10-27 | F8 | `F8-04` | — | `DatabaseManager.Records.cs` dividido por dominio en `.Rollover`, `.Awards`, `.History` y `.Progression`; el archivo principal de Records baja a 1.166 líneas sin cambiar firmas públicas. Suite completa en verde. **564/564 EditMode**; build Linux correcto. |
 | 2026-10-27 | F8 | `F8-03` | — | Pipeline del día explícito en `GameDayPipeline`; `ProcessGameDayRoutine` queda como orquestador y el pre-lote, lineup, previa, transacción simulación/bookkeeping, transiciones, calendario y post-día son pasos nombrados con aborto controlado por `_dayAborted`. Tests de orden y de parada del runner. **564/564 EditMode**; build Linux correcto. |
 | 2026-10-27 | F8 | `F8-02` | — | Mercado IA extraído a `AiMarketService`: buyout, FA propios, traspasos/fire sale, S&T, ofertas al usuario, estrellas y renovaciones. Estrategia, deadline y caché se inyectan por delegados; el controller mantiene transacción/psicólogo/modal. Reglas puras de ventana y renovación + tests. **561/561 EditMode**; build Linux correcto. |
 | 2026-10-27 | F8 | `F8-01` | — | Economía extraída a `TeamEconomyService`: asistencia, taquilla, patrocinio/TV de partido, nómina de jugadores/empleados, luxury tax y abonos. `DashboardController` pierde ~430 líneas y solo orquesta; tests de reglas puras en `TeamEconomyServiceTests`. **558/558 EditMode**; build Linux correcto. |

@@ -68,11 +68,11 @@ _(none open — see resolved B1 below)_
 - **Impact:** tax can reduce the calculated expense total and inflate displayed balance.
 - **Fix:** ✅ el luxury tax se registra en **positivo** como gasto (`ECO-05`, migración `loan_records_reclassified` normaliza importes antiguos).
 
-### B3. `DatabaseManager` is a monolith — **PARTIAL (mostly done)**
+### B3. `DatabaseManager` is a monolith — **DONE (F8-04)**
 - **Type:** refactor.
-- **Detail [F]:** the main file is now 968 ln (down from ~5,600) split into **10 partial classes** by domain: `.Teams`, `.Players`, `.Staff`, `.Manager`, `.Games`, `.Seeding` (1354 ln), `.Records` (3586 ln), `.Achievements`, `.Cup`. `SQLite.cs` (sqlite-net wrapper) is separate.
-- **Remaining:** `DatabaseManager.Records.cs` (3586 ln) and `.Seeding.cs` (1354 ln) are still oversized; DTOs moved out to `DatabaseRows.cs`. Further split optional.
-- **Fix:** split `.Records` into record-checking vs awards vs HOF vs retired-numbers partials.
+- **Detail [F]:** the main file is now 968 ln (down from ~5,600) split into **16 partial classes** by domain: `.Teams`, `.Players`, `.Staff`, `.Manager`, `.Games`, `.Seeding`, `.Records` (1.166 ln), `.Achievements`, `.Cup`, `.GLeague`, `.Storylines`, `.Awards`, `.History`, `.Rollover`, `.Progression`. `SQLite.cs` (sqlite-net wrapper) is separate.
+- **Remaining:** `.Seeding.cs` sigue siendo el archivo grande; DTOs viven en `DatabaseRows.cs`. Un split adicional es opcional.
+- **Fix:** hecho en F8-04 para `.Records` (rollover/premios/histórico/progresión).
 
 ### B4. Config modal duplication — **DONE**
 - **Detail [F]:** the settings modal (3 volume sliders + quality buttons + sim-mode toggle + exit confirms) is now centralized in `UIScreenController.InitConfigModal`/`OpenConfigModal`/`CloseConfigModal` (base class). `CustomSlider` is the shared slider control.
@@ -181,7 +181,7 @@ _(none open — see resolved B1 below)_
 
 1. **B9** — wrap the game-day pipeline in transactions (highest data-integrity value).
 2. **B21/B22/B23** — small base-class cleanups (dead `LoadSidebarIcons`, redundant full-screen, double header) — low risk, reduces confusion.
-3. **B3** — split `DatabaseManager.Records.cs` (3586 ln) further.
+3. **B3** — hecho en F8-04; solo queda un split opcional de `.Seeding.cs` (1.506 ln).
 4. **B12** — introduce enums for `phase`/`game_type`/`trade_type` before the next feature that touches them.
 5. **B4 note** — reconcile the 12 controllers overriding `RegisterCallbacks()` without `base` (either standardize or document intent).
 6. **B36** — sync or delete `PLAN.md`.

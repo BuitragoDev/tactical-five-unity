@@ -68,7 +68,7 @@
 | Hecho | Consecuencia |
 |---|---|
 | **Escena única** `MainMenu.unity`; pantallas como `UIDocument` GOs; `ScreenManager.GoTo(GameScreen, mode)` conmuta `SetActive` | No cargues escenas. Nunca navegues con `SetActive` directo — usa `ScreenManager.Instance.GoTo`. |
-| **Toda la persistencia es SQLite** vía `DatabaseManager.Instance` (sqlite-net incluido; `DatabaseManager` dividido en **10 partial classes** por dominio: `.Teams/.Players/.Staff/.Manager/.Games/.Seeding/.Records/.Achievements/.Cup`) | Nunca abras tu propia conexión. Todo acceso pasa por `DatabaseManager`. |
+| **Toda la persistencia es SQLite** vía `DatabaseManager.Instance` (sqlite-net incluido; `DatabaseManager` dividido en **16 partial classes** por dominio (incluye `.Awards`, `.History`, `.Rollover` y `.Progression` desde F8-04)) | Nunca abras tu propia conexión. Todo acceso pasa por `DatabaseManager`. |
 | **Sin prefabs y sin ScriptableObjects de juego.** Contenido = seeders + tablas SQLite; vistas = UXML+USS | Para nueva entidad → tabla+seeder; para vista nueva → UXML+USS. |
 | **Sin event bus** (ni `Action`/`UnityEvent` entre sistemas). Comunicación: mensajes DB (`MessageData`), estado estático (`GameResultCache`, `ScreenManager.*`, cola de toasts de `AchievementService`), `PlayerPrefs` (solo settings), callbacks UI | No inventes un sistema de eventos. Sigue los canales existentes. |
 | **Todos los controllers heredan `UIScreenController`** (base en `Scripts/Core/UIScreenController.cs`, 575 ln): fullscreen, inyección Header/Sidebar, navegación, cursores, modal de configuración, `RefreshHeader` | Nuevas pantallas: hereda la base y sobreescribe solo lo que difiera. |
@@ -183,7 +183,7 @@ Método `SeedX()` en `DatabaseManager` con guard de tabla-vacía en `SeedStaticD
 |---|---|
 | `Scripts/Core/ScreenManager.cs` | Navegación y registro de `UIDocument` (`GoTo` switch) |
 | `Scripts/Core/UIScreenController.cs` | Base de controllers (chrome, nav, config modal) |
-| `Scripts/Data/DatabaseManager.cs` + 9 partials | Único acceso a DB (~150 métodos públicos) |
+| `Scripts/Data/DatabaseManager.cs` + 15 partials | Único acceso a DB (~150 métodos públicos) |
 | `Scripts/Data/GameSaveManager.cs` | Slots, `template.db`, `saves.json` |
 | `Scripts/GameSimulator.cs` | Motor de partidos (por posesión) |
 | `Scripts/Core/TradeHelper.cs` | Salary cap, aprons, luxury tax, valoración IA |

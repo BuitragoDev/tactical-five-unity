@@ -13,7 +13,7 @@ A single-player **NBA management sim** ("Tactical Five", version and exact Unity
 | Fact | Consequence for you |
 |---|---|
 | **One scene** (`MainMenu.unity`); screens are `UIDocument` GameObjects; `ScreenManager.GoTo(GameScreen, mode)` toggles `SetActive`. | Never load scenes. Never navigate directly with `SetActive` — use `ScreenManager`. |
-| **All persistence = SQLite** via `DatabaseManager.Instance` (bundled sqlite-net + native plugin), split into 10 partials. | Never open your own connection. All data access through `DatabaseManager`. |
+| **All persistence = SQLite** via `DatabaseManager.Instance` (bundled sqlite-net + native plugin), split into 16 partials. | Never open your own connection. All data access through `DatabaseManager`. |
 | **No prefabs, no game ScriptableObjects.** | New views = UXML+USS; new content = seeders + SQLite tables. |
 | **No event bus.** Communication = DB messages (`MessageData`), static state (`GameResultCache`, `ScreenManager.*`, `AchievementService` toast queue), `PlayerPrefs` (settings), DB `schema_migrations` (data migrations), UI callbacks. | Don't invent an event system; follow existing channels. |
 | **Static utility classes** hold game logic (`GameSimulator`, `TradeHelper`, `TravelHelper`, `CupHelper`, `SummerLeagueHelper`, `DraftGenerator`, `ScheduleGenerator`, `PlayoffsGenerator`, `QuickNewsGenerator`, `AchievementService`, `AdvancedStatsHelper`, `FogOfWarHelper`, `HallOfFameHelper`, `MatchupPreview`, `ObjectiveHelper`, `TradeValueHelper`). | Put new rules in static helpers; keep controllers thin. |
@@ -29,7 +29,7 @@ A single-player **NBA management sim** ("Tactical Five", version and exact Unity
 ```
 Assets/_TacticalFive/
   Scripts/Core/     navigation, audio, cursor, base UIScreenController, generators, trade rules, enums, achievements, stats helpers
-  Scripts/Data/     DatabaseManager (10 partials), GameSaveManager, ~45 table models, seeders, Constants, DatabaseRows
+  Scripts/Data/     DatabaseManager (16 partials), GameSaveManager, ~45 table models, seeders, Constants, DatabaseRows
   Scripts/UI/       screen controllers + CustomSlider
   Scripts/(root)    GameSimulator, GameResultCache, QuickNewsGenerator, PlayerPhotoHelper
   Scenes/           MainMenu.unity

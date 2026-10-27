@@ -21,7 +21,7 @@ Tactical Five is a **data-driven, single-scene, UI-Toolkit-first** management ga
 │  + MonoBehaviour singletons: AudioManager · CursorManager               │
 ├─────────────────────────────────────────────────────────────────────────┤
 │  DATA LAYER — SQLite (sqlite-net)                                       │
-│  DatabaseManager (singleton, partial classes ×10) · GameSaveManager      │
+│  DatabaseManager (singleton, partial classes ×16) · GameSaveManager      │
 │  ~45 table model classes (SQLite attributes) · seeders · migrations     │
 │  background threads (Task.Run + WAL + AsyncLocal ambient connection)    │
 └─────────────────────────────────────────────────────────────────────────┘
@@ -41,7 +41,7 @@ Tactical Five is a **data-driven, single-scene, UI-Toolkit-first** management ga
 | **Navigation** | `ScreenManager.cs`, `GameEnums.cs`, `UIScreenController.cs`, `FullScreenUI.cs` | Screen enum, show/hide documents, global selected player / game mode, base controller |
 | **Localization** | `LocalizationService.cs`, `Resources/Localization/es.json`, `Tools/localization_extract.py` | Runtime de claves/tokens, tabla española y extractor; `UIScreenController` aplica los tokens al final de `OnEnable` |
 | **Día de partido (F8-03)** | `GameDayPipeline.cs`, `DashboardController.ProcessGameDayRoutine` | Orden explícito de pasos y subpasos; aborto controlado por `_dayAborted`; el controller inyecta las corrutinas reales |
-| **Persistence** | `DatabaseManager.cs` + 9 partials (`DatabaseManager.{Teams,Players,Staff,Manager,Games,Seeding,Records,Achievements,Cup}.cs`), `GameSaveManager.cs`, `SQLite.cs`, `SaveSlotInfo.cs` | Tables, queries, migrations, seeding, slots/template, background-thread execution |
+| **Persistence** | `DatabaseManager.cs` + 15 partials (`DatabaseManager.{Teams,Players,Staff,Manager,Games,Seeding,Records,Achievements,Cup,GLeague,Storylines,Awards,History,Rollover,Progression}.cs`), `GameSaveManager.cs`, `SQLite.cs`, `SaveSlotInfo.cs` | Tables, queries, migrations, seeding, slots/template, background-thread execution |
 | **Simulation/calibration** | `GameSimulator.cs`, `MonteCarloRunner.cs`, `MonteCarloCalibration.cs`, `TravelHelper.cs`, `CupHelper.cs`, `SummerLeagueHelper.cs` | Possession sim; seeded offline league lab, versioned acceptance profile and markdown report (`MonteCarloLabWindow`, Editor-only); travel distances and rest/fatigue for the schedule; NBA Cup group/knockout flow |
 | **Season generation** | `ScheduleGenerator.cs`, `PlayoffsGenerator.cs`, `DraftGenerator.cs` | 82-game schedule + All-Star; Play-In/Playoffs; draft lottery + class |
 | **Salary/trades** | `TradeHelper.cs` | Cap constants, trade validation, luxury tax, AI accept evaluation, pick bonus |
