@@ -19,6 +19,7 @@
 
 - **Files:** `GameSaveManager.cs` (static), `SaveSlotInfo.cs`, `DatabaseManager.InitSaveSlot`.
 - **Behavior:** one `save_{n}.db` per slot + `saves.json` metadata + `template.db` seed. `InitSaveSlot` opens with WAL, creates tables, runs migrations, then clones `template.db` (15 static tables) or seeds fresh.
+- **Lotes de fondo F8-07:** `WaitForBackgroundBatch` devuelve `NoBatch/Completed/Faulted/TimedOut`; `InitSaveSlot` aborta con `LastInitError` y `CloseActiveSlot`/delete no continúan si el lote sigue escribiendo. `RunInBackground*` no abre una segunda conexión si el lote anterior no terminó.
 - **Detail:** full doc in `SAVE_SYSTEM.md`.
 
 ## S3. Match simulation engine

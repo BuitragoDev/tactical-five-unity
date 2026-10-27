@@ -64,6 +64,12 @@ All under `Application.persistentDataPath`:
 - There is **no explicit autosave timer** [F]. Everything is persisted **immediately** at the moment of each mutation (`DatabaseManager.UpdatePlayer/UpdateGame/UpdateTeam/AddFinanceRecord/...` write synchronously). The only "save on exit" logic is metadata refresh; quitting mid-session without a mutation loses nothing because mutations are already committed.
 - **Background work:** heavy operations run off the main thread via `RunInBackground`/`RunInBackgroundAsync` (SQLite WAL mode, AsyncLocal ambient `_ambientDb` connection, `[ThreadStatic]` RNG) — see `ARCHITECTURE.md §7`. `FastSimRoutine` still yields while its day transaction is open, so its atomicity guarantee is not equivalent to the normal single-frame path [F].
 
+## 4b. Lotes de fondo y cambio de slot (F8-07)
+
+- `WaitForBackgroundBatch(timeoutMs)` devuelve `BackgroundBatchWaitResult`: `NoBatch`, `Completed`, `Faulted` o `TimedOut`, y deja el motivo en `LastBackgroundBatchError`.
+- `InitSaveSlot` cancela y espera; si no termina, devuelve `false` y muestra `LastInitError`. `CloseActiveSlot` devuelve `false` y `GameSaveManager.DeleteSave` no borra el archivo mientras el lote siga escribiendo.
+- `RunInBackground`/`RunInBackgroundAsync` son single-flight: si un lote no termina a tiempo devuelven una tarea fallida (`BackgroundBatchBusyException`) en vez de abrir una segunda conexión sobre el mismo `.db`.
+
 ## 5. Versioning & migrations
 
 - **`schema_migrations` table + `PRAGMA user_version`** [F]: `SCHEMA_VERSION = 2`. The `schema_migrations` table (`name` PK, `applied_at`) stores one-time data migrations **inside the DB** (per-slot: deleting the slot resets state). **F8-06:** `RunMigrations()` ejecuta todo en una transacción y solo aplica `PRAGMA user_version = 2` al terminar con éxito; los fallos de una migración obligatoria lanzan `DatabaseMigrationException`, revierten el bloque y bloquean la apertura del slot con `LastInitError`/`LastMigrationError`.

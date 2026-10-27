@@ -8,6 +8,19 @@ using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 
+public enum BackgroundBatchWaitResult
+{
+    NoBatch,
+    Completed,
+    Faulted,
+    TimedOut
+}
+
+public class BackgroundBatchBusyException : System.Exception
+{
+    public BackgroundBatchBusyException(string message) : base(message) { }
+}
+
 public partial class DatabaseManager : MonoBehaviour
 {
     /// <summary>
@@ -76,6 +89,9 @@ public partial class DatabaseManager : MonoBehaviour
     /// <summary>Último error de migración; se mantiene separado para diagnóstico.</summary>
     public string LastMigrationError { get; private set; }
 
+    /// <summary>Último error observado al esperar un lote de fondo.</summary>
+    public static string LastBackgroundBatchError { get; private set; }
+
     private string DbPath => GameSaveManager.GetSaveDbPath(_activeSaveSlot);
 
     private const int SCHEMA_VERSION = 2;
@@ -106,7 +122,15 @@ public partial class DatabaseManager : MonoBehaviour
             // No cambiar de conexión/partida mientras un lote de fondo sigue escribiendo:
             // lo cancelamos y esperamos a que termine (rollback limpio si aborta).
             CancelBackgroundBatches();
-            WaitForBackgroundBatch();
+            var batchWait = WaitForBackgroundBatch();
+            if (batchWait != BackgroundBatchWaitResult.NoBatch
+                && batchWait != BackgroundBatchWaitResult.Completed)
+            {
+                LastInitError = batchWait == BackgroundBatchWaitResult.TimedOut
+                    ? "No se puede cambiar de partida: un lote de fondo sigue activo. Inténtalo de nuevo."
+                    : $"No se puede cambiar de partida: el lote de fondo terminó con error ({LastBackgroundBatchError}).";
+                return false;
+            }
 
             if (_dbField != null)
             {
@@ -213,10 +237,17 @@ public partial class DatabaseManager : MonoBehaviour
     }
 
     /// <summary>Cierra la conexión del slot activo (p. ej. antes de borrar la partida).</summary>
-    public void CloseActiveSlot()
+    public bool CloseActiveSlot()
     {
         CancelBackgroundBatches();
-        WaitForBackgroundBatch();
+        var batchWait = WaitForBackgroundBatch();
+        if (batchWait == BackgroundBatchWaitResult.TimedOut
+            || batchWait == BackgroundBatchWaitResult.Faulted)
+        {
+            Debug.LogError($"[DB] No se cierra el slot: {LastBackgroundBatchError}");
+            return false;
+        }
+
         if (_dbField != null)
         {
             try { _dbField.Close(); } catch { }
@@ -224,6 +255,7 @@ public partial class DatabaseManager : MonoBehaviour
         }
         _activeSaveSlot = 0;
         _isTemplateSession = false;
+        return true;
     }
 
     private static Task _runningBatch;
@@ -248,15 +280,77 @@ public partial class DatabaseManager : MonoBehaviour
             throw new OperationCanceledException("Operación cancelada (se cambió de partida).");
     }
 
-    /// <summary>Espera (con tope) a que termine un lote de fondo en curso. Evita cambiar
-    /// de conexión/partida mientras una tarea sigue escribiendo.</summary>
-    public static void WaitForBackgroundBatch(int timeoutMs = 10000)
+    /// <summary>
+    /// Espera (con tope) a que termine un lote de fondo y devuelve qué ocurrió.
+    /// El llamador decide si continúa, vuelve a esperar o aborta el cambio de slot.
+    /// Un timeout NO inicia una segunda conexión sobre el mismo archivo.
+    /// </summary>
+    public static BackgroundBatchWaitResult WaitForBackgroundBatch(int timeoutMs = 10000)
     {
         var t = _runningBatch;
-        if (t == null || t.IsCompleted) return;
-        Debug.LogWarning("[DB] Esperando a que termine un lote de fondo antes de continuar...");
-        try { t.Wait(timeoutMs); }
-        catch (Exception e) { Debug.LogError($"[DB] El lote de fondo terminó con error: {e.Message}"); }
+        if (t == null) return BackgroundBatchWaitResult.NoBatch;
+
+        if (!t.IsCompleted)
+        {
+            Debug.LogWarning("[DB] Esperando a que termine un lote de fondo antes de continuar...");
+            try
+            {
+                if (!t.Wait(timeoutMs))
+                {
+                    LastBackgroundBatchError = $"el lote sigue activo tras {timeoutMs} ms";
+                    Debug.LogError($"[DB] Timeout esperando el lote de fondo ({timeoutMs} ms).");
+                    return BackgroundBatchWaitResult.TimedOut;
+                }
+            }
+            catch (Exception e) when (IsCancellation(e))
+            {
+                // Cancelar es una salida limpia: el lote ya no escribe.
+                ClearTrackedBatch(t);
+                return BackgroundBatchWaitResult.Completed;
+            }
+            catch (Exception e)
+            {
+                LastBackgroundBatchError = e.GetBaseException().Message;
+                Debug.LogError($"[DB] El lote de fondo terminó con error: {LastBackgroundBatchError}");
+                ClearTrackedBatch(t);
+                return BackgroundBatchWaitResult.Faulted;
+            }
+        }
+
+        try
+        {
+            t.GetAwaiter().GetResult();
+            ClearTrackedBatch(t);
+            return BackgroundBatchWaitResult.Completed;
+        }
+        catch (Exception e) when (IsCancellation(e))
+        {
+            ClearTrackedBatch(t);
+            return BackgroundBatchWaitResult.Completed;
+        }
+        catch (Exception e)
+        {
+            LastBackgroundBatchError = e.GetBaseException().Message;
+            Debug.LogError($"[DB] El lote de fondo terminó con error: {LastBackgroundBatchError}");
+            ClearTrackedBatch(t);
+            return BackgroundBatchWaitResult.Faulted;
+        }
+    }
+
+    static bool IsCancellation(Exception exception)
+    {
+        if (exception is OperationCanceledException) return true;
+        if (exception is AggregateException aggregate)
+            return aggregate.Flatten().InnerExceptions.All(e => e is OperationCanceledException);
+        return exception?.GetBaseException() is OperationCanceledException;
+    }
+
+    static void ClearTrackedBatch(Task task)
+    {
+        if (!ReferenceEquals(_runningBatch, task)) return;
+        _runningBatch = null;
+        _batchCts?.Dispose();
+        _batchCts = null;
     }
 
     /// <summary>Registra el lote en curso para poder esperarlo/cancelarlo.</summary>
@@ -275,11 +369,26 @@ public partial class DatabaseManager : MonoBehaviour
         return task;
     }
 
+    static Task AbortedBatchTask()
+        => Task.FromException(new BackgroundBatchBusyException(
+            $"No se inicia un lote de fondo: {LastBackgroundBatchError ?? "hay otro lote activo"}."));
+
+    static Task<T> AbortedBatchTask<T>()
+        => Task.FromException<T>(new BackgroundBatchBusyException(
+            $"No se inicia un lote de fondo: {LastBackgroundBatchError ?? "hay otro lote activo"}."));
+
+    static bool CanStartBackgroundBatch()
+    {
+        var result = WaitForBackgroundBatch();
+        return result == BackgroundBatchWaitResult.NoBatch
+            || result == BackgroundBatchWaitResult.Completed;
+    }
+
     public Task<T> RunInBackground<T>(Func<SQLiteConnection, T> work)
     {
         // Single-flight: si ya hay un lote en curso, esperar a que termine
         // (evita que dos lotes compartan estado/RNG y compitan por el lock de escritura).
-        WaitForBackgroundBatch();
+        if (!CanStartBackgroundBatch()) return AbortedBatchTask<T>();
         string path = DbPath;
         var task = Task.Run(() =>
         {
@@ -293,7 +402,7 @@ public partial class DatabaseManager : MonoBehaviour
     {
         // Single-flight: si ya hay un lote en curso, esperar a que termine
         // (evita que dos lotes compartan estado/RNG y compitan por el lock de escritura).
-        WaitForBackgroundBatch();
+        if (!CanStartBackgroundBatch()) return AbortedBatchTask();
         string path = DbPath;
         var task = Task.Run(() =>
         {
@@ -313,7 +422,7 @@ public partial class DatabaseManager : MonoBehaviour
     {
         // Single-flight: si ya hay un lote en curso, esperar a que termine
         // (evita que dos lotes compartan estado/RNG y compitan por el lock de escritura).
-        WaitForBackgroundBatch();
+        if (!CanStartBackgroundBatch()) return AbortedBatchTask();
         string path = DbPath;
         var task = Task.Run(() =>
         {
@@ -331,7 +440,7 @@ public partial class DatabaseManager : MonoBehaviour
     {
         // Single-flight: si ya hay un lote en curso, esperar a que termine
         // (evita que dos lotes compartan estado/RNG y compitan por el lock de escritura).
-        WaitForBackgroundBatch();
+        if (!CanStartBackgroundBatch()) return AbortedBatchTask<T>();
         string path = DbPath;
         var task = Task.Run(() =>
         {

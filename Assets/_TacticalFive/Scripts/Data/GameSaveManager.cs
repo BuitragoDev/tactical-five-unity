@@ -446,7 +446,13 @@ public static class GameSaveManager
         // Si es la partida cargada, cerramos la conexión antes de borrar el archivo:
         // en Linux un unlink con la conexión abierta deja escrituras huérfanas.
         if (DatabaseManager.Instance != null && DatabaseManager.Instance.ActiveSaveSlot == slotNumber)
-            DatabaseManager.Instance.CloseActiveSlot();
+        {
+            if (!DatabaseManager.Instance.CloseActiveSlot())
+            {
+                Debug.LogError($"[GameSaveManager] No se borra la partida {slotNumber}: un lote de fondo sigue escribiendo.");
+                return;
+            }
+        }
 
         DeleteDbFiles(slotNumber);
 
