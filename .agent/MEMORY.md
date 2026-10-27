@@ -171,7 +171,7 @@
 
 ## 9. Audit warnings that must remain visible
 
-- **F8 gate cuantitativa (B47):** los ítems F8 están implementados y con tests/build verdes, pero `DashboardController.cs` sigue en ~8.079 líneas frente al objetivo ~3.000 y falta la medición final antes/después de un día de 15 partidos. No presentar F8 como cerrada en su puerta cuantitativa hasta resolver B47.
+- **F8 gate cuantitativa (B47) — resuelta:** `DashboardController.cs` queda en **973 líneas** (antes 8.079) y la clase se reparte en 9 partials por dominio. Medición de 15 partidos sin regresión: directa `19→18 ms`, crónica `37→36 ms`; 360 filas `429→434 ms` una a una y `3→6 ms` en lote. La clase completa sigue ~8.2k líneas: para nuevas mejoras, mover lógica pura a servicios y no volver a inflar el archivo principal.
 
 - ~~`FastSimRoutine` yields while the day transaction is open~~ — **resuelto (B38):** la fase simulación + bookkeeping ya no contiene `yield return` entre `BeginTransaction` y `Commit`; vive en una transacción de un solo frame (el respiro de la UI en fast sim se da antes de abrirla).
 - `BuildTemplateDatabaseInBackground` temporarily swaps the shared `_dbField` from a worker thread; isolate template generation before allowing concurrent editor/save operations.

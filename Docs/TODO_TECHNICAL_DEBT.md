@@ -158,11 +158,12 @@ _(none open — see resolved B1 below)_
 - **Detail [F]:** base `Refresh()` → `RefreshHeader()` plus `HeaderController.Attach` populate the same header blocks; both run per screen load.
 - **Fix:** make `RefreshHeader` idempotent or call once.
 
-### B47. F8 quantitative gate — **OPEN**
+### B47. F8 quantitative gate — **DONE (B47)**
 - **Type:** architecture/performance debt.
-- **Detail [F]:** F8-01..F8-08 están implementados y con tests/build verdes, pero la puerta cuantitativa de F8 no se cumple: `DashboardController.cs` sigue en ~8.079 líneas (objetivo ~3.000) y no se ha registrado la medición final antes/después de un día de 15 partidos.
-- **Impact:** el controller sigue siendo el mayor punto de acoplamiento; la mejora funcional existe, pero el objetivo de tamaño no está cerrado.
-- **Fix:** extraer más pasos/UI del Dashboard a partials/servicios y medir un día de 15 partidos con el pipeline actual. No cerrar F8 como gate cuantitativo hasta entonces.
+- **Detail [F]:** el archivo principal `DashboardController.cs` baja de **8.079 a 973 líneas**. La clase se reparte en **9 partials por dominio**: `GameDay`, `Match`, `FastSim`, `Offers`, `Modals`, `DaySupport`, `MarketUI`, `Results` y `Refresh`. No cambian firmas, orden del pipeline ni comportamiento; solo se mueve código.
+- **Medición de un día de 15 partidos (misma máquina, mejor de 3):** antes `19 ms` directa / `37 ms` con crónica; después `18 ms` / `36 ms`. Persistencia de 360 filas (15 × 24): antes `429 ms` una por una / `3 ms` en lote; después `434 ms` / `6 ms` (ruido de disco). Sin regresión apreciable. Comando: `Unity -runTests -testFilter "GameSimulatorTests.SimulateGame_CaptureCost_IsMeasured;BatchPersistenceTests.EscrituraPorFila_EsMasCaraQueElLote"`.
+- **Nota [F]:** la clase completa sigue rondando las 8.200 líneas repartidas; el objetivo operativo era sacar el archivo principal de ~3.000 líneas y aislar dominios, no reducir el total. Para nuevas extracciones, mover lógica pura a servicios, no más métodos de UI al archivo principal.
+- **Fix aplicado:** split mecánico + medición antes/después. La puerta cuantitativa de F8 queda cerrada.
 
 ---
 

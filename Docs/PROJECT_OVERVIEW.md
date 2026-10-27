@@ -49,9 +49,9 @@ User clicks "avanzar día" in `DashboardController` → `ProcessGameDayRoutine()
 ## 4. Technical architecture in one paragraph
 
 - **One scene, zero prefabs, zero game ScriptableObjects.** All UI is **UI Toolkit** (`UIDocument` per screen) instantiated in the scene `MainMenu.unity`; `ScreenManager` (singleton) shows/hides GameObjects to navigate. No `SceneManager.LoadScene` anywhere.
-- **Persistence is SQLite** (bundled `sqlite-net` `SQLite.cs` + native plugin `Assets/Plugins/SQLite/{x86_64,Linux/x86_64}`) behind the `DatabaseManager` singleton (**split into 16 partial classes by domain**; main file ~1.950 lines). One `.db` file per save slot under `persistentDataPath/TacticalFive/`. **Heavy batches run off the main thread** via `RunInBackground`/`RunInBackgroundAsync` with WAL + a per-thread `AsyncLocal` "ambient" connection.
+- **Persistence is SQLite** (bundled `sqlite-net` `SQLite.cs` + native plugin `Assets/Plugins/SQLite/{x86_64,Linux/x86_64}`) behind the `DatabaseManager` singleton (**split into 16 partial classes by domain**; main file ~2.110 lines). One `.db` file per save slot under `persistentDataPath/TacticalFive/`. **Heavy batches run off the main thread** via `RunInBackground`/`RunInBackgroundAsync` with WAL + a per-thread `AsyncLocal` "ambient" connection.
 - **Simulation core** lives in static utility classes and focused services: `GameSimulator`, `MonteCarloRunner` (offline deterministic lab), `DraftGenerator`, `ScheduleGenerator`, `PlayoffsGenerator`, `TradeHelper`, `TravelHelper` (viajes/descanso), `CupHelper` (NBA Cup), `SummerLeagueHelper` (camp post-draft), `QuickNewsGenerator`, `ObjectiveHelper`, `MatchupPreview`, `AdvancedStatsHelper`, `FogOfWarHelper`, `HallOfFameHelper`, `TeamEconomyService` (asistencia, taquilla, nómina y abonos), `AiMarketService` (mercado IA), `GameDayPipeline` (orden del día).
-- **UI is procedural**: controllers extend the `UIScreenController` base class; tables/rows are built by hand (no `ListView`); header and sidebar are injected at runtime from `Resources/UI/Core/`.
+- **UI is procedural**: controllers extend the `UIScreenController` base class; tables/rows are built by hand (no `ListView`); header and sidebar are injected at runtime from `Resources/UI/Core/`. `DashboardController` is split into a 973-line main file plus 9 domain partials (B47).
 
 ## 5. Project structure
 

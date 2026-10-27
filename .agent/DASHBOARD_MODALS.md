@@ -41,7 +41,7 @@ Gestionados por `UIScreenController` base. Estos ya siguen el patrón estándar 
 
 ## Procedural C# Modals (14)
 
-Todos construidos en `DashboardController.cs` usando `_firedOverlay`. Cada uno necesita reestructurarse con header+body.
+Todos construidos en `DashboardController.Modals.cs` usando `_firedOverlay` (el archivo principal conserva el campo y el ciclo de vida). Cada uno necesita reestructurarse con header+body.
 
 | # | Modal | Borde | Trigger | Método | Estado |
 |---|---|---|---|---|---|

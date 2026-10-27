@@ -191,7 +191,7 @@ Método `SeedX()` en `DatabaseManager` con guard de tabla-vacía en `SeedStaticD
 | `Scripts/Core/AiMarketService.cs` | Mercado IA: traspasos, buyout, FA, S&T, estrellas y renovaciones (F8-02) |
 | `Scripts/Core/GameDayPipeline.cs` | Orden explícito de pasos/subpasos del día y runner con aborto (F8-03) |
 | `Scripts/Data/ReferentialIntegrity.cs` | Relaciones declaradas y validador de huérfanos (F8-08) |
-| `Scripts/UI/DashboardController.cs` | El hub: día, sim, traspasos IA, economía, modales |
+| `Scripts/UI/DashboardController.cs` + 9 partials | El hub: día, sim, traspasos IA, economía y modales; el archivo principal queda en 973 ln (B47) |
 | `Scripts/UI/RosterController.cs` | Plantilla, renovaciones, buyouts, trade block |
 | `Scripts/UI/MarketController.cs` | Traspasos, FA, S&T, deadline |
 | `Scripts/Core/GameEnums.cs` | `GameScreen`, `GameMode` |

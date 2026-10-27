@@ -57,6 +57,8 @@ Tactical Five is a **data-driven, single-scene, UI-Toolkit-first** management ga
 | **Reusable UI** | `HeaderController.cs`, `SidebarController.cs` (static helpers), `CustomSlider.cs` | Injected header/sidebar; custom slider control |
 | **Assets** | `Art/Resources/*`, `UI/*` | Textures, audio, fonts, UXML/USS, panel settings |
 
+**`DashboardController` (B47):** el archivo principal `DashboardController.cs` conserva ciclo de vida, campos, acción del día y cabecera (973 líneas). El resto se reparte en partials por dominio: `GameDay` (pipeline F8-03), `Match` (partido individual/G-League), `FastSim`, `Offers`, `Modals` (rotación, quinteto, IR, deadline), `DaySupport` (fechas, lesiones, scouting, estrategia IA), `MarketUI` (traspasos/S&T/renovación), `Results` (premios, último/próximo partido, standings) y `Refresh` (stats, tablas, noticias, iconos). No añadir métodos de UI nuevos al archivo principal; usar el partial del dominio o extraer lógica pura a un servicio.
+
 ### Simulation randomness (F3-01)
 
 - `GameSimulator.SimulateGame(..., IRandomSource random = null)` receives a random source. `null` preserves the game behavior through `UnityRandomSource` (`UnityEngine.Random`); tests and offline tools can pass `SeededRandomSource(seed)`.
@@ -188,7 +190,7 @@ Legend: solid = direct call; the biggest coupling is every controller → `Datab
 - `RunInBackground(work)` — opens a fresh connection, runs `work(conn)` directly (used by the daily injury/fatigue recovery batch; no WAL pragma).
 - `RunInBackgroundAsync(work)` / `RunInBackgroundAsync<T>` — `Task.Run` → opens its own connection with `PRAGMA journal_mode=WAL`, sets the ambient connection, runs the work, restores the previous ambient in `finally`.
 - **Thread-safe RNG:** `[ThreadStatic] private static System.Random _threadRng;` (`DatabaseManager.cs:158-161`); `Rng` gives each background thread its own seeded instance. Used in `StartNewSeason` (attribute decline), player-option decisions, mentoring.
-- **Off-main-thread today:** daily injury/recovery batch (`DashboardController.cs:772`), AI trades + star-FA signings + psychologist (`:864`, `ProcessAIMarket`), and the full `StartNewSeason` rollover (`NewSeasonController.cs:375`).
+- **Off-main-thread today:** daily injury/recovery batch (`DashboardController.GameDay.cs`, `RunPreBatch`), AI trades + star-FA signings + psychologist (`DashboardController.DaySupport.cs`, `ProcessAIMarket`), and the full `StartNewSeason` rollover (`NewSeasonController.cs`).
 - **Stays on main thread (intentional):** `GameSimulator.SimulateGame` (measured fast) and draft generation.
 
 **Risks [D]:** helpers that capture `_db` in a closure before the ambient is set would still hit the main connection; Unity API (`Random.Range`, `Debug.Log`, `PlayerPrefs`) must not be called on background threads — the code keeps those on the main path.
@@ -202,9 +204,9 @@ Legend: solid = direct call; the biggest coupling is every controller → `Datab
 | `SavePlayoffGames` | `Games.cs:264` | `RunInTransaction` |
 | `SeedPlayers` / `SeedFreeAgents` | `Seeding.cs:630,1048` | `BeginTransaction` |
 | **`StartNewSeason`** | `Records.cs:2570-3070` | single giant transaction wrapping the whole rollover |
-| Day processing (steps 2/4) | `DashboardController.cs:846,969,1627,1962,3130` | manual `BeginTransaction`/`Commit` |
+| Day processing (steps 2/4) | `DashboardController.GameDay.cs` (`RunSimulationBookkeeping`, `RunPhaseTransitions`) | manual `BeginTransaction`/`Commit` |
 | Post-game batch (stats + physique/injuries) | `GameSimulator.cs` → `UpdatePlayersBatch`/`SavePlayerGameStatsBatch` | writes inside the open day transaction (`own = !_db.IsInTransaction`, never nests `BEGIN`) |
-| Injury/fatigue recovery batch | `DashboardController.cs:775-805` | inside `RunInBackground` |
+| Injury/fatigue recovery batch | `DashboardController.GameDay.cs` (`RunPreBatch`) | inside `RunInBackground` |
 
 ## 9. Shared helper patterns
 
