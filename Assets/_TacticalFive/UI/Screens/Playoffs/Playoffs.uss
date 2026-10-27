@@ -162,7 +162,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 14px;
     letter-spacing: 2px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     color: rgb(85, 102, 119);
     flex-grow: 1;
 }
@@ -213,7 +213,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
     color: rgb(208, 216, 232);
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     flex: 1 1 auto;
     min-width: 0;
     overflow: hidden;
@@ -267,7 +267,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 16px;
     letter-spacing: 1px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     color: rgb(85, 102, 119);
     margin-left: 12px;
     flex-shrink: 0;
@@ -278,7 +278,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 16px;
     letter-spacing: 2px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     color: rgb(58, 74, 99);
     -unity-text-align: middle-center;
     padding: 24px;
@@ -305,7 +305,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 24px;
     letter-spacing: 3px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     color: rgb(208, 216, 232);
     -unity-text-align: middle-center;
     margin-bottom: 12px;
@@ -325,7 +325,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
     letter-spacing: 2px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     color: rgb(212, 160, 23);
     padding: 16px 0 8px 0;
     border-bottom-width: 1px;
@@ -351,7 +351,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 14px;
     letter-spacing: 1px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     color: rgb(85, 102, 119);
     flex-shrink: 0;
 }
@@ -369,7 +369,7 @@
 .playoff-matchup-team {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 16px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     color: rgb(140, 155, 180);
     width: 80px;
     -unity-text-align: middle-center;

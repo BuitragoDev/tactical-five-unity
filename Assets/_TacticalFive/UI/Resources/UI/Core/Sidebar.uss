@@ -47,7 +47,7 @@
     margin-left: 18px;
     -unity-text-align: middle-left;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     letter-spacing: 1px;
 }
 .nav-item:hover .nav-label {
@@ -99,7 +99,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
     font-size: 16px;
     letter-spacing: 1px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     -unity-text-align: middle-left;
     color: rgb(100, 116, 148);
 }

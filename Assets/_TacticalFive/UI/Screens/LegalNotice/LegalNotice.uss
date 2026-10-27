@@ -40,7 +40,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 34px;
     letter-spacing: 2px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     color: rgb(255, 255, 255);
     padding: 10px 24px;
     background-color: rgb(33, 32, 28);
@@ -90,7 +90,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
     letter-spacing: 3px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     color: rgb(120, 160, 230);
     background-color: rgb(20, 28, 45);
     border-width: 2px;
@@ -125,7 +125,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
     letter-spacing: 2px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     border-width: 2px;
     border-radius: 8px;
     padding: 12px 32px;

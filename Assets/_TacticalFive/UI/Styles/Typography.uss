@@ -67,7 +67,7 @@
 /* === UTILIDADES === */
 
 .uppercase {
-    -unity-text-transform: upper;
+    text-transform: uppercase;
 }
 
 .text-center {

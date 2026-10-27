@@ -48,7 +48,7 @@
     font-size: 32px;
     letter-spacing: 1px;
     color: rgb(255, 255, 255);
-    -unity-text-transform: upper;
+    text-transform: uppercase;
 }
 
 .pa-header-manager {
@@ -92,7 +92,7 @@
     color: rgb(120, 160, 230);
     font-size: 22px;
     letter-spacing: 2px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     padding: 10px 18px;
     -unity-text-align: middle-center;
     border-radius: 8px;
@@ -146,7 +146,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 56px;
     letter-spacing: 2px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     color: rgb(255, 255, 255);
     margin-right: 16px;
 }
@@ -158,7 +158,7 @@
     font-size: 24px;
     letter-spacing: 2px;
     padding: 4px 12px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
 }
 
 .pa-screen-subtitle {
@@ -230,7 +230,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
     letter-spacing: 1px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     color: rgb(122, 138, 170);
 }
 
@@ -272,7 +272,7 @@
     font-size: 22px;
     letter-spacing: 1px;
     color: rgb(255, 255, 255);
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     -unity-text-align: middle-center;
     margin-bottom: 2px;
 }
@@ -387,6 +387,6 @@
     font-size: 11px;
     color: rgb(122, 138, 170);
     letter-spacing: 1px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     -unity-text-align: middle-center;
 }

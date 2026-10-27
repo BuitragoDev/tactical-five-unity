@@ -124,7 +124,7 @@
     font-size: 24px;
     color: rgb(248, 196, 64);
     letter-spacing: 1.5px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
 }
 
 /* ── Arena Info Body ── */
@@ -165,7 +165,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
     letter-spacing: 1px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     color: rgb(22, 26, 36);
     background-color: rgb(248, 196, 64);
     border-radius: 3px;
@@ -283,7 +283,7 @@
     font-size: 24px;
     color: rgb(248, 196, 64);
     letter-spacing: 1.5px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
 }
 
 /* Warning */
@@ -389,7 +389,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
     letter-spacing: 2px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     color: rgb(100, 200, 140);
     background-color: rgb(20, 36, 35);
     border-width: 2px;

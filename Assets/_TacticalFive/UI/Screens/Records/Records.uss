@@ -75,7 +75,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
     letter-spacing: 2px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     padding: 10px 24px;
     background-color: rgb(18, 23, 34);
     border-width: 1px;
@@ -196,7 +196,7 @@
     font-size: 24px;
     letter-spacing: 1px;
     color: rgb(255, 255, 255);
-    -unity-text-transform: upper;
+    text-transform: uppercase;
 }
 
 .record-card-subtitle {
@@ -204,7 +204,7 @@
     font-size: 16px;
     letter-spacing: 1px;
     color: rgb(122, 138, 170);
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     margin-top: 1px;
     white-space: normal;
 }
@@ -299,7 +299,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
     letter-spacing: 2px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     color: rgb(122, 138, 170);
     -unity-text-align: middle-center;
 }

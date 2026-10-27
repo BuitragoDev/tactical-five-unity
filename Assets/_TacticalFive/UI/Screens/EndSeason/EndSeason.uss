@@ -45,14 +45,14 @@
     font-size: 22px;
     letter-spacing: 2px;
     color: rgb(255, 255, 255);
-    -unity-text-transform: upper;
+    text-transform: uppercase;
 }
 .end-season-root .header-brand-text-gold {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 22px;
     letter-spacing: 2px;
     color: rgb(212, 160, 23);
-    -unity-text-transform: upper;
+    text-transform: uppercase;
 }
 .end-season-root .header-team-logo {
     width: 64px;
@@ -72,7 +72,7 @@
     font-size: 24px;
     letter-spacing: 1px;
     color: rgb(255, 255, 255);
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     margin-right: 12px;
 }
 .end-season-root .header-subtitle {
@@ -80,7 +80,7 @@
     font-size: 18px;
     color: rgb(212, 160, 23);
     letter-spacing: 2px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
 }
 .end-season-root .header-manager-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
@@ -125,7 +125,7 @@
     color: rgb(120, 160, 230);
     font-size: 24px;
     letter-spacing: 2px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     padding: 10px 18px;
     -unity-text-align: middle-center;
     border-radius: 8px;
@@ -150,7 +150,7 @@
     color: rgb(230, 120, 100);
     font-size: 24px;
     letter-spacing: 2px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     padding: 10px 18px;
     -unity-text-align: middle-center;
     border-radius: 8px;
@@ -180,7 +180,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 36px;
     letter-spacing: 4px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     color: rgb(208, 216, 232);
     -unity-text-align: middle-center;
 }
@@ -198,7 +198,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 16px;
     letter-spacing: 2px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     color: rgb(122, 138, 170);
     margin-top: 10px;
     -unity-text-align: middle-center;
@@ -282,7 +282,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
     letter-spacing: 2px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     color: rgb(212, 160, 23);
     margin-bottom: 14px;
     padding-bottom: 8px;
@@ -511,7 +511,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 20px;
     letter-spacing: 2px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     padding: 14px 0;
     -unity-text-align: middle-center;
     flex-shrink: 0;
@@ -569,7 +569,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 28px;
     letter-spacing: 3px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     color: rgb(255, 255, 255);
     margin-bottom: 4px;
 }
@@ -630,7 +630,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
     letter-spacing: 2px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     color: rgb(212, 160, 23);
 }
 .draft-col-icon {
@@ -847,7 +847,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 22px;
     color: rgb(255, 255, 255);
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     margin-bottom: 4px;
 }
 .draft-card-college {
@@ -929,7 +929,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 16px;
     letter-spacing: 1px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     color: rgb(122, 138, 170);
     margin-bottom: 4px;
 }
@@ -969,7 +969,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
     letter-spacing: 2px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     color: rgb(212, 160, 23);
     margin-bottom: 8px;
 }
@@ -1050,7 +1050,7 @@
     color: rgb(212, 160, 23);
     font-size: 18px;
     letter-spacing: 2px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     padding: 12px 24px;
     -unity-text-align: middle-center;
     border-radius: 8px;
@@ -1075,7 +1075,7 @@
     color: rgb(120, 160, 230);
     font-size: 18px;
     letter-spacing: 2px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     padding: 12px 24px;
     -unity-text-align: middle-center;
     border-radius: 8px;
@@ -1257,7 +1257,7 @@
     background-color: rgb(37, 35, 28);
     border-color: rgb(212, 160, 23);
     color: rgb(212, 160, 23);
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     -unity-text-align: middle-center;
     flex-grow: 1;
     cursor: pointer;
@@ -1348,7 +1348,7 @@
     background-color: rgb(20, 28, 45);
     border-color: rgb(42, 95, 201);
     color: rgb(120, 160, 230);
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     -unity-text-align: middle-center;
     min-width: 200px;
     cursor: pointer;

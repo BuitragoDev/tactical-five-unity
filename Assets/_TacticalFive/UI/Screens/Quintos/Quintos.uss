@@ -48,7 +48,7 @@
     font-size: 32px;
     letter-spacing: 1px;
     color: rgb(255, 255, 255);
-    -unity-text-transform: upper;
+    text-transform: uppercase;
 }
 
 .qt-header-manager {
@@ -92,7 +92,7 @@
     color: rgb(120, 160, 230);
     font-size: 22px;
     letter-spacing: 2px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     padding: 10px 18px;
     -unity-text-align: middle-center;
     border-radius: 8px;
@@ -136,7 +136,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 56px;
     letter-spacing: 2px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     color: rgb(255, 255, 255);
 }
 
@@ -200,7 +200,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 24px;
     letter-spacing: 2px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     color: rgb(255, 255, 255);
 }
 
@@ -208,7 +208,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
     letter-spacing: 2px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     margin-top: 2px;
 }
 
@@ -241,7 +241,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
     letter-spacing: 1px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
 }
 
 .qt-trophy-badge--gold .qt-trophy-label {
@@ -342,7 +342,7 @@
     font-size: 18px;
     letter-spacing: 1px;
     color: rgb(255, 255, 255);
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     -unity-text-align: middle-center;
     margin-bottom: 2px;
 }

@@ -23,7 +23,7 @@ TacticalFivePanelSettings.asset (PanelSettings)
 ```
 
 - **GlobalVariables.uss** defines `--bg-primary rgb(11,16,23)`, `--bg-secondary`, `--bg-card`, `--bg-modal`, borders, text colors, accents (`--accent-blue/gold/green`), button variables.
-- **F7-01:** no se usa `rgba()` en USS/UXML. Los colores translúcidos se han compuesto a `rgb()` opaco sobre el fondo oscuro del bloque (base `rgb(18,21,28)`) o se resuelven con `opacity`. `UiStyleTests` falla si reaparece.
+- **F7-01/F7-02:** no se usa `rgba()` en USS/UXML. Los colores translúcidos se han compuesto a `rgb()` opaco sobre el fondo oscuro del bloque (base `rgb(18,21,28)`) o se resuelven con `opacity`. Las mayúsculas usan `text-transform: uppercase` (nunca `-unity-text-transform` ni `text-transform: upper`); `-unity-text-align` se mantiene. `UiStyleTests` falla si reaparece cualquiera.
 - **Typography.uss** sizes 10px→80px; **Utilities.uss** flexbox/spacing helpers.
 - **Per-screen USS** overrides; fonts `BarlowCondensed-*` and `Saira_Condensed-*` referenced via `url("project://database/Assets/_TacticalFive/Art/Fonts/...")` with TMP SDF counterparts under `Art/Fonts/*.asset`.
 

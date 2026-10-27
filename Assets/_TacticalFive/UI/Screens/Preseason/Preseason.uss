@@ -33,7 +33,7 @@
     color: rgb(100, 160, 230);
     font-size: 24px;
     letter-spacing: 2px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     padding: 10px 26px;
     -unity-text-align: middle-center;
     border-radius: 8px;
@@ -71,7 +71,7 @@
     color: rgb(100, 200, 140);
     font-size: 24px;
     letter-spacing: 2px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     padding: 10px 26px;
     -unity-text-align: middle-center;
     border-radius: 8px;

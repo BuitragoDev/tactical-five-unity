@@ -91,6 +91,8 @@ Variantes de color de borde:
 
 **No usar `gap`** — UI Toolkit no lo soporta. Separar botones con `margin-left: 6px`.
 
+**Mayúsculas:** usar siempre `text-transform: uppercase`; no `-unity-text-transform` ni `text-transform: upper`. No usar `rgba()`: componer el color sobre el fondo oscuro conocido (`rgb(18, 21, 28)` por defecto) o usar `opacity` si el diseño lo permite.
+
 ### Action buttons (outline moderno)
 
 Botón de acción principal:

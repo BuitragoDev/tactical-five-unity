@@ -315,7 +315,7 @@
     font-size: 18px;
     font-weight: 600;
     letter-spacing: 1.5px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     color: rgb(212, 160, 23);
 }
 
@@ -350,7 +350,7 @@
     font-size: 16px;
     font-weight: 700;
     letter-spacing: 1px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     color: rgb(255, 255, 255);
     margin-bottom: 10px;
     padding-bottom: 8px;
@@ -441,7 +441,7 @@
     color: rgb(255, 255, 255);
     font-weight: 600;
     letter-spacing: 1px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     display: block;
 }
 
@@ -473,7 +473,7 @@
     font-size: 16px;
     font-weight: 600;
     letter-spacing: 1.5px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     padding: 6px;
     border-radius: 4px;
     cursor: pointer;
@@ -528,7 +528,7 @@
     font-size: 16px;
     color: rgb(208, 216, 232);
     flex-grow: 1;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     align-self: center;
     -unity-text-align: middle-left;
 }
@@ -597,7 +597,7 @@
     font-size: 15px;
     font-weight: 700;
     letter-spacing: 1px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     padding: 8px 14px;
     border-radius: 6px;
     cursor: pointer;
@@ -626,7 +626,7 @@
     font-size: 15px;
     font-weight: 700;
     letter-spacing: 1px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     padding: 8px 14px;
     border-radius: 6px;
     cursor: pointer;
@@ -679,7 +679,7 @@
     font-size: 18px;
     font-weight: 600;
     letter-spacing: 1px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
 }
 
 .market-modal-body {
@@ -821,7 +821,7 @@
     font-size: 28px;
     letter-spacing: 2px;
     color: rgb(192, 57, 43);
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     -unity-text-align: middle-center;
 }
 .market-closed-overlay-text {
@@ -849,7 +849,7 @@
     font-size: 14px;
     font-weight: 600;
     letter-spacing: 1px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     color: rgb(122, 138, 170);
 }
 

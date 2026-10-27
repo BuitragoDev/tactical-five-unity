@@ -234,7 +234,7 @@
     border-radius: 8px;
     font-size: 24px;
     letter-spacing: 2px;
-    -unity-text-transform: uppercase;
+    text-transform: uppercase;
     padding: 10px 18px;
     -unity-text-align: middle-center;
     cursor: pointer;

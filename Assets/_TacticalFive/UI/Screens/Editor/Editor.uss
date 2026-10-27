@@ -37,7 +37,7 @@
     color: rgb(120, 160, 230);
     font-size: 24px;
     letter-spacing: 2px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     border-radius: 8px;
     -unity-text-align: middle-center;
     cursor: pointer;

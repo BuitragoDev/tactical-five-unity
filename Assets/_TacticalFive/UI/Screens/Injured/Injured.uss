@@ -77,7 +77,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 24px;
     letter-spacing: 3px;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     color: rgb(212, 160, 23);
     margin-bottom: 12px;
 }
@@ -120,7 +120,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 24px;
     color: rgb(208, 216, 232);
-    -unity-text-transform: upper;
+    text-transform: uppercase;
 }
 
 .med-staff-reputation {
@@ -294,7 +294,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
     color: rgb(255, 255, 255);
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     flex-grow: 1;
     min-width: 0;
     white-space: nowrap;
@@ -887,7 +887,7 @@
     font-size: 18px;
     color: rgb(208, 216, 232);
     -unity-text-align: middle-left;
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     flex-shrink: 0;
 }
 .league-injured-row-injury {

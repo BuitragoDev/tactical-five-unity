@@ -27,4 +27,24 @@ public class UiStyleTests
         Assert.That(offenders, Is.Empty,
             "La UI todavía usa rgba():\n" + string.Join("\n", offenders.OrderBy(x => x)));
     }
+
+    [Test]
+    public void UiStyles_UseStandardTextTransform()
+    {
+        string root = Path.Combine(Application.dataPath, "_TacticalFive", "UI");
+        Assert.That(Directory.Exists(root), Is.True, $"No existe {root}");
+
+        var offenders = new List<string>();
+        foreach (string file in Directory.GetFiles(root, "*.*", SearchOption.AllDirectories)
+                     .Where(f => f.EndsWith(".uss") || f.EndsWith(".uxml")))
+        {
+            string text = File.ReadAllText(file);
+            if (text.Contains("-unity-text-transform") || text.Contains("text-transform: upper;"))
+                offenders.Add(file.Substring(root.Length).TrimStart('/', '\\'));
+        }
+
+        Assert.That(offenders, Is.Empty,
+            "La UI todavía usa -unity-text-transform o text-transform: upper:\n" +
+            string.Join("\n", offenders.OrderBy(x => x)));
+    }
 }

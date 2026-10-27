@@ -289,7 +289,7 @@
     font-size: 20px;
     letter-spacing: 1px;
     color: rgb(230, 235, 245);
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     -unity-text-align: middle-center;
     white-space: normal;
 }
@@ -471,7 +471,7 @@
     font-size: 16px;
     letter-spacing: 3px;
     color: rgb(212, 160, 23);
-    -unity-text-transform: upper;
+    text-transform: uppercase;
 }
 
 .match-modal-title {
@@ -514,7 +514,7 @@
     font-size: 22px;
     letter-spacing: 1px;
     color: rgb(212, 160, 23);
-    -unity-text-transform: upper;
+    text-transform: uppercase;
 }
 
 .match-modal-arena-attendance {
@@ -564,7 +564,7 @@
     font-size: 24px;
     letter-spacing: 1px;
     color: rgb(230, 235, 245);
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     -unity-text-align: middle-center;
 }
 
@@ -594,7 +594,7 @@
     font-size: 16px;
     letter-spacing: 2px;
     color: rgb(212, 160, 23);
-    -unity-text-transform: upper;
+    text-transform: uppercase;
     margin-bottom: 6px;
 }
 
