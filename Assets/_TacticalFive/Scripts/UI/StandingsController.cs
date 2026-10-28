@@ -431,6 +431,7 @@ using System.Linq;
 
             var stageLabel = new Label(LocalizationService.T(key));
             stageLabel.AddToClassList("standings-cup-group");
+            stageLabel.AddToClassList("standings-cup-round");
             _standingsBody.Add(stageLabel);
 
             foreach (var game in stageGames)
