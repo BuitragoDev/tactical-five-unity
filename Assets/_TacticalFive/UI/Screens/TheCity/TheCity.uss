@@ -171,7 +171,7 @@
     margin-top: 12px;
     padding: 1px 8px;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 14px;
+    font-size: 16px;
     color: rgb(212, 160, 23);
     background-color: rgb(13, 15, 20);
     border-width: 1px;
