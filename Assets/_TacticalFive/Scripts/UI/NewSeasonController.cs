@@ -510,7 +510,8 @@ public class NewSeasonController : UIScreenController
             name.AddToClassList("ns-summer-name");
             var meta = new Label(LocalizationService.T(
                 "ui.code.new_season_controller.summer_league_player_meta",
-                p.position, p.age, p.overall, p.potential));
+                PositionCodes.GetName(p.position).ToUpperInvariant(),
+                p.age, p.overall, p.potential));
             meta.AddToClassList("ns-summer-meta");
             playerInfo.Add(name);
             playerInfo.Add(meta);
