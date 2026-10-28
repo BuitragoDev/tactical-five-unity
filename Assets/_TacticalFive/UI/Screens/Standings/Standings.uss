@@ -263,20 +263,75 @@
     background-color: rgb(17, 24, 34);
 }
 .standings-cup-ko-row {
-    min-height: 38px;
+    min-height: 46px;
+    padding: 6px 16px;
 }
-.standings-cup-ko-line {
+.standings-cup-ko-header-team {
     flex-grow: 1;
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 16px;
-    color: rgb(208, 216, 232);
-    white-space: normal;
-}
-.standings-cup-ko-header .standings-cup-ko-line {
-    font-size: 13px;
+    flex-basis: 0;
+    font-size: 12px;
     color: rgb(122, 138, 170);
     letter-spacing: 1px;
     text-transform: uppercase;
+}
+.standings-cup-ko-header-result {
+    width: 150px;
+    flex-shrink: 0;
+    font-size: 12px;
+    color: rgb(122, 138, 170);
+    letter-spacing: 1px;
+    -unity-text-align: middle-center;
+    text-transform: uppercase;
+}
+.standings-cup-ko-team {
+    flex-grow: 1;
+    flex-basis: 0;
+    flex-direction: row;
+    align-items: center;
+    min-width: 0;
+}
+.standings-cup-ko-team--away {
+    margin-left: 12px;
+}
+.standings-cup-ko-logo {
+    width: 30px;
+    height: 30px;
+    margin-right: 8px;
+    flex-shrink: 0;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+.standings-cup-ko-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 15px;
+    color: rgb(208, 216, 232);
+    white-space: normal;
+    flex-shrink: 1;
+}
+.standings-cup-ko-name--winner {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    color: rgb(39, 174, 96);
+}
+.standings-cup-ko-result {
+    width: 150px;
+    flex-shrink: 0;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+.standings-cup-ko-score {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    color: rgb(208, 216, 232);
+}
+.standings-cup-ko-score--winner {
+    color: rgb(39, 174, 96);
+}
+.standings-cup-ko-dash {
+    font-size: 15px;
+    color: rgb(122, 138, 170);
+    margin: 0 5px;
 }
 .standings-cup-message {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");

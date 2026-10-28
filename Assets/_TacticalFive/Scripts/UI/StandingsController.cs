@@ -450,12 +450,19 @@ using System.Linq;
     {
         var row = new VisualElement();
         row.AddToClassList("standings-cup-ko-header");
-        var header = new Label(
-            $"{LocalizationService.T("ui.standings.cup_ko_home")}   ·   " +
-            $"{LocalizationService.T("ui.standings.cup_ko_score")}   ·   " +
-            $"{LocalizationService.T("ui.standings.cup_ko_away")}");
-        header.AddToClassList("standings-cup-ko-line");
-        row.Add(header);
+
+        var home = new Label(LocalizationService.T("ui.standings.cup_ko_home"));
+        home.AddToClassList("standings-cup-ko-header-team");
+        row.Add(home);
+
+        var away = new Label(LocalizationService.T("ui.standings.cup_ko_away"));
+        away.AddToClassList("standings-cup-ko-header-team");
+        row.Add(away);
+
+        var result = new Label(LocalizationService.T("ui.standings.cup_ko_score"));
+        result.AddToClassList("standings-cup-ko-header-result");
+        row.Add(result);
+
         _standingsBody.Add(row);
     }
 
@@ -463,14 +470,63 @@ using System.Linq;
     {
         var home = _allTeams.Find(t => t.id == game.home_team_id);
         var away = _allTeams.Find(t => t.id == game.away_team_id);
+        bool played = game.is_played == 1;
+        bool homeWon = played && game.home_score > game.away_score;
+        bool awayWon = played && game.away_score > game.home_score;
+
         var row = new VisualElement();
         row.AddToClassList("standings-cup-ko-row");
-
-        string score = game.is_played == 1 ? $"{game.home_score} - {game.away_score}" : "—";
-        var line = new Label($"{home?.name.ToUpper() ?? "—"}   ·   {score}   ·   {away?.name.ToUpper() ?? "—"}");
-        line.AddToClassList("standings-cup-ko-line");
-        row.Add(line);
+        row.Add(CreateCupKnockoutTeam(home, homeWon, false));
+        row.Add(CreateCupKnockoutTeam(away, awayWon, true));
+        row.Add(CreateCupKnockoutResult(game, homeWon, awayWon));
         _standingsBody.Add(row);
+    }
+
+    VisualElement CreateCupKnockoutTeam(TeamData team, bool winner, bool away)
+    {
+        var block = new VisualElement();
+        block.AddToClassList("standings-cup-ko-team");
+        if (away) block.AddToClassList("standings-cup-ko-team--away");
+
+        var logo = new VisualElement();
+        logo.AddToClassList("standings-cup-ko-logo");
+        if (team != null) SetTeamLogo(logo, team.logo);
+        block.Add(logo);
+
+        var name = new Label(team?.name.ToUpper() ?? "—");
+        name.AddToClassList("standings-cup-ko-name");
+        if (winner) name.AddToClassList("standings-cup-ko-name--winner");
+        block.Add(name);
+        return block;
+    }
+
+    VisualElement CreateCupKnockoutResult(GameData game, bool homeWon, bool awayWon)
+    {
+        var block = new VisualElement();
+        block.AddToClassList("standings-cup-ko-result");
+        if (game.is_played != 1)
+        {
+            var pending = new Label("—");
+            pending.AddToClassList("standings-cup-ko-score");
+            block.Add(pending);
+            return block;
+        }
+
+        var homeScore = new Label(game.home_score.ToString());
+        homeScore.AddToClassList("standings-cup-ko-score");
+        if (homeWon) homeScore.AddToClassList("standings-cup-ko-score--winner");
+
+        var dash = new Label("-");
+        dash.AddToClassList("standings-cup-ko-dash");
+
+        var awayScore = new Label(game.away_score.ToString());
+        awayScore.AddToClassList("standings-cup-ko-score");
+        if (awayWon) awayScore.AddToClassList("standings-cup-ko-score--winner");
+
+        block.Add(homeScore);
+        block.Add(dash);
+        block.Add(awayScore);
+        return block;
     }
 
     List<StandingRow> BuildStandings(List<TeamData> teams)
