@@ -76,7 +76,7 @@
                             <ui:VisualElement name="LastGameMeta" class="game-meta-row">
                                 <ui:Label name="LastGameArena" text="" class="game-meta-arena"/>
                                 <ui:VisualElement class="game-meta-footer">
-                                    <ui:Label text="{loc:ui.dashboard.ver_resumen}" class="panel-footer-link"/>
+                                    <ui:Label name="LastGameFooterLink" text="{loc:ui.dashboard.ver_resumen}" class="panel-footer-link"/>
                                     <ui:Label text="→" class="panel-footer-arrow"/>
                                 </ui:VisualElement>
                             </ui:VisualElement>
@@ -109,7 +109,7 @@
                             <ui:VisualElement name="NextGameMeta" class="game-meta-row">
                                 <ui:Label name="NextGameArena" text="" class="game-meta-arena"/>
                                 <ui:VisualElement class="game-meta-footer">
-                                    <ui:Label text="{loc:ui.dashboard.ver_previa}" class="panel-footer-link"/>
+                                    <ui:Label name="NextGameFooterLink" text="{loc:ui.dashboard.ver_previa}" class="panel-footer-link"/>
                                     <ui:Label text="→" class="panel-footer-arrow"/>
                                 </ui:VisualElement>
                             </ui:VisualElement>
@@ -181,7 +181,7 @@
                             </ui:VisualElement>
                             <ui:VisualElement name="StandingsBody" class="standings-table"/>
                             <ui:VisualElement class="panel-footer">
-                                <ui:Label text="{loc:ui.dashboard.ver_clasificacion_completa}" class="panel-footer-link"/>
+                                <ui:Label name="StandingsFooterLink" text="{loc:ui.dashboard.ver_clasificacion_completa}" class="panel-footer-link"/>
                                 <ui:Label text="→" class="panel-footer-arrow"/>
                             </ui:VisualElement>
                         </ui:VisualElement>
@@ -313,7 +313,7 @@
                                 <ui:VisualElement name="MessagesBody" class="messages-body"/>
                             </ui:ScrollView>
                             <ui:VisualElement class="panel-footer">
-                                <ui:Label text="{loc:ui.dashboard.ver_todas_las_noticias}" class="panel-footer-link"/>
+                                <ui:Label name="MessagesFooterLink" text="{loc:ui.dashboard.ver_todas_las_noticias}" class="panel-footer-link"/>
                                 <ui:Label text="→" class="panel-footer-arrow"/>
                             </ui:VisualElement>
                         </ui:VisualElement>

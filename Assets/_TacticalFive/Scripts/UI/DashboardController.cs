@@ -575,28 +575,29 @@ using System.Threading.Tasks;
             btn.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(screen); });
         }
 
-        // Panel footer links (query by link text)
-        var footerLinkTexts = new (string text, GameScreen screen)[]
+        // Enlaces del pie de los paneles: se enlazan por nombre de UXML, no por
+        // texto, porque RegisterCallbacks corre antes de LocalizationService.Apply
+        // y los labels todavía contienen los tokens {loc:...}.
+        var footerLinks = new (string name, GameScreen screen)[]
         {
-            ("VER RESUMEN", GameScreen.Results),
-                ("VER PREVIA", GameScreen.PreGame),
-            ("VER CLASIFICACIÓN COMPLETA", GameScreen.Standings),
-            ("VER TODAS LAS NOTICIAS", GameScreen.Messages),
+            ("LastGameFooterLink", GameScreen.Results),
+            ("NextGameFooterLink", GameScreen.PreGame),
+            ("StandingsFooterLink", GameScreen.Standings),
+            ("MessagesFooterLink", GameScreen.Messages),
         };
-        var allClickables = _root.Query(className: "panel-footer").ToList();
-        allClickables.AddRange(_root.Query(className: "game-meta-footer").ToList());
-        foreach (var clickable in allClickables)
+        foreach (var (name, screen) in footerLinks)
         {
-            var linkLabel = clickable.Q<Label>(className: "panel-footer-link");
+            var linkLabel = _root.Q<Label>(name);
             if (linkLabel == null) continue;
-            foreach (var (text, screen) in footerLinkTexts)
+
+            // Toda la zona del pie es clicable, no solo el texto.
+            var clickable = linkLabel.parent ?? linkLabel;
+            clickable.RegisterCallback<ClickEvent>(_ =>
             {
-                if (linkLabel.text == text)
-                {
-                    clickable.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(screen); });
-                    break;
-                }
-            }
+                PlayClick();
+                ScreenManager.Instance.GoTo(screen);
+            });
+            CursorManager.Instance?.RegisterHandCursor(clickable);
         }
     }
 
