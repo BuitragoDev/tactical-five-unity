@@ -8480,6 +8480,39 @@
     {
       "key": "ui.tv.volver_al_menu_principal",
       "value": "VOLVER AL MENÚ PRINCIPAL"
+    },
+    {
+      "key": "ui.code.new_season_controller.summer_league_subtitle",
+      "value": "Ventana post-draft: 3 partidos para rookies y sophomores. Elige hasta {0} convocados. El desarrollo es acotado: como máximo +1 en un atributo y nunca supera el potencial."
+    },
+    {
+      "key": "ui.code.new_season_controller.summer_league_count",
+      "value": "CONVOCADOS: {0}/{1}"
+    },
+    {
+      "key": "ui.code.new_season_controller.summer_league_legend",
+      "value": "Pulsa CONVOCADO o FUERA para cambiar la convocatoria."
+    },
+    {
+      "key": "ui.code.new_season_controller.summer_league_selected",
+      "value": "CONVOCADO"
+    },
+    {
+      "key": "ui.code.new_season_controller.summer_league_out",
+      "value": "FUERA"
+    },
+    {
+      "key": "ui.code.new_season_controller.summer_league_player_meta",
+      "value": "{0} · {1} años · MED {2} / POT {3}"
+    },
+    {
+      "key": "ui.code.new_season_controller.summer_league_summary_line",
+      "value": "{0} PJ · {1} min · {2} pts · {3} reb · {4} as{5}"
+    },
+    {
+      "key": "ui.code.new_season_controller.summer_league_gain",
+      "value": " · +1 ATRIBUTO"
     }
+
   ]
 }

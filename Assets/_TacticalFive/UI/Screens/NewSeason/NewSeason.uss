@@ -396,6 +396,222 @@
     background-color: rgb(42, 51, 71);
 }
 
+/* ══ Summer League / Camp de desarrollo ══ */
+.ns-summer-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgb(3, 3, 4);
+    align-items: center;
+    justify-content: center;
+    display: none;
+}
+
+.ns-summer-box {
+    width: 1060px;
+    max-width: 100%;
+    max-height: 90%;
+    background-color: rgb(13, 14, 18);
+    border-width: 1px;
+    border-color: rgb(180, 140, 40);
+    border-radius: 12px;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.ns-summer-header {
+    padding: 22px 28px 14px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(42, 51, 71);
+    flex-shrink: 0;
+}
+
+.ns-summer-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 32px;
+    letter-spacing: 2px;
+    color: rgb(255, 255, 255);
+    text-transform: uppercase;
+}
+
+.ns-summer-subtitle {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 15px;
+    color: rgb(179, 190, 214);
+    white-space: normal;
+    margin-top: 6px;
+}
+
+.ns-summer-counter {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    letter-spacing: 1px;
+    color: rgb(212, 160, 23);
+    padding: 12px 28px 0;
+    flex-shrink: 0;
+}
+
+.ns-summer-legend {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 14px;
+    color: rgb(122, 138, 170);
+    padding: 4px 28px 10px;
+    flex-shrink: 0;
+}
+
+.ns-summer-list {
+    width: 100%;
+    max-height: 360px;
+    flex-grow: 1;
+    flex-shrink: 1;
+    padding: 0 24px;
+}
+
+.ns-summer-row {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    padding: 10px 4px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(42, 51, 71);
+}
+
+.ns-summer-player {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+    flex-direction: column;
+}
+
+.ns-summer-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    color: rgb(208, 216, 232);
+}
+
+.ns-summer-meta {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 14px;
+    color: rgb(122, 138, 170);
+    margin-top: 2px;
+    white-space: normal;
+}
+
+.ns-summer-toggle {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 14px;
+    letter-spacing: 1px;
+    min-width: 140px;
+    flex-shrink: 0;
+    margin-left: 12px;
+    padding: 9px 14px;
+    border-width: 1px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    -unity-text-align: middle-center;
+    cursor: pointer;
+}
+
+.ns-summer-toggle--selected {
+    color: rgb(100, 200, 140);
+    background-color: rgb(20, 36, 35);
+    border-color: rgb(39, 174, 96);
+}
+
+.ns-summer-toggle--selected:hover {
+    background-color: rgb(23, 59, 45);
+}
+
+.ns-summer-toggle--out {
+    color: rgb(180, 120, 110);
+    background-color: rgb(35, 25, 30);
+    border-color: rgb(120, 70, 70);
+}
+
+.ns-summer-toggle--out:hover {
+    background-color: rgb(52, 30, 34);
+}
+
+.ns-summer-actions {
+    flex-direction: row;
+    justify-content: flex-end;
+    padding: 16px 24px 20px;
+    border-top-width: 1px;
+    border-top-color: rgb(42, 51, 71);
+    flex-shrink: 0;
+}
+
+.ns-summer-btn {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 16px;
+    letter-spacing: 1px;
+    padding: 11px 20px;
+    border-width: 2px;
+    border-radius: 8px;
+    text-transform: uppercase;
+    -unity-text-align: middle-center;
+    cursor: pointer;
+    margin-left: 8px;
+}
+
+.ns-summer-btn--skip {
+    color: rgb(230, 120, 100);
+    background-color: rgb(35, 25, 30);
+    border-color: rgb(192, 57, 43);
+}
+
+.ns-summer-btn--skip:hover {
+    background-color: rgb(62, 30, 32);
+    color: rgb(240, 145, 125);
+}
+
+.ns-summer-btn--simulate,
+.ns-summer-btn--continue {
+    color: rgb(100, 200, 140);
+    background-color: rgb(20, 36, 35);
+    border-color: rgb(39, 174, 96);
+}
+
+.ns-summer-btn--simulate:hover,
+.ns-summer-btn--continue:hover {
+    background-color: rgb(23, 59, 45);
+}
+
+.ns-summer-btn:disabled {
+    color: rgb(86, 103, 143);
+    background-color: rgb(42, 51, 71);
+    border-color: rgb(58, 74, 99);
+}
+
+.ns-summer-summary-row {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 4px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(42, 51, 71);
+}
+
+.ns-summer-summary-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 17px;
+    color: rgb(208, 216, 232);
+    flex-shrink: 0;
+    margin-right: 16px;
+}
+
+.ns-summer-summary-stats {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 14px;
+    color: rgb(179, 190, 214);
+    flex-grow: 1;
+    -unity-text-align: middle-right;
+}
+
+.ns-summer-summary-gain {
+    color: rgb(100, 200, 140);
+}
+
 /* ══ Team Option Modal ══ */
 .ns-option-box {
     width: 700px;

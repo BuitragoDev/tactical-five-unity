@@ -65,7 +65,7 @@ public class NewSeasonController : UIScreenController
         _root.Add(_teamOptionOverlay);
 
         _summerLeagueOverlay = new VisualElement();
-        _summerLeagueOverlay.AddToClassList("ns-roster-overlay");
+        _summerLeagueOverlay.AddToClassList("ns-summer-overlay");
         _root.Add(_summerLeagueOverlay);
 
         CursorManager.Instance?.SetDefaultCursor();
@@ -472,47 +472,57 @@ public class NewSeasonController : UIScreenController
         _summerLeagueOverlay.Clear();
         _summerLeagueOverlay.style.display = DisplayStyle.Flex;
 
-        var box = new VisualElement();
-        box.AddToClassList("ns-roster-box");
-        _summerLeagueOverlay.Add(box);
+        var box = CreateSummerLeagueBox(
+            LocalizationService.T("ui.code.new_season_controller.summer_league_camp_de_desarrollo"),
+            LocalizationService.T("ui.code.new_season_controller.summer_league_subtitle", SummerLeagueHelper.MaxRoster));
 
-        var title = new Label(LocalizationService.T("ui.code.new_season_controller.summer_league_camp_de_desarrollo"));
-        title.AddToClassList("ns-roster-title");
-        box.Add(title);
+        var counter = new Label();
+        counter.AddToClassList("ns-summer-counter");
+        box.Add(counter);
 
-        var subtitle = new Label($"Ventana post-draft: 3 partidos para rookies y sophomores. " +
-                                 $"Elige hasta {SummerLeagueHelper.MaxRoster} convocados. " +
-                                 "El desarrollo es acotado: como máximo +1 en un atributo y nunca supera el potencial.");
-        subtitle.AddToClassList("ns-roster-subtitle");
-        box.Add(subtitle);
+        var legend = new Label(LocalizationService.T("ui.code.new_season_controller.summer_league_legend"));
+        legend.AddToClassList("ns-summer-legend");
+        box.Add(legend);
 
         var scroll = new ScrollView(ScrollViewMode.Vertical);
-        scroll.style.maxHeight = 380;
-        scroll.style.marginTop = 8;
-        scroll.style.marginBottom = 8;
+        scroll.AddToClassList("ns-summer-list");
         box.Add(scroll);
+
+        Button simulate = null;
+        void RefreshSelectionUi()
+        {
+            counter.text = LocalizationService.T(
+                "ui.code.new_season_controller.summer_league_count",
+                _summerLeagueSelected.Count, SummerLeagueHelper.MaxRoster);
+            if (simulate != null)
+                simulate.SetEnabled(_summerLeagueSelected.Count > 0);
+        }
 
         foreach (var p in candidates)
         {
             var row = new VisualElement();
-            row.style.flexDirection = FlexDirection.Row;
-            row.style.alignItems = Align.Center;
-            row.style.justifyContent = Justify.SpaceBetween;
-            row.style.paddingTop = 5;
-            row.style.paddingBottom = 5;
-            row.style.borderBottomWidth = 1;
-            row.style.borderBottomColor = new Color(0.22f, 0.24f, 0.30f);
+            row.AddToClassList("ns-summer-row");
 
-            var info = new Label($"{p.first_name} {p.last_name} · {p.position} · {p.age} años · " +
-                                 $"MED {p.overall} / POT {p.potential}");
-            info.style.color = new Color(0.82f, 0.85f, 0.92f);
-            info.style.fontSize = 14;
-            row.Add(info);
+            var playerInfo = new VisualElement();
+            playerInfo.AddToClassList("ns-summer-player");
+            var name = new Label($"{p.first_name} {p.last_name}");
+            name.AddToClassList("ns-summer-name");
+            var meta = new Label(LocalizationService.T(
+                "ui.code.new_season_controller.summer_league_player_meta",
+                p.position, p.age, p.overall, p.potential));
+            meta.AddToClassList("ns-summer-meta");
+            playerInfo.Add(name);
+            playerInfo.Add(meta);
+            row.Add(playerInfo);
 
             var toggle = new Button();
-            toggle.AddToClassList("ns-option-btn");
-            toggle.style.minWidth = 120;
-            toggle.text = _summerLeagueSelected.Contains(p.id) ? "CONVOCADO" : "FUERA";
+            toggle.AddToClassList("ns-summer-toggle");
+            bool isSelected = _summerLeagueSelected.Contains(p.id);
+            toggle.text = LocalizationService.T(isSelected
+                ? "ui.code.new_season_controller.summer_league_selected"
+                : "ui.code.new_season_controller.summer_league_out");
+            toggle.EnableInClassList("ns-summer-toggle--selected", isSelected);
+            toggle.EnableInClassList("ns-summer-toggle--out", !isSelected);
             toggle.RegisterCallback<ClickEvent>(_ =>
             {
                 PlayClick();
@@ -520,7 +530,14 @@ public class NewSeasonController : UIScreenController
                     _summerLeagueSelected.Remove(p.id);
                 else if (_summerLeagueSelected.Count < SummerLeagueHelper.MaxRoster)
                     _summerLeagueSelected.Add(p.id);
-                toggle.text = _summerLeagueSelected.Contains(p.id) ? "CONVOCADO" : "FUERA";
+
+                bool selected = _summerLeagueSelected.Contains(p.id);
+                toggle.text = LocalizationService.T(selected
+                    ? "ui.code.new_season_controller.summer_league_selected"
+                    : "ui.code.new_season_controller.summer_league_out");
+                toggle.EnableInClassList("ns-summer-toggle--selected", selected);
+                toggle.EnableInClassList("ns-summer-toggle--out", !selected);
+                RefreshSelectionUi();
             });
             CursorManager.Instance?.RegisterHandCursor(toggle);
             row.Add(toggle);
@@ -528,15 +545,13 @@ public class NewSeasonController : UIScreenController
         }
 
         var actions = new VisualElement();
-        actions.style.flexDirection = FlexDirection.Row;
-        actions.style.marginTop = 8;
+        actions.AddToClassList("ns-summer-actions");
         box.Add(actions);
 
         var skip = new Button();
-        skip.AddToClassList("ns-roster-continue");
-        skip.style.backgroundColor = new Color(0.55f, 0.18f, 0.15f);
+        skip.AddToClassList("ns-summer-btn");
+        skip.AddToClassList("ns-summer-btn--skip");
         skip.text = LocalizationService.T("ui.code.new_season_controller.saltar_camp");
-        skip.style.marginRight = 8;
         skip.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
@@ -547,10 +562,10 @@ public class NewSeasonController : UIScreenController
         CursorManager.Instance?.RegisterHandCursor(skip);
         actions.Add(skip);
 
-        var simulate = new Button();
-        simulate.AddToClassList("ns-roster-continue");
+        simulate = new Button();
+        simulate.AddToClassList("ns-summer-btn");
+        simulate.AddToClassList("ns-summer-btn--simulate");
         simulate.text = LocalizationService.T("ui.code.new_season_controller.simular_summer_league");
-        simulate.SetEnabled(_summerLeagueSelected.Count > 0);
         simulate.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
@@ -558,6 +573,27 @@ public class NewSeasonController : UIScreenController
         });
         CursorManager.Instance?.RegisterHandCursor(simulate);
         actions.Add(simulate);
+        RefreshSelectionUi();
+    }
+
+    VisualElement CreateSummerLeagueBox(string titleText, string subtitleText)
+    {
+        var box = new VisualElement();
+        box.AddToClassList("ns-summer-box");
+
+        var header = new VisualElement();
+        header.AddToClassList("ns-summer-header");
+
+        var title = new Label(titleText);
+        title.AddToClassList("ns-summer-title");
+        header.Add(title);
+
+        var subtitle = new Label(subtitleText);
+        subtitle.AddToClassList("ns-summer-subtitle");
+        header.Add(subtitle);
+
+        box.Add(header);
+        return box;
     }
 
     void RunSummerLeague(List<PlayerData> candidates)
@@ -588,44 +624,47 @@ public class NewSeasonController : UIScreenController
         _summerLeagueOverlay.Clear();
         _summerLeagueOverlay.style.display = DisplayStyle.Flex;
 
-        var box = new VisualElement();
-        box.AddToClassList("ns-roster-box");
-        _summerLeagueOverlay.Add(box);
-
-        var title = new Label(LocalizationService.T("ui.code.new_season_controller.summer_league_completada"));
-        title.AddToClassList("ns-roster-title");
-        box.Add(title);
-
-        var subtitle = new Label(LocalizationService.T("ui.code.new_season_controller.resumen_del_camp_los_jugadores_con_minut_8c87d326"));
-        subtitle.AddToClassList("ns-roster-subtitle");
-        box.Add(subtitle);
+        var box = CreateSummerLeagueBox(
+            LocalizationService.T("ui.code.new_season_controller.summer_league_completada"),
+            LocalizationService.T("ui.code.new_season_controller.resumen_del_camp_los_jugadores_con_minut_8c87d326"));
 
         var scroll = new ScrollView(ScrollViewMode.Vertical);
-        scroll.style.maxHeight = 380;
-        scroll.style.marginTop = 8;
+        scroll.AddToClassList("ns-summer-list");
         box.Add(scroll);
 
         foreach (var row in results.OrderByDescending(r => r.development_gain).ThenByDescending(r => r.points))
         {
             var player = DatabaseManager.Instance.GetPlayerById(row.player_id);
             if (player == null) continue;
-            string gain = row.development_gain > 0 ? " · +1 ATRIBUTO" : "";
-            var line = new Label(
-                $"{player.first_name} {player.last_name} · {row.games} PJ · {row.minutes} min · " +
-                $"{row.points} pts · {row.rebounds} reb · {row.assists} as{gain}");
-            line.style.color = row.development_gain > 0
-                ? new Color(0.45f, 0.88f, 0.55f)
-                : new Color(0.82f, 0.85f, 0.92f);
-            line.style.fontSize = 14;
-            line.style.paddingTop = 4;
-            line.style.paddingBottom = 4;
-            scroll.Add(line);
+
+            var summaryRow = new VisualElement();
+            summaryRow.AddToClassList("ns-summer-summary-row");
+
+            var name = new Label($"{player.first_name} {player.last_name}");
+            name.AddToClassList("ns-summer-summary-name");
+            summaryRow.Add(name);
+
+            string gain = row.development_gain > 0
+                ? LocalizationService.T("ui.code.new_season_controller.summer_league_gain")
+                : "";
+            var stats = new Label(LocalizationService.T(
+                "ui.code.new_season_controller.summer_league_summary_line",
+                row.games, row.minutes, row.points, row.rebounds, row.assists, gain));
+            stats.AddToClassList("ns-summer-summary-stats");
+            if (row.development_gain > 0)
+                stats.AddToClassList("ns-summer-summary-gain");
+            summaryRow.Add(stats);
+            scroll.Add(summaryRow);
         }
 
+        var actions = new VisualElement();
+        actions.AddToClassList("ns-summer-actions");
+        box.Add(actions);
+
         var continueBtn = new Button();
-        continueBtn.AddToClassList("ns-roster-continue");
+        continueBtn.AddToClassList("ns-summer-btn");
+        continueBtn.AddToClassList("ns-summer-btn--continue");
         continueBtn.text = LocalizationService.T("ui.code.new_season_controller.continuar_a_la_temporada");
-        continueBtn.style.marginTop = 10;
         continueBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
@@ -634,7 +673,7 @@ public class NewSeasonController : UIScreenController
             ExecuteStartSeason();
         });
         CursorManager.Instance?.RegisterHandCursor(continueBtn);
-        box.Add(continueBtn);
+        actions.Add(continueBtn);
     }
 
     void ExecuteStartSeason()
