@@ -409,7 +409,9 @@ using System.Linq;
             string key = edition != null && edition.status == "group"
                 ? "ui.standings.cup_knockout_pending"
                 : "ui.standings.cup_knockout_empty";
-            _standingsBody.Add(new Label(LocalizationService.T(key)));
+            var empty = new Label(LocalizationService.T(key));
+            empty.AddToClassList("standings-cup-message");
+            _standingsBody.Add(empty);
             return;
         }
 

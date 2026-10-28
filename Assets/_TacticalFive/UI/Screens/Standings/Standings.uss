@@ -285,6 +285,14 @@
     color: rgb(122, 138, 170);
     letter-spacing: 1px;
 }
+.standings-cup-message {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 16px;
+    color: rgb(179, 190, 214);
+    padding: 18px 16px;
+    white-space: normal;
+    -unity-text-align: middle-center;
+}
 
 .standings-row--my-team {
     background-color: rgb(20, 28, 48);
