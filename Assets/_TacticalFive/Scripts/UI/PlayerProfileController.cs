@@ -204,7 +204,7 @@ using System.Linq;
                       : _player.has_player_option == 1 ? "Player Option"
                       : "—";
 
-        AddInfoField(_profileContractBody, "SALARIO", $"${_player.salary:N0}");
+        AddInfoField(_profileContractBody, "SALARIO", _player.salary.ToString("N0").Replace(',', '.') + " $");
         AddInfoField(_profileContractBody, "AÑOS DE CONTRATO", _player.contract_years.ToString());
         AddInfoField(_profileContractBody, "AÑOS GARANTIZADOS", _player.guaranteed_years.ToString());
         AddInfoField(_profileContractBody, "AÑOS DE SERVICIO", _player.years_of_service.ToString());
