@@ -482,12 +482,13 @@
 #TabContentSalonFama .td-hof-rank {
     width: 56px;
     flex-shrink: 0;
-    -unity-text-align: middle-center;
+    -unity-text-align: middle-left;
 }
 
 #TabContentSalonFama .th-hof-name,
 #TabContentSalonFama .td-hof-name {
     flex: 2.2;
+    -unity-text-align: middle-left;
 }
 
 #TabContentSalonFama .th-hof-pos,
@@ -507,14 +508,14 @@
 #TabContentSalonFama .td-hof-rings {
     width: 80px;
     flex-shrink: 0;
-    -unity-text-align: middle-center;
+    -unity-text-align: middle-left;
 }
 
 #TabContentSalonFama .th-hof-fmvp,
 #TabContentSalonFama .td-hof-fmvp {
     width: 110px;
     flex-shrink: 0;
-    -unity-text-align: middle-center;
+    -unity-text-align: middle-left;
 }
 
 #TabContentSalonFama .th-hof-points,
@@ -525,20 +526,20 @@
 #TabContentSalonFama .td-hof-assists {
     width: 110px;
     flex-shrink: 0;
-    -unity-text-align: middle-right;
+    -unity-text-align: middle-left;
 }
 
 #TabContentSalonFama .th-hof-season,
 #TabContentSalonFama .td-hof-season {
     width: 100px;
     flex-shrink: 0;
-    -unity-text-align: middle-center;
+    -unity-text-align: middle-left;
 }
 
 .td-hof-rank {
     color: rgb(85, 102, 119) !important;
     font-size: 16px !important;
-    -unity-text-align: middle-center;
+    -unity-text-align: middle-left;
 }
 
 .td-hof-name {

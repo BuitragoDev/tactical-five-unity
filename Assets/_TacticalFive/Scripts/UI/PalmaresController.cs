@@ -702,20 +702,20 @@ public class PalmaresController : UIScreenController
             var row = new VisualElement();
             row.AddToClassList("palmares-data-row");
 
-            row.Add(MakeHoFCell((i + 1).ToString(), "td-hof-rank", true));
-            var nameCell = MakeHoFCell(m.FullName, "td-hof-name", false);
+            row.Add(MakeHoFCell((i + 1).ToString(), "td-hof-rank"));
+            var nameCell = MakeHoFCell(m.FullName, "td-hof-name");
             // Etiqueta ligera de legado: nº de hitos de carrera registrados (E1).
             if (m.player_id > 0 && _milestoneCounts.TryGetValue(m.player_id, out var mCount) && mCount > 0)
                 nameCell.tooltip = $"{mCount} hito(s) de carrera";
             row.Add(nameCell);
-            row.Add(MakeHoFCell(PositionCodes.GetName(m.position), "td-hof-pos", false));
-            row.Add(MakeHoFCell(GetHoFTeamName(m), "td-hof-team", false));
-            row.Add(MakeHoFCell(m.rings.ToString(), "td-hof-rings", false));
-            row.Add(MakeHoFCell(m.finals_mvps.ToString(), "td-hof-fmvp", false));
-            row.Add(MakeHoFCell(FormatThousands(m.career_points), "td-hof-points", true));
-            row.Add(MakeHoFCell(FormatThousands(m.career_rebounds), "td-hof-rebounds", true));
-            row.Add(MakeHoFCell(FormatThousands(m.career_assists), "td-hof-assists", true));
-            row.Add(MakeHoFCell(m.induction_season, "td-hof-season", false));
+            row.Add(MakeHoFCell(PositionCodes.GetName(m.position), "td-hof-pos"));
+            row.Add(MakeHoFCell(GetHoFTeamName(m), "td-hof-team"));
+            row.Add(MakeHoFCell(m.rings.ToString(), "td-hof-rings"));
+            row.Add(MakeHoFCell(m.finals_mvps.ToString(), "td-hof-fmvp"));
+            row.Add(MakeHoFCell(FormatThousands(m.career_points), "td-hof-points"));
+            row.Add(MakeHoFCell(FormatThousands(m.career_rebounds), "td-hof-rebounds"));
+            row.Add(MakeHoFCell(FormatThousands(m.career_assists), "td-hof-assists"));
+            row.Add(MakeHoFCell(m.induction_season, "td-hof-season"));
 
             _hoFBody.Add(row);
         }
@@ -741,11 +741,10 @@ public class PalmaresController : UIScreenController
         return value.ToString("N0", _hoFCulture);
     }
 
-    Label MakeHoFCell(string text, string cssClass, bool right)
+    Label MakeHoFCell(string text, string cssClass)
     {
         var lbl = new Label { text = text };
         lbl.AddToClassList(cssClass);
-        if (right) lbl.style.unityTextAlign = TextAnchor.MiddleRight;
         return lbl;
     }
 
