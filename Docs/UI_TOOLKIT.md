@@ -104,7 +104,7 @@ protected virtual void OnEnable()
 | 15 | Standings | `Screens/Standings` | `StandingsController` | Conference standings + pestaña NBA CUP (grupos, campeón/MVP) |
 | 16 | Stats | `Screens/Stats` | `StatsController` | League stat leaders |
 | 17 | Records | `Screens/Records` | `RecordsController` | Records screen |
-| 18 | Palmares | `Screens/Palmares` | `PalmaresController` | Historical palmarés + Hall of Fame panel |
+| 18 | Palmares | `Screens/Palmares` | `PalmaresController` | Historical palmarés: Campeones NBA, Campeones NBA Cup, jugadores, quintetos, All-Star y Hall of Fame |
 | 19 | Premios | `Screens/Premios` | `PremiosController` | Monthly awards |
 | 20 | Logros | `Screens/Logros` | `LogrosController` | GM achievements: tabs + grid + counter |
 | 21 | Market | `Screens/Market` | `MarketController` | Trades + FA market (TO/PO toggles, S&T, deadline banner) |

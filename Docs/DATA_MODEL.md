@@ -88,7 +88,7 @@ players 1──1 hof_players (player_id)            teams 1──N retired_numbe
 `id` (PK AI), `team_id`, `player_id`, `season_id`, `amount`, `rights_type` (`RFA`/`UFA`), `is_active`. Se crea al expirar contrato/opción y se elimina al firmar o renunciar. No es salario contable ni afecta nómina mensual/impuesto; sí suma al payroll efectivo del cap sheet, mercado y validación de traspasos. El hold activo se ignora si el jugador ya no es FA del equipo titular.
 
 ### NBA Cup (F5-04)
-- `tournament_editions`: `id`, `season_id`, `manager_id`, `year_start`, `status` (`group`/`knockout`/`finished`), `champion_team_id`, `mvp_player_id`, `created_at`.
+- `tournament_editions`: `id`, `season_id`, `manager_id`, `year_start`, `status` (`group`/`knockout`/`finished`), `champion_team_id`, `finalist_team_id`, `final_score`, `mvp_player_id`, `created_at`.
 - `tournament_groups`: `id`, `edition_id`, `group_name`, `conference`, `team_id`. Una fila por equipo; el grupo es la división.
 - `tournament_standings`: `id`, `edition_id`, `group_name`, `conference`, `team_id`, `wins`, `losses`, `points_for`, `points_against`, `point_diff`, `rank`.
 - Los partidos de grupo son `games` regulares con `series_label="cup-group-..."`; los de eliminatoria son `game_type="cup_playoff"` y `series_label="cup-qf-*"`, `"cup-sf-*"`, `"cup-final"`.

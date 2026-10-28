@@ -17,13 +17,14 @@
             <ui:VisualElement class="palmares-content">
                 <ui:VisualElement class="palmares-tabs" style="border-left-width: 17px; border-top-width: 10px;">
                     <ui:Button name="TabEquipos" text="{loc:ui.palmares.tab_equipos}" class="palmares-tab"/>
+                    <ui:Button name="TabCup" text="{loc:ui.palmares.tab_cup}" class="palmares-tab"/>
                     <ui:Button name="TabJugadores" text="{loc:ui.palmares.tab_jugadores}" class="palmares-tab"/>
                     <ui:Button name="TabQuintetos" text="{loc:ui.palmares.tab_quintetos}" class="palmares-tab"/>
                     <ui:Button name="TabAllStar" text="{loc:ui.palmares.tab_all_star}" class="palmares-tab"/>
                     <ui:Button name="TabSalonFama" text="{loc:ui.palmares.tab_salon_fama}" class="palmares-tab"/>
                 </ui:VisualElement>
 
-                <!-- ══ TAB: EQUIPOS ══ -->
+                <!-- ══ TAB: CAMPEONES NBA ══ -->
                 <ui:VisualElement name="TabContentEquipos" class="palmares-tab-content">
                     <ui:VisualElement class="palmares-split">
                         <ui:VisualElement class="palmares-left">
@@ -52,6 +53,41 @@
                                 </ui:VisualElement>
                                 <ui:VisualElement name="FinalsHistoryTrack" class="palmares-scrollbar">
                                     <ui:VisualElement name="FinalsHistoryThumb" class="palmares-scrollbar-thumb" />
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- ══ TAB: CAMPEONES NBA CUP ══ -->
+                <ui:VisualElement name="TabContentCup" class="palmares-tab-content" style="display: none;">
+                    <ui:VisualElement class="palmares-split">
+                        <ui:VisualElement class="palmares-left">
+                            <ui:Label class="palmares-section-title" text="{loc:ui.palmares.clasificacion_por_titulos_cup}" />
+                            <ui:VisualElement class="palmares-scroll-row">
+                                <ui:VisualElement name="CupTitlesRankingViewport" class="palmares-viewport">
+                                    <ui:VisualElement name="CupTitlesRankingBody" class="champs-list" />
+                                </ui:VisualElement>
+                                <ui:VisualElement name="CupTitlesRankingTrack" class="palmares-scrollbar">
+                                    <ui:VisualElement name="CupTitlesRankingThumb" class="palmares-scrollbar-thumb" />
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="palmares-right">
+                            <ui:Label class="palmares-section-title" text="{loc:ui.palmares.historial_de_finales_cup}" />
+                            <ui:VisualElement class="palmares-table-header">
+                                <ui:Label class="th-season" text="{loc:ui.palmares.temporada}" />
+                                <ui:Label class="th-champ" text="{loc:ui.palmares.campeon}" />
+                                <ui:Label class="th-finalist" text="{loc:ui.palmares.finalista}" />
+                                <ui:Label class="th-result" text="{loc:ui.palmares.resultado}" />
+                                <ui:Label class="th-mvp" text="{loc:ui.palmares.mvp_finales}" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="palmares-scroll-row">
+                                <ui:VisualElement name="CupFinalsHistoryViewport" class="palmares-viewport">
+                                    <ui:VisualElement name="CupFinalsHistoryBody" class="palmares-table-body" />
+                                </ui:VisualElement>
+                                <ui:VisualElement name="CupFinalsHistoryTrack" class="palmares-scrollbar">
+                                    <ui:VisualElement name="CupFinalsHistoryThumb" class="palmares-scrollbar-thumb" />
                                 </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>

@@ -5358,6 +5358,10 @@
       "value": "CLASIFICACIÓN POR TÍTULOS"
     },
     {
+      "key": "ui.palmares.clasificacion_por_titulos_cup",
+      "value": "CLASIFICACIÓN POR TÍTULOS NBA CUP"
+    },
+    {
       "key": "ui.palmares.config_btn_cerrar",
       "value": "CERRAR"
     },
@@ -5446,6 +5450,10 @@
       "value": "HISTORIAL DE FINALES"
     },
     {
+      "key": "ui.palmares.historial_de_finales_cup",
+      "value": "HISTORIAL DE FINALES NBA CUP"
+    },
+    {
       "key": "ui.palmares.historial_de_premios",
       "value": "HISTORIAL DE PREMIOS"
     },
@@ -5530,8 +5538,12 @@
       "value": "ALL-STAR"
     },
     {
+      "key": "ui.palmares.tab_cup",
+      "value": "CAMPEONES NBA CUP"
+    },
+    {
       "key": "ui.palmares.tab_equipos",
-      "value": "EQUIPOS"
+      "value": "CAMPEONES NBA"
     },
     {
       "key": "ui.palmares.tab_jugadores",

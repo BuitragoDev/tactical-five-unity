@@ -42,10 +42,10 @@
 
 ### S4b. NBA Cup (F5-04)
 
-- **Files:** `CupHelper.cs`, `DatabaseManager.Cup.cs`, `TournamentData.cs`, `StandingsController.cs` (pestaña NBA CUP).
+- **Files:** `CupHelper.cs`, `DatabaseManager.Cup.cs`, `TournamentData.cs`, `StandingsController.cs` (pestaña NBA CUP), `PalmaresController.cs` (pestaña CAMPEONES NBA CUP).
 - **Group stage:** `ScheduleGenerator` separa 60 partidos de división (`series_label="cup-group-..."`) antes de programar el resto y los coloca en las noches de Cup (30 oct, 6, 13, 20, 24, 25 y 27 nov); cada equipo juega 4, 2 en casa y 2 fuera. Las noches de grupo solo reservan a los equipos que juegan la Cup; el resto del calendario regular puede seguir usándolas. Las noches de eliminatorias (QF/SF/final) sí bloquean el calendario regular. No se duplican: son los mismos 82 partidos.
 - **Knockout:** `CupHelper.AdvanceIfNeeded` se llama tras simular el día dentro de la transacción. Con los 60 partidos jugados crea QF (6 campeones + 1 wildcard por conferencia) el 4-5 dic, SF el 8-9 dic y final el 11 dic, como `game_type="cup_playoff"`. No toca `seasons.phase`; los partidos de eliminatoria no cuentan para standings ni récords regulares.
-- **Tables:** `tournament_editions`, `tournament_groups`, `tournament_standings` (`id`, edición, grupo, conferencia, equipo, W/L, puntos, diferencia, rank, campeón/MVP).
+- **Tables:** `tournament_editions` (`champion_team_id`, `finalist_team_id`, `final_score`, `mvp_player_id`), `tournament_groups`, `tournament_standings` (`id`, edición, grupo, conferencia, equipo, W/L, puntos, diferencia, rank).
 
 ### S4c. Summer League (F5-05)
 

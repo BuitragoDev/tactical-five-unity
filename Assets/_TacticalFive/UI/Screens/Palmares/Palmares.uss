@@ -300,33 +300,43 @@
     margin-right: 10px;
 }
 
-/* --- Column widths: Equipos tab --- */
+/* --- Column widths: Campeones NBA / Campeones NBA Cup --- */
 
 #TabContentEquipos .th-season,
-#TabContentEquipos .td-season {
+#TabContentCup .th-season,
+#TabContentEquipos .td-season,
+#TabContentCup .td-season {
     width: 100px;
     flex-shrink: 0;
 }
 
 #TabContentEquipos .th-champ,
-#TabContentEquipos .td-champ {
+#TabContentCup .th-champ,
+#TabContentEquipos .td-champ,
+#TabContentCup .td-champ {
     flex: 1;
 }
 
 #TabContentEquipos .th-finalist,
-#TabContentEquipos .td-finalist {
+#TabContentCup .th-finalist,
+#TabContentEquipos .td-finalist,
+#TabContentCup .td-finalist {
     flex: 1;
 }
 
 #TabContentEquipos .th-result,
-#TabContentEquipos .td-result {
+#TabContentCup .th-result,
+#TabContentEquipos .td-result,
+#TabContentCup .td-result {
     width: 100px;
     flex-shrink: 0;
     -unity-text-align: middle-left;
 }
 
 #TabContentEquipos .th-mvp,
-#TabContentEquipos .td-mvp {
+#TabContentCup .th-mvp,
+#TabContentEquipos .td-mvp,
+#TabContentCup .td-mvp {
     flex: 1;
 }
 

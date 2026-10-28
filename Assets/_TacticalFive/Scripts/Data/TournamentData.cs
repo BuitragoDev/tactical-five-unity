@@ -14,6 +14,8 @@ public class TournamentEditionData
     /// <summary>group → knockout → finished.</summary>
     public string status { get; set; }
     public int champion_team_id { get; set; }
+    public int finalist_team_id { get; set; }
+    public string final_score { get; set; }
     public int mvp_player_id { get; set; }
     public string created_at { get; set; }
 }

@@ -7,11 +7,13 @@ public class PalmaresController : UIScreenController
 {
     protected override GameScreen ScreenId => GameScreen.Palmares;
     private Button _tabEquipos;
+    private Button _tabCup;
     private Button _tabJugadores;
     private Button _tabQuintetos;
     private Button _tabAllStar;
     private Button _tabSalonFama;
     private VisualElement _tabContentEquipos;
+    private VisualElement _tabContentCup;
     private VisualElement _tabContentJugadores;
     private VisualElement _tabContentQuintetos;
     private VisualElement _tabContentAllStar;
@@ -22,6 +24,9 @@ public class PalmaresController : UIScreenController
     private List<FinalsRecord> _titlesRankingData;
     private VisualElement _finalsHistoryBody;
     private List<FinalsRecord> _finalsHistoryData;
+    private VisualElement _cupTitlesRankingBody;
+    private List<TournamentEditionData> _cupEditions;
+    private VisualElement _cupFinalsHistoryBody;
     private VisualElement _mvpRankingBody;
     private List<AwardsRecord> _mvpRankingData;
     private VisualElement _awardsHistoryBody;
@@ -41,6 +46,8 @@ public class PalmaresController : UIScreenController
     // ── Scrollbar elements (viewport, track, thumb per list) ──
     private VisualElement _titlesRankingViewport, _titlesRankingTrack, _titlesRankingThumb;
     private VisualElement _finalsHistoryViewport, _finalsHistoryTrack, _finalsHistoryThumb;
+    private VisualElement _cupTitlesRankingViewport, _cupTitlesRankingTrack, _cupTitlesRankingThumb;
+    private VisualElement _cupFinalsHistoryViewport, _cupFinalsHistoryTrack, _cupFinalsHistoryThumb;
     private VisualElement _mvpRankingViewport, _mvpRankingTrack, _mvpRankingThumb;
     private VisualElement _awardsHistoryViewport, _awardsHistoryTrack, _awardsHistoryThumb;
     private VisualElement _quintetAppearancesViewport, _quintetAppearancesTrack, _quintetAppearancesThumb;
@@ -49,7 +56,9 @@ public class PalmaresController : UIScreenController
     private VisualElement _allStarHistoryViewport, _allStarHistoryTrack, _allStarHistoryThumb;
     private VisualElement _hoFViewport, _hoFTrack, _hoFThumb;
 
-    private ScrollBar _titlesRankingBar, _finalsHistoryBar, _mvpRankingBar, _awardsHistoryBar;
+    private ScrollBar _titlesRankingBar, _finalsHistoryBar;
+    private ScrollBar _cupTitlesRankingBar, _cupFinalsHistoryBar;
+    private ScrollBar _mvpRankingBar, _awardsHistoryBar;
     private ScrollBar _quintetAppearancesBar, _quintetHistoryBar, _allStarAppearancesBar, _allStarHistoryBar, _hoFBar;
 
     private List<TeamData> _allTeams;
@@ -65,6 +74,7 @@ public class PalmaresController : UIScreenController
     protected override void CacheReferences()
     {
         _tabEquipos = _root.Q<Button>("TabEquipos");
+        _tabCup = _root.Q<Button>("TabCup");
         _tabJugadores = _root.Q<Button>("TabJugadores");
         _tabQuintetos = _root.Q<Button>("TabQuintetos");
         _tabAllStar = _root.Q<Button>("TabAllStar");
@@ -73,6 +83,7 @@ public class PalmaresController : UIScreenController
 
 
         _tabContentEquipos = _root.Q<VisualElement>("TabContentEquipos");
+        _tabContentCup = _root.Q<VisualElement>("TabContentCup");
         _tabContentJugadores = _root.Q<VisualElement>("TabContentJugadores");
         _tabContentQuintetos = _root.Q<VisualElement>("TabContentQuintetos");
         _tabContentAllStar = _root.Q<VisualElement>("TabContentAllStar");
@@ -83,6 +94,8 @@ public class PalmaresController : UIScreenController
 
         _titlesRankingBody = _root.Q<VisualElement>("TitlesRankingBody");
         _finalsHistoryBody = _root.Q<VisualElement>("FinalsHistoryBody");
+        _cupTitlesRankingBody = _root.Q<VisualElement>("CupTitlesRankingBody");
+        _cupFinalsHistoryBody = _root.Q<VisualElement>("CupFinalsHistoryBody");
         _mvpRankingBody = _root.Q<VisualElement>("MVPRankingBody");
         _awardsHistoryBody = _root.Q<VisualElement>("AwardsHistoryBody");
         _quintetAppearancesBody = _root.Q<VisualElement>("QuintetAppearancesBody");
@@ -98,6 +111,12 @@ public class PalmaresController : UIScreenController
         _finalsHistoryViewport = _root.Q<VisualElement>("FinalsHistoryViewport");
         _finalsHistoryTrack = _root.Q<VisualElement>("FinalsHistoryTrack");
         _finalsHistoryThumb = _root.Q<VisualElement>("FinalsHistoryThumb");
+        _cupTitlesRankingViewport = _root.Q<VisualElement>("CupTitlesRankingViewport");
+        _cupTitlesRankingTrack = _root.Q<VisualElement>("CupTitlesRankingTrack");
+        _cupTitlesRankingThumb = _root.Q<VisualElement>("CupTitlesRankingThumb");
+        _cupFinalsHistoryViewport = _root.Q<VisualElement>("CupFinalsHistoryViewport");
+        _cupFinalsHistoryTrack = _root.Q<VisualElement>("CupFinalsHistoryTrack");
+        _cupFinalsHistoryThumb = _root.Q<VisualElement>("CupFinalsHistoryThumb");
         _mvpRankingViewport = _root.Q<VisualElement>("MVPRankingViewport");
         _mvpRankingTrack = _root.Q<VisualElement>("MVPRankingTrack");
         _mvpRankingThumb = _root.Q<VisualElement>("MVPRankingThumb");
@@ -146,6 +165,7 @@ public class PalmaresController : UIScreenController
     {
         base.RegisterCallbacks();
         _tabEquipos?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowTab("equipos"); });
+        _tabCup?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowTab("cup"); });
         _tabJugadores?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowTab("jugadores"); });
         _tabQuintetos?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowTab("quintetos"); });
         _tabAllStar?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowTab("allstar"); });
@@ -163,6 +183,7 @@ public class PalmaresController : UIScreenController
     void ShowTab(string tab)
     {
         _tabEquipos.RemoveFromClassList("palmares-tab--active");
+        _tabCup.RemoveFromClassList("palmares-tab--active");
         _tabJugadores.RemoveFromClassList("palmares-tab--active");
         _tabQuintetos.RemoveFromClassList("palmares-tab--active");
         _tabAllStar.RemoveFromClassList("palmares-tab--active");
@@ -171,6 +192,7 @@ public class PalmaresController : UIScreenController
 
 
         _tabContentEquipos.style.display = DisplayStyle.None;
+        _tabContentCup.style.display = DisplayStyle.None;
         _tabContentJugadores.style.display = DisplayStyle.None;
         _tabContentQuintetos.style.display = DisplayStyle.None;
         _tabContentAllStar.style.display = DisplayStyle.None;
@@ -184,6 +206,11 @@ public class PalmaresController : UIScreenController
                 _tabEquipos.AddToClassList("palmares-tab--active");
                 _tabContentEquipos.style.display = DisplayStyle.Flex;
                 BuildEquiposTab();
+                break;
+            case "cup":
+                _tabCup.AddToClassList("palmares-tab--active");
+                _tabContentCup.style.display = DisplayStyle.Flex;
+                BuildCupTab();
                 break;
             case "jugadores":
                 _tabJugadores.AddToClassList("palmares-tab--active");
@@ -266,6 +293,9 @@ public class PalmaresController : UIScreenController
             t.name.IndexOf(keyword, System.StringComparison.OrdinalIgnoreCase) >= 0 ||
             string.Equals(t.logo, keyword, System.StringComparison.OrdinalIgnoreCase));
     }
+
+    TeamData FindTeamById(int teamId)
+        => teamId > 0 ? _allTeams?.Find(t => t.id == teamId) : null;
 
     // ══ EQUIPOS TAB ══════════════════════════════════════
 
@@ -361,6 +391,115 @@ public class PalmaresController : UIScreenController
             _finalsHistoryBody.Add(row);
         }
         _finalsHistoryBar = BindScrollBar(_finalsHistoryViewport, _finalsHistoryBody, _finalsHistoryTrack, _finalsHistoryThumb);
+    }
+
+    // ══ CAMPEONES NBA CUP TAB ═══════════════════════════
+
+    void BuildCupTab()
+    {
+        _cupEditions = DatabaseManager.Instance.GetCupEditions(_manager.id);
+        RenderCupTitlesRanking();
+        RenderCupFinalsHistory();
+    }
+
+    void RenderCupTitlesRanking()
+    {
+        var champCounts = new Dictionary<int, (int count, TeamData team)>();
+        foreach (var edition in _cupEditions)
+        {
+            if (edition.champion_team_id <= 0) continue;
+            if (!champCounts.ContainsKey(edition.champion_team_id))
+                champCounts[edition.champion_team_id] = (0, FindTeamById(edition.champion_team_id));
+            var cur = champCounts[edition.champion_team_id];
+            champCounts[edition.champion_team_id] = (cur.count + 1, cur.team);
+        }
+        var sorted = champCounts
+            .OrderByDescending(kv => kv.Value.count)
+            .ThenBy(kv => kv.Value.team?.name ?? "")
+            .ToList();
+
+        _cupTitlesRankingBody.Clear();
+
+        if (sorted.Count == 0)
+        {
+            var emptyLbl = new Label { text = LocalizationService.T("ui.code.palmares_controller.aun_no_hay_campeonatos_registrados") };
+            emptyLbl.AddToClassList("no-data-cell");
+            _cupTitlesRankingBody.Add(emptyLbl);
+            return;
+        }
+
+        for (int i = 0; i < sorted.Count; i++)
+        {
+            var kv = sorted[i];
+            var row = new VisualElement();
+            row.AddToClassList("champ-row");
+
+            var rankLbl = new Label { text = (i + 1).ToString() };
+            rankLbl.AddToClassList("champ-rank");
+            row.Add(rankLbl);
+
+            var logo = new VisualElement();
+            logo.AddToClassList("champ-logo");
+            if (kv.Value.team != null && _logoSprites32.TryGetValue(kv.Value.team.logo, out var sp))
+                logo.style.backgroundImage = new StyleBackground(sp);
+            row.Add(logo);
+
+            var nameLbl = new Label { text = kv.Value.team?.name ?? "—" };
+            nameLbl.AddToClassList("champ-name");
+            row.Add(nameLbl);
+
+            var countLbl = new Label { text = kv.Value.count.ToString() };
+            countLbl.AddToClassList("champ-count");
+            row.Add(countLbl);
+
+            _cupTitlesRankingBody.Add(row);
+        }
+        _cupTitlesRankingBar = BindScrollBar(_cupTitlesRankingViewport, _cupTitlesRankingBody,
+            _cupTitlesRankingTrack, _cupTitlesRankingThumb);
+    }
+
+    void RenderCupFinalsHistory()
+    {
+        _cupFinalsHistoryBody.Clear();
+
+        if (_cupEditions.Count == 0) return;
+
+        foreach (var edition in _cupEditions.OrderByDescending(e => e.year_start))
+        {
+            var row = new VisualElement();
+            row.AddToClassList("palmares-data-row");
+
+            var seasonLbl = new Label { text = $"{edition.year_start}-{(edition.year_start + 1) % 100:00}" };
+            seasonLbl.AddToClassList("td-season");
+            row.Add(seasonLbl);
+
+            var champion = FindTeamById(edition.champion_team_id);
+            row.Add(CreateCellWithLogo(champion, "td-champ", champion?.name ?? "—"));
+
+            var finalist = FindTeamById(edition.finalist_team_id);
+            row.Add(CreateCellWithLogo(finalist, "td-finalist", finalist?.name ?? "—"));
+
+            var resultLbl = new Label
+            {
+                text = string.IsNullOrWhiteSpace(edition.final_score) ? "—" : edition.final_score
+            };
+            resultLbl.AddToClassList("td-result");
+            row.Add(resultLbl);
+
+            var mvp = edition.mvp_player_id > 0
+                ? DatabaseManager.Instance.GetPlayerById(edition.mvp_player_id)
+                : null;
+            var mvpLbl = new Label
+            {
+                text = mvp != null ? $"{mvp.first_name} {mvp.last_name}" : "—"
+            };
+            mvpLbl.AddToClassList("td-mvp");
+            row.Add(mvpLbl);
+
+            _cupFinalsHistoryBody.Add(row);
+        }
+        _cupFinalsHistoryBar = BindScrollBar(_cupFinalsHistoryViewport, _cupFinalsHistoryBody,
+            _cupFinalsHistoryTrack, _cupFinalsHistoryThumb);
     }
 
     // ══ JUGADORES TAB ════════════════════════════════════

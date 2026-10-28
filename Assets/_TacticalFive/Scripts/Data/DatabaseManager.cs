@@ -1338,6 +1338,10 @@ public partial class DatabaseManager : MonoBehaviour
         AddColumnIfMissing("teams", "plan_offense", "plan_offense INTEGER DEFAULT 0");
         AddColumnIfMissing("teams", "plan_defense", "plan_defense INTEGER DEFAULT 1");
 
+        // Palmarés de la NBA Cup: finalista y marcador de la final.
+        AddColumnIfMissing("tournament_editions", "finalist_team_id", "finalist_team_id INTEGER NOT NULL DEFAULT 0");
+        AddColumnIfMissing("tournament_editions", "final_score", "final_score TEXT NOT NULL DEFAULT ''");
+
         // E3: tamaño de mercado (economía). Las partidas antiguas no lo traen: se rellena por
         // reputación (proxy) para que la asistencia/patrocinios no arranquen a cero.
         if (AddColumnIfMissing("teams", "market_size", "market_size INTEGER DEFAULT 0"))

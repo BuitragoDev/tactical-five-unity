@@ -274,6 +274,12 @@ public static class CupHelper
                     .OrderByDescending(s => s.rating)
                     .FirstOrDefault();
                 edition.champion_team_id = champion;
+                edition.finalist_team_id = final.home_team_id == champion
+                    ? final.away_team_id
+                    : final.home_team_id;
+                int championScore = final.home_team_id == champion ? final.home_score : final.away_score;
+                int finalistScore = final.home_team_id == champion ? final.away_score : final.home_score;
+                edition.final_score = $"{championScore}-{finalistScore}";
                 edition.mvp_player_id = mvp?.player_id ?? 0;
                 edition.status = "finished";
                 db.UpdateCupEdition(edition);

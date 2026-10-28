@@ -355,6 +355,13 @@ public class ScheduleGeneratorDiagnosticTests
         var finished = db.GetCupEdition(season.id);
         Assert.That(finished.status, Is.EqualTo("finished"));
         Assert.That(finished.champion_team_id, Is.GreaterThan(0));
+        Assert.That(finished.finalist_team_id, Is.GreaterThan(0));
+        Assert.That(finished.finalist_team_id, Is.Not.EqualTo(finished.champion_team_id));
+        Assert.That(finished.final_score, Is.EqualTo("110-90"));
+
+        var cupEditions = db.GetCupEditions(MANAGER_ID);
+        Assert.That(cupEditions, Has.Count.EqualTo(1));
+        Assert.That(cupEditions[0].champion_team_id, Is.EqualTo(finished.champion_team_id));
     }
 
     static void PlayCupRound(DatabaseManager db, SeasonData season, string labelPrefix, bool homeWins)

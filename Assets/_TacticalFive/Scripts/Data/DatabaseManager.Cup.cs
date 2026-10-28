@@ -22,6 +22,8 @@ public partial class DatabaseManager
             year_start = season.year_start,
             status = "group",
             champion_team_id = 0,
+            finalist_team_id = 0,
+            final_score = "",
             mvp_player_id = 0,
             created_at = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
         };
@@ -47,6 +49,16 @@ public partial class DatabaseManager
         => _db.Table<TournamentEditionData>()
               .Where(e => e.season_id == seasonId)
               .FirstOrDefault();
+
+    /// <summary>Ediciones de la Cup ya decididas, de la más antigua a la más reciente.</summary>
+    public List<TournamentEditionData> GetCupEditions(int managerId)
+    {
+        if (!EnsureDb()) return new List<TournamentEditionData>();
+        return _db.Table<TournamentEditionData>()
+                  .Where(e => e.manager_id == managerId && e.champion_team_id > 0)
+                  .OrderBy(e => e.year_start)
+                  .ToList();
+    }
 
     public void UpdateCupEdition(TournamentEditionData edition)
     {
