@@ -299,54 +299,6 @@
     margin-top: 4px;
 }
 
-/* F6-03: evolución por temporada y comparativa con la liga */
-.playerprofile-trends {
-    width: 100%;
-    flex-direction: column;
-    margin-top: 16px;
-    border-top-width: 1px;
-    border-top-color: rgb(86, 70, 26);
-    padding-top: 10px;
-}
-.playerprofile-trends-title {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 18px;
-    letter-spacing: 2px;
-    color: rgb(212, 160, 23);
-    margin-bottom: 4px;
-}
-.playerprofile-trends-compare {
-    font-size: 14px;
-    color: rgb(179, 190, 214);
-    margin-bottom: 6px;
-}
-.playerprofile-trends-row {
-    flex-direction: row;
-    align-items: center;
-    width: 100%;
-    padding: 4px 8px;
-    border-bottom-width: 1px;
-    border-bottom-color: rgb(30, 36, 50);
-}
-.playerprofile-trends-row--head {
-    background-color: rgb(33, 32, 28);
-}
-.playerprofile-trends-cell {
-    width: 80px;
-    -unity-text-align: middle-center;
-    font-size: 14px;
-    color: rgb(210, 218, 232);
-}
-.playerprofile-trends-cell--season {
-    width: 120px;
-    -unity-text-align: middle-left;
-}
-.playerprofile-trends-cell--head {
-    color: rgb(212, 160, 23);
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 13px;
-}
-
 /* Columnas: Información · Atributos · Lesiones */
 .playerprofile-columns {
     flex-direction: row;
