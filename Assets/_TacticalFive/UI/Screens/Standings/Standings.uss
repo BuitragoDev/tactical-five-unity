@@ -186,9 +186,9 @@
 
 /* Pestañas NBA Cup: comparten fila con las de conferencia. */
 .standings-cup-tab {
-    font-size: 14px;
+    font-size: 16px;
     padding: 10px 12px;
-    letter-spacing: 1px;
+    letter-spacing: 2px;
 }
 
 .standings-scroll {
