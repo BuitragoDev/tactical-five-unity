@@ -771,7 +771,7 @@ using System.Linq;
                 _tableHeader.Add(MakeHeaderCell("TC%", "col-stat", false));
                 break;
             case "perdidas":
-                _tableHeader.Add(MakeHeaderCell($"TO{suffix}", "col-stat", true));
+                _tableHeader.Add(MakeHeaderCell($"PE{suffix}", "col-stat", true));
                 _tableHeader.Add(MakeHeaderCell($"PTS{suffix}", "col-stat", false));
                 _tableHeader.Add(MakeHeaderCell($"REB{suffix}", "col-stat", false));
                 _tableHeader.Add(MakeHeaderCell($"AST{suffix}", "col-stat", false));
