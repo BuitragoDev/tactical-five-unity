@@ -8,6 +8,9 @@ using System.Linq;
     private Button _tabEast;
     private Button _tabWest;
     private Button _tabCup;
+    private VisualElement _cupTabs;
+    private Button _cupTabEast, _cupTabWest, _cupTabKnockout;
+    private VisualElement _standingsHeaderRow;
     private VisualElement _standingsBody;
 
     // Right panel stat cards
@@ -29,11 +32,17 @@ using System.Linq;
     private Dictionary<string, Sprite> _logoSprites32 = new();
     private Dictionary<string, Sprite> _logoSprites64 = new();
     private string _currentFilter = "East";
+    private string _cupFilter = "East";
     protected override void CacheReferences()
     {
         _tabEast = _root.Q<Button>("TabEast");
         _tabWest = _root.Q<Button>("TabWest");
         _tabCup = _root.Q<Button>("TabCup");
+        _cupTabs = _root.Q<VisualElement>("CupTabs");
+        _cupTabEast = _root.Q<Button>("CupTabEast");
+        _cupTabWest = _root.Q<Button>("CupTabWest");
+        _cupTabKnockout = _root.Q<Button>("CupTabKnockout");
+        _standingsHeaderRow = _root.Q<VisualElement>("StandingsHeaderRow");
         _standingsBody = _root.Q<VisualElement>("StandingsBody");
 
         _cardBestAttackLogo = _root.Q<VisualElement>("CardBestAttackLogo");
@@ -83,6 +92,9 @@ using System.Linq;
         _tabEast?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowStandings("East"); });
         _tabWest?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowStandings("West"); });
         _tabCup?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowStandings("Cup"); });
+        _cupTabEast?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowCupFilter("East"); });
+        _cupTabWest?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowCupFilter("West"); });
+        _cupTabKnockout?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowCupFilter("Knockout"); });
     }
     protected override void Refresh()
     {
@@ -280,11 +292,18 @@ using System.Linq;
         else if (filter == "West") _tabWest.AddToClassList("standings-tab--active");
         else _tabCup?.AddToClassList("standings-tab--active");
 
-        if (filter == "Cup")
+        bool isCup = filter == "Cup";
+        if (_cupTabs != null)
+            _cupTabs.style.display = isCup ? DisplayStyle.Flex : DisplayStyle.None;
+        if (isCup)
         {
+            UpdateCupTabState();
             ShowCupStandings();
             return;
         }
+
+        if (_standingsHeaderRow != null)
+            _standingsHeaderRow.style.display = DisplayStyle.Flex;
 
         var subtitleLabel = _root.Q<Label>("StandingsSubtitle");
         if (subtitleLabel != null)
@@ -300,6 +319,24 @@ using System.Linq;
             var rowElem = CreateStandingsRow(row, team);
             _standingsBody.Add(rowElem);
         }
+    }
+
+    void ShowCupFilter(string filter)
+    {
+        _cupFilter = filter;
+        UpdateCupTabState();
+        ShowCupStandings();
+    }
+
+    void UpdateCupTabState()
+    {
+        _cupTabEast?.RemoveFromClassList("standings-tab--active");
+        _cupTabWest?.RemoveFromClassList("standings-tab--active");
+        _cupTabKnockout?.RemoveFromClassList("standings-tab--active");
+
+        if (_cupFilter == "East") _cupTabEast?.AddToClassList("standings-tab--active");
+        else if (_cupFilter == "West") _cupTabWest?.AddToClassList("standings-tab--active");
+        else _cupTabKnockout?.AddToClassList("standings-tab--active");
     }
 
     void ShowCupStandings()
@@ -320,15 +357,6 @@ using System.Linq;
             return;
         }
 
-        var standings = DatabaseManager.Instance.GetCupStandings(edition.id);
-        if (standings.Count == 0)
-        {
-            var groupGames = DatabaseManager.Instance.GetCupGames(_season.id, _manager.id)
-                .Where(g => (g.series_label ?? "").StartsWith(CupHelper.GroupLabelPrefix))
-                .ToList();
-            standings = CupHelper.ComputeStandings(_allTeams, groupGames);
-        }
-
         string championText = "";
         if (edition.champion_team_id > 0)
         {
@@ -338,15 +366,37 @@ using System.Linq;
         if (subtitle != null)
             subtitle.text = $"NBA CUP {edition.year_start}-{edition.year_start + 1}{championText}";
 
-        foreach (var group in standings.GroupBy(s => s.group_name).OrderBy(g => g.Key))
+        if (_cupFilter == "Knockout")
+        {
+            if (_standingsHeaderRow != null)
+                _standingsHeaderRow.style.display = DisplayStyle.None;
+            ShowCupKnockout(edition);
+            return;
+        }
+
+        if (_standingsHeaderRow != null)
+            _standingsHeaderRow.style.display = DisplayStyle.Flex;
+
+        var standings = DatabaseManager.Instance.GetCupStandings(edition.id);
+        if (standings.Count == 0)
+        {
+            var groupGames = DatabaseManager.Instance.GetCupGames(_season.id, _manager.id)
+                .Where(g => (g.series_label ?? "").StartsWith(CupHelper.GroupLabelPrefix))
+                .ToList();
+            standings = CupHelper.ComputeStandings(_allTeams, groupGames);
+        }
+
+        var conferenceStandings = standings.Where(s => s.conference == _cupFilter).ToList();
+        if (conferenceStandings.Count == 0)
+        {
+            _standingsBody.Add(new Label(LocalizationService.T("ui.standings.cup_standings_empty")));
+            return;
+        }
+
+        foreach (var group in conferenceStandings.GroupBy(s => s.group_name).OrderBy(g => g.Key))
         {
             var header = new Label(group.Key.ToUpper());
-            header.style.color = new StyleColor(new Color(0.83f, 0.63f, 0.09f));
-            header.style.unityFontStyleAndWeight = FontStyle.Bold;
-            header.style.fontSize = 15;
-            header.style.marginTop = 10;
-            header.style.marginBottom = 4;
-            header.style.marginLeft = 10;
+            header.AddToClassList("standings-cup-group");
             _standingsBody.Add(header);
 
             foreach (var row in group.OrderBy(r => r.rank))
@@ -361,9 +411,88 @@ using System.Linq;
                     pa = row.points_against
                 };
                 var team = _allTeams.Find(t => t.id == row.team_id);
-                _standingsBody.Add(CreateStandingsRow(standing, team));
+                _standingsBody.Add(CreateStandingsRow(standing, team, true));
             }
         }
+    }
+
+    void ShowCupKnockout(TournamentEditionData edition)
+    {
+        var games = DatabaseManager.Instance.GetCupGames(_season.id, _manager.id)
+            .Where(IsCupKnockoutGame)
+            .OrderBy(g => g.game_day)
+            .ThenBy(g => g.id)
+            .ToList();
+
+        if (games.Count == 0)
+        {
+            string key = edition != null && edition.status == "group"
+                ? "ui.standings.cup_knockout_pending"
+                : "ui.standings.cup_knockout_empty";
+            _standingsBody.Add(new Label(LocalizationService.T(key)));
+            return;
+        }
+
+        AddCupKnockoutHeader();
+        var stages = new (string prefix, string key, bool final)[]
+        {
+            (CupHelper.QfPrefix, "ui.standings.cup_round_qf", false),
+            (CupHelper.SfPrefix, "ui.standings.cup_round_sf", false),
+            (CupHelper.FinalLabel, "ui.standings.cup_round_final", true),
+        };
+        foreach (var (prefix, key, final) in stages)
+        {
+            var stageGames = final
+                ? games.Where(g => g.series_label == CupHelper.FinalLabel).ToList()
+                : games.Where(g => (g.series_label ?? "").StartsWith(prefix)).ToList();
+            if (stageGames.Count == 0) continue;
+
+            var stageLabel = new Label(LocalizationService.T(key));
+            stageLabel.AddToClassList("standings-cup-group");
+            _standingsBody.Add(stageLabel);
+
+            foreach (var game in stageGames)
+                AddCupKnockoutRow(game);
+        }
+    }
+
+    static bool IsCupKnockoutGame(GameData game)
+    {
+        string label = game.series_label ?? "";
+        return label.StartsWith(CupHelper.QfPrefix)
+            || label.StartsWith(CupHelper.SfPrefix)
+            || label == CupHelper.FinalLabel;
+    }
+
+    void AddCupKnockoutHeader()
+    {
+        var row = new VisualElement();
+        row.AddToClassList("standings-cup-ko-header");
+        row.Add(MakeCupKnockoutLabel(LocalizationService.T("ui.standings.cup_ko_home"), "standings-cup-ko-team"));
+        row.Add(MakeCupKnockoutLabel(LocalizationService.T("ui.standings.cup_ko_score"), "standings-cup-ko-score"));
+        row.Add(MakeCupKnockoutLabel(LocalizationService.T("ui.standings.cup_ko_away"), "standings-cup-ko-team"));
+        _standingsBody.Add(row);
+    }
+
+    void AddCupKnockoutRow(GameData game)
+    {
+        var home = _allTeams.Find(t => t.id == game.home_team_id);
+        var away = _allTeams.Find(t => t.id == game.away_team_id);
+        var row = new VisualElement();
+        row.AddToClassList("standings-cup-ko-row");
+
+        row.Add(MakeCupKnockoutLabel(home?.name.ToUpper() ?? "—", "standings-cup-ko-team"));
+        string score = game.is_played == 1 ? $"{game.home_score} - {game.away_score}" : "—";
+        row.Add(MakeCupKnockoutLabel(score, "standings-cup-ko-score"));
+        row.Add(MakeCupKnockoutLabel(away?.name.ToUpper() ?? "—", "standings-cup-ko-team"));
+        _standingsBody.Add(row);
+    }
+
+    static Label MakeCupKnockoutLabel(string text, string className)
+    {
+        var label = new Label(text);
+        label.AddToClassList(className);
+        return label;
     }
 
     List<StandingRow> BuildStandings(List<TeamData> teams)
@@ -371,10 +500,11 @@ using System.Linq;
         return StandingsHelper.Build(teams, _allGames);
     }
 
-    VisualElement CreateStandingsRow(StandingRow row, TeamData team)
+    VisualElement CreateStandingsRow(StandingRow row, TeamData team, bool cupRow = false)
     {
         var elem = new VisualElement();
         elem.AddToClassList("standings-row");
+        if (cupRow) elem.AddToClassList("standings-row--cup");
 
         bool isMyTeam = team != null && team.id == _myTeam.id;
         if (isMyTeam) elem.AddToClassList("standings-row--my-team");

@@ -33,6 +33,11 @@
                         <ui:Button name="TabWest" class="standings-tab" text="{loc:ui.standings.tab_west}" />
                         <ui:Button name="TabCup" class="standings-tab" text="{loc:ui.standings.tab_cup}" />
                     </ui:VisualElement>
+                    <ui:VisualElement name="CupTabs" class="standings-cup-tabs" style="display:none">
+                        <ui:Button name="CupTabEast" class="standings-tab standings-cup-tab" text="{loc:ui.standings.cup_tab_east}" />
+                        <ui:Button name="CupTabWest" class="standings-tab standings-cup-tab" text="{loc:ui.standings.cup_tab_west}" />
+                        <ui:Button name="CupTabKnockout" class="standings-tab standings-cup-tab" text="{loc:ui.standings.cup_tab_knockout}" />
+                    </ui:VisualElement>
 
                     <!-- Standings table -->
                     <ui:ScrollView class="standings-scroll"
@@ -40,7 +45,7 @@
                                    mode="Vertical">
                         <ui:VisualElement class="standings-table-container">
                             <!-- Header row -->
-                            <ui:VisualElement class="standings-header-row">
+                            <ui:VisualElement name="StandingsHeaderRow" class="standings-header-row">
                                 <ui:Label class="col-rank col-stat--header" text="#" />
                                 <ui:VisualElement class="col-logo-space" />
                                 <ui:Label class="col-team-name col-stat--header" text="{loc:ui.standings.equipo}" />

@@ -8512,7 +8512,54 @@
     {
       "key": "ui.code.new_season_controller.summer_league_gain",
       "value": " · +1 ATRIBUTO"
+    },
+    {
+      "key": "ui.standings.cup_tab_east",
+      "value": "NBA CUP ESTE"
+    },
+    {
+      "key": "ui.standings.cup_tab_west",
+      "value": "NBA CUP OESTE"
+    },
+    {
+      "key": "ui.standings.cup_tab_knockout",
+      "value": "NBA CUP ELIMINATORIAS"
+    },
+    {
+      "key": "ui.standings.cup_knockout_pending",
+      "value": "LA ELIMINATORIA SE GENERA AL TERMINAR LA FASE DE GRUPOS"
+    },
+    {
+      "key": "ui.standings.cup_knockout_empty",
+      "value": "AÚN NO HAY PARTIDOS DE ELIMINATORIA"
+    },
+    {
+      "key": "ui.standings.cup_standings_empty",
+      "value": "NO HAY CLASIFICACIÓN DE LA NBA CUP"
+    },
+    {
+      "key": "ui.standings.cup_round_qf",
+      "value": "CUARTOS DE FINAL"
+    },
+    {
+      "key": "ui.standings.cup_round_sf",
+      "value": "SEMIFINALES"
+    },
+    {
+      "key": "ui.standings.cup_round_final",
+      "value": "FINAL"
+    },
+    {
+      "key": "ui.standings.cup_ko_home",
+      "value": "LOCAL"
+    },
+    {
+      "key": "ui.standings.cup_ko_score",
+      "value": "RESULTADO"
+    },
+    {
+      "key": "ui.standings.cup_ko_away",
+      "value": "VISITANTE"
     }
-
   ]
 }
