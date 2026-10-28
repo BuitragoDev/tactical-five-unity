@@ -294,7 +294,7 @@ public partial class DatabaseManager
     }
 
     /// <summary>Número máximo de NO CONVOCADOS (slot 2) en la convocatoria.</summary>
-    public const int INACTIVE_SLOTS = 5;
+    public const int INACTIVE_SLOTS = 6;
 
     /// <summary>Garantiza que la convocatoria (team_lineup) existe y está al día con la
     /// plantilla: crea la convocatoria automática si está vacía, elimina filas de
@@ -563,9 +563,9 @@ public partial class DatabaseManager
             assigned.Add(remaining[i].id);
         }
 
-        // ── Inactive: forced-inactive first, then overflow (max 5) ──
+        // ── Inactive: forced-inactive first, then overflow ──
         int inactIdx = 0;
-        const int maxInactive = 5;
+        const int maxInactive = INACTIVE_SLOTS;
 
         foreach (var p in players.Where(p => forceInactive.Contains(p.id)))
         {

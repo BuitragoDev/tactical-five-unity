@@ -155,7 +155,7 @@ Si un equipo no llega a cinco sanos se simula con los disponibles y, sin ninguno
 ## 3. Lineups & rotations
 
 - `LineupData.slot`: 0 = starter, 1 = bench, 2 = inactive. `slot_index` orders them.
-- `AutoSeedLineup` builds a default rotation (starters by position, bench by role). `EnsureLineupSeeded(teamId, players)` (compartido por Quinteto y Rotación) lo crea si la tabla está vacía, borra filas de jugadores que ya no están y mete a los nuevos en NO CONVOCADOS (máx. 5).
+- `AutoSeedLineup` builds a default rotation (starters by position, bench by role). `EnsureLineupSeeded(teamId, players)` (compartido por Quinteto y Rotación) lo crea si la tabla está vacía, borra filas de jugadores que ya no están y mete a los nuevos en NO CONVOCADOS (máx. 6).
 - **Pantalla ROTACIÓN** (`GameScreen.Rotation`, `RotationController`): reparto manual de los **240 minutos** de un partido (5 × 48) entre los 12 convocados.
   - Se guarda en **`team_lineup.rotation_minutes`** (migración `ALTER TABLE ... DEFAULT -1`); **`-1` = automático**, `0..48` = fijo. No se guarda en `players` (hay un campo transitorio `[Ignore] PlayerData.rotation_minutes` para dárselo al simulador).
   - `GetActivePlayers(_myTeam.id)` copia el valor a cada jugador convocado → `InitPS` lo mete en `PlayerStatSnapshot.target_minutes` (`fixed_minutes = true`) → `PrepareRotationMetadata` lo aplica (suelo 2) y `PickSubstitution` lo respeta de verdad.
