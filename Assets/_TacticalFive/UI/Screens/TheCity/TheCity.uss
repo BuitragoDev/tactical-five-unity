@@ -156,7 +156,7 @@
     position: absolute;
     width: 14px;
     height: 14px;
-    bottom: 36px;
+    bottom: 33px;
     left: 93px;
     background-color: rgb(17, 24, 34);
     border-right-width: 1px;
