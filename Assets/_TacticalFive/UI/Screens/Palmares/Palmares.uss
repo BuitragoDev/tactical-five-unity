@@ -240,6 +240,8 @@
     border-bottom-width: 1px;
     border-bottom-color: rgb(42, 51, 71);
     padding-bottom: 0;
+    /* Mismo ancho que el cuerpo: el viewport pierde 12px de barra + 4px de margen. */
+    padding-right: 16px;
     flex-shrink: 0;
 }
 
@@ -254,6 +256,7 @@
     -unity-text-align: middle-left;
     overflow: hidden;
     text-overflow: ellipsis;
+    min-width: 0;
 }
 
 .palmares-table-body {
@@ -319,7 +322,7 @@
 #TabContentEquipos .td-result {
     width: 100px;
     flex-shrink: 0;
-    -unity-text-align: middle-center;
+    -unity-text-align: middle-left;
 }
 
 #TabContentEquipos .th-mvp,
@@ -339,7 +342,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf") !important;
     font-size: 16px !important;
     color: rgb(212, 160, 23) !important;
-    -unity-text-align: middle-center;
+    -unity-text-align: middle-left;
     white-space: nowrap !important;
 }
 
@@ -360,7 +363,7 @@
 #TabContentJugadores .td-rating {
     width: 100px;
     flex-shrink: 0;
-    -unity-text-align: middle-center;
+    -unity-text-align: middle-left;
 }
 
 #TabContentJugadores .th-rookie,
@@ -372,7 +375,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf") !important;
     font-size: 16px !important;
     color: rgb(85, 102, 119) !important;
-    -unity-text-align: middle-center;
+    -unity-text-align: middle-left;
     white-space: nowrap !important;
 }
 
@@ -388,7 +391,7 @@
 #TabContentAllStar .td-result {
     width: 100px;
     flex-shrink: 0;
-    -unity-text-align: middle-center;
+    -unity-text-align: middle-left;
 }
 
 #TabContentAllStar .th-winner,
@@ -442,6 +445,7 @@
     flex-direction: row;
     align-items: center;
     flex: 1;
+    min-width: 0;
     padding: 0 12px;
     overflow: hidden;
 }
