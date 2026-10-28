@@ -44,7 +44,14 @@
                         </ui:VisualElement>
                         <ui:VisualElement class="stats-table-wrapper">
                             <ui:VisualElement name="AssignedHeader" class="stats-header-row" />
-                            <ui:VisualElement name="AssignedBody" class="stats-table" />
+                            <ui:VisualElement class="stats-scroll-row">
+                                <ui:VisualElement name="AssignedViewport" class="stats-viewport">
+                                    <ui:VisualElement name="AssignedBody" class="stats-table" />
+                                </ui:VisualElement>
+                                <ui:VisualElement name="AssignedScrollTrack" class="stats-scrollbar">
+                                    <ui:VisualElement name="AssignedScrollThumb" class="stats-scrollbar-thumb" />
+                                </ui:VisualElement>
+                            </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
 
@@ -55,7 +62,14 @@
                         </ui:VisualElement>
                         <ui:VisualElement class="stats-table-wrapper">
                             <ui:VisualElement name="EligibleHeader" class="stats-header-row" />
-                            <ui:VisualElement name="EligibleBody" class="stats-table" />
+                            <ui:VisualElement class="stats-scroll-row">
+                                <ui:VisualElement name="EligibleViewport" class="stats-viewport">
+                                    <ui:VisualElement name="EligibleBody" class="stats-table" />
+                                </ui:VisualElement>
+                                <ui:VisualElement name="EligibleScrollTrack" class="stats-scrollbar">
+                                    <ui:VisualElement name="EligibleScrollThumb" class="stats-scrollbar-thumb" />
+                                </ui:VisualElement>
+                            </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
                     </ui:VisualElement>

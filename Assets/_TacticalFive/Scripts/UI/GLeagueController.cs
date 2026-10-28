@@ -17,8 +17,11 @@ public class GLeagueController : UIScreenController
     private Label _assignedTitle;
     private VisualElement _assignedHeader;
     private VisualElement _assignedBody;
+    private VisualElement _assignedViewport, _assignedScrollTrack, _assignedScrollThumb;
     private VisualElement _eligibleHeader;
     private VisualElement _eligibleBody;
+    private VisualElement _eligibleViewport, _eligibleScrollTrack, _eligibleScrollThumb;
+    private CustomScrollbar.Handle _assignedScrollBar, _eligibleScrollBar;
 
     // ── Página Clasificación / Resultados / Líderes ──
     private Button _glTabEast, _glTabWest;
@@ -60,8 +63,14 @@ public class GLeagueController : UIScreenController
         _assignedTitle = _root.Q<Label>("AssignedTitle");
         _assignedHeader = _root.Q<VisualElement>("AssignedHeader");
         _assignedBody = _root.Q<VisualElement>("AssignedBody");
+        _assignedViewport = _root.Q<VisualElement>("AssignedViewport");
+        _assignedScrollTrack = _root.Q<VisualElement>("AssignedScrollTrack");
+        _assignedScrollThumb = _root.Q<VisualElement>("AssignedScrollThumb");
         _eligibleHeader = _root.Q<VisualElement>("EligibleHeader");
         _eligibleBody = _root.Q<VisualElement>("EligibleBody");
+        _eligibleViewport = _root.Q<VisualElement>("EligibleViewport");
+        _eligibleScrollTrack = _root.Q<VisualElement>("EligibleScrollTrack");
+        _eligibleScrollThumb = _root.Q<VisualElement>("EligibleScrollThumb");
 
         // Resto de páginas
         _glTabEast = _root.Q<Button>("GlTabEast");
@@ -158,6 +167,10 @@ public class GLeagueController : UIScreenController
                 RefreshSummary();
                 BuildAssigned();
                 BuildEligible();
+                _assignedScrollBar = BindScrollBar(_assignedViewport, _assignedBody,
+                    _assignedScrollTrack, _assignedScrollThumb);
+                _eligibleScrollBar = BindScrollBar(_eligibleViewport, _eligibleBody,
+                    _eligibleScrollTrack, _eligibleScrollThumb);
                 break;
         }
     }
