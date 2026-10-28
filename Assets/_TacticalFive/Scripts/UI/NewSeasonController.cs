@@ -475,6 +475,7 @@ public class NewSeasonController : UIScreenController
         var box = CreateSummerLeagueBox(
             LocalizationService.T("ui.code.new_season_controller.summer_league_camp_de_desarrollo"),
             LocalizationService.T("ui.code.new_season_controller.summer_league_subtitle", SummerLeagueHelper.MaxRoster));
+        _summerLeagueOverlay.Add(box);
 
         var counter = new Label();
         counter.AddToClassList("ns-summer-counter");
@@ -627,6 +628,7 @@ public class NewSeasonController : UIScreenController
         var box = CreateSummerLeagueBox(
             LocalizationService.T("ui.code.new_season_controller.summer_league_completada"),
             LocalizationService.T("ui.code.new_season_controller.resumen_del_camp_los_jugadores_con_minut_8c87d326"));
+        _summerLeagueOverlay.Add(box);
 
         var scroll = new ScrollView(ScrollViewMode.Vertical);
         scroll.AddToClassList("ns-summer-list");
