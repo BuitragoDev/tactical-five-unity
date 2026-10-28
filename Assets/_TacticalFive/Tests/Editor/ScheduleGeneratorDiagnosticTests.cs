@@ -182,6 +182,11 @@ public class ScheduleGeneratorDiagnosticTests
                     Is.False,
                     $"{team.abbreviation}: back-to-back {previous.game_day}->{current.game_day} de {kilometers:N0} km");
             }
+
+            Assert.That(MaxConsecutiveGames(teamGames), Is.LessThanOrEqualTo(2),
+                $"{team.abbreviation}: más de 2 días consecutivos");
+            Assert.That(HasMoreThanFourInCalendarWeek(teamGames, season), Is.False,
+                $"{team.abbreviation}: más de 4 partidos en una semana natural");
         }
     }
 
@@ -236,6 +241,11 @@ public class ScheduleGeneratorDiagnosticTests
                         Assert.That(TravelHelper.IsImpossibleBackToBack(previous.game_day, current.game_day, kilometers),
                             Is.False, $"semilla {i}: {team.abbreviation} B2B {previous.game_day}->{current.game_day} ({kilometers:N0} km)");
                     }
+
+                    Assert.That(MaxConsecutiveGames(teamGames), Is.LessThanOrEqualTo(2),
+                        $"semilla {i}: {team.abbreviation} más de 2 días consecutivos");
+                    Assert.That(HasMoreThanFourInCalendarWeek(teamGames, season), Is.False,
+                        $"semilla {i}: {team.abbreviation} más de 4 partidos en una semana natural");
                 }
             }
         }
@@ -360,6 +370,31 @@ public class ScheduleGeneratorDiagnosticTests
             game.is_played = 1;
             db.UpdateGame(game);
         }
+    }
+
+    static int MaxConsecutiveGames(List<GameData> teamGames)
+    {
+        int maximum = 1;
+        int current = 1;
+        for (int i = 1; i < teamGames.Count; i++)
+        {
+            current = teamGames[i].game_day == teamGames[i - 1].game_day + 1 ? current + 1 : 1;
+            if (current > maximum) maximum = current;
+        }
+        return maximum;
+    }
+
+    static bool HasMoreThanFourInCalendarWeek(List<GameData> teamGames, SeasonData season)
+    {
+        var start = new DateTime(season.year_start, 10, 22);
+        int offset = ((int)start.DayOfWeek + 6) % 7;
+        var counts = new Dictionary<int, int>();
+        foreach (var game in teamGames)
+        {
+            int week = (game.game_day - 1 + offset) / 7;
+            counts[week] = counts.TryGetValue(week, out int count) ? count + 1 : 1;
+        }
+        return counts.Values.Any(count => count > 4);
     }
 
     static string BuildReport(List<TeamData> teams, List<GameData> games, int generated)

@@ -6,6 +6,10 @@ using Random = UnityEngine.Random;
 
 public static class ScheduleGenerator
 {
+    // Reintentos del reparto greedy: cada intento usa otra mezcla aleatoria y
+    // mantiene las mismas reglas de descanso.
+    const int MAX_ARRANGE_ATTEMPTS = 24;
+
     // Genera los 82 partidos por equipo para la temporada regular
     public static int GenerateSchedule(SeasonData season, List<TeamData> teams)
     {
@@ -95,101 +99,41 @@ public static class ScheduleGenerator
             }
         }
 
-        // Shuffle
-        matchups = matchups.OrderBy(_ => Random.value).ToList();
-
-        var teamDaySet      = teams.ToDictionary(t => t.id, _ => new HashSet<int>());
-        var dayGamesCount   = new Dictionary<int, int>();
-        var scheduled       = new List<(int day, int home, int away)>();
-        var unplaced        = new List<(int home, int away)>();
         var teamsById       = teams.ToDictionary(t => t.id);
-        var lastGameDay     = teams.ToDictionary(t => t.id, _ => -1);
-        var lastVenue       = teams.ToDictionary(t => t.id, _ => 0);
-        var venueByTeamDay  = new Dictionary<(int team, int day), int>();
         var cupDays         = CupHelper.GroupPlayDays(season);
+        // Las noches de grupo solo bloquean a los equipos que juegan la Cup
+        // (ya están en teamDaySet); el resto puede jugar partido regular.
+        // Las eliminatorias sí bloquean el calendario regular completo.
         var blockedDayIndexes = new HashSet<int>(CupHelper.BlockedRegularDays(season).Select(d => d - 1));
-        var cupGameLabels   = new Dictionary<(int day, int home, int away), string>();
+        foreach (int groupDay in cupDays)
+            blockedDayIndexes.Remove(groupDay - 1);
         var cupAssignments  = fullLeague ? AssignCupGames(cupGames, cupDays, teams) : new List<(int day, int home, int away, string group)>();
         if (fullLeague && cupAssignments.Count != 60)
         {
             Debug.LogError($"[Schedule] NBA Cup: no se pudieron colocar los 60 partidos en las noches de grupo.");
             return -1;
         }
+
+        var cupGameLabels = new Dictionary<(int day, int home, int away), string>();
         foreach (var (dayIdx, homePk, awayPk, groupName) in cupAssignments)
-        {
-            scheduled.Add((dayIdx, homePk, awayPk));
-            teamDaySet[homePk].Add(dayIdx);
-            teamDaySet[awayPk].Add(dayIdx);
-            // Reservar también el día anterior y el siguiente para que un partido
-            // regular no cree un back-to-back con la Cup.
-            if (dayIdx > 0)
-            {
-                teamDaySet[homePk].Add(dayIdx - 1);
-                teamDaySet[awayPk].Add(dayIdx - 1);
-            }
-            teamDaySet[homePk].Add(dayIdx + 1);
-            teamDaySet[awayPk].Add(dayIdx + 1);
-            dayGamesCount[dayIdx] = dayGamesCount.GetValueOrDefault(dayIdx, 0) + 1;
             cupGameLabels[(dayIdx, homePk, awayPk)] = groupName;
-            RecordGame(homePk, awayPk, dayIdx, lastGameDay, lastVenue, venueByTeamDay);
-        }
 
-        // Cada partido es una entrada individual: no se deduplica por pareja
-        // orientada (dos partidos idénticos son dos partidos distintos).
-        foreach (var (homePk, awayPk) in matchups)
+        // El reparto greedy puede dejar uno o dos partidos sin hueco por una mala
+        // mezcla inicial. Se reintenta con otra mezcla aleatoria sin relajar las
+        // reglas de descanso; solo se rinde si ninguna ordenación cabe.
+        List<(int day, int home, int away)> scheduled = new List<(int day, int home, int away)>();
+        List<(int home, int away)> stillUnplaced = new List<(int home, int away)>();
+        int attempts = fullLeague ? MAX_ARRANGE_ATTEMPTS : 1;
+        for (int attempt = 0; attempt < attempts; attempt++)
         {
-            int day = FindDay(homePk, awayPk, totalDays, teamDaySet, dayGamesCount,
-                seasonStart, teamsById, lastGameDay, lastVenue, venueByTeamDay, blockedDayIndexes);
-            if (day >= 0)
-            {
-                scheduled.Add((day, homePk, awayPk));
-                teamDaySet[homePk].Add(day);
-                teamDaySet[awayPk].Add(day);
-                dayGamesCount[day] = dayGamesCount.GetValueOrDefault(day, 0) + 1;
-                RecordGame(homePk, awayPk, day, lastGameDay, lastVenue, venueByTeamDay);
-            }
-            else
-            {
-                unplaced.Add((homePk, awayPk));
-            }
+            var arrangement = TryArrangeRegularGames(
+                matchups, cupAssignments, teams, totalDays, seasonStart, blockedDayIndexes);
+            scheduled = arrangement.scheduled;
+            stillUnplaced = arrangement.unplaced;
+            if (stillUnplaced.Count == 0) break;
         }
 
-        // Partidos que el greedy no pudo colocar: forzar en el primer día libre.
-        // Si aun así no caben, se registran y la generación falla (no se guarda).
-        var stillUnplaced = new List<(int home, int away)>();
-        foreach (var (homePk, awayPk) in unplaced)
-        {
-            bool placed = false;
-            for (int d = 0; d < totalDays; d++)
-            {
-                var date = seasonStart.AddDays(d);
-                if (date.Month == 2 && date.Day >= 8 && date.Day <= 14)
-                    continue;
-                if (blockedDayIndexes.Contains(d))
-                    continue;
-
-                if (!teamDaySet[homePk].Contains(d) && !teamDaySet[awayPk].Contains(d)
-                    && !ImpossibleBackToBack(homePk, d, homePk, teamsById, venueByTeamDay)
-                    && !ImpossibleBackToBack(awayPk, d, homePk, teamsById, venueByTeamDay))
-                {
-                    scheduled.Add((d, homePk, awayPk));
-                    teamDaySet[homePk].Add(d);
-                    teamDaySet[awayPk].Add(d);
-                    dayGamesCount[d] = dayGamesCount.GetValueOrDefault(d, 0) + 1;
-                    RecordGame(homePk, awayPk, d, lastGameDay, lastVenue, venueByTeamDay);
-                    placed = true;
-                    break;
-                }
-            }
-            if (!placed) stillUnplaced.Add((homePk, awayPk));
-        }
-
-        if (unplaced.Count > 0)
-        {
-            Debug.LogWarning($"[Schedule] El greedy no pudo colocar {unplaced.Count} partido(s); " +
-                             $"{stillUnplaced.Count} siguen sin día tras el respaldo.");
-        }
-        if (stillUnplaced.Count > 0)
+        if (stillUnplaced.Count > 0 && fullLeague)
         {
             foreach (var (homePk, awayPk) in stillUnplaced.Take(20))
                 Debug.LogError($"[Schedule] Partido sin programar: {homePk} vs {awayPk}");
@@ -229,16 +173,35 @@ public static class ScheduleGenerator
                 .Where(g => g.home == t.id || g.away == t.id)
                 .OrderBy(g => g.day)
                 .ToList();
+            int consecutive = 1;
             for (int i = 1; i < teamGames.Count; i++)
             {
                 var previous = teamGames[i - 1];
                 var current = teamGames[i];
+                consecutive = current.day == previous.day + 1 ? consecutive + 1 : 1;
+                if (consecutive > 2)
+                {
+                    Debug.LogError($"[Schedule] {t.name}: {consecutive} días consecutivos de partido; no se guarda el calendario.");
+                    invalid = true;
+                }
+
                 int kilometers = TravelHelper.DistanceKilometers(previous.home, current.home, teamsById);
                 if (TravelHelper.IsImpossibleBackToBack(previous.day, current.day, kilometers))
                 {
                     Debug.LogError($"[Schedule] {t.name}: back-to-back {previous.day}->{current.day} " +
                                    $"de {kilometers:N0} km; no se guarda el calendario.");
                     invalid = true;
+                }
+            }
+
+            // Máximo 4 partidos por semana natural (lunes-domingo).
+            foreach (var week in teamGames.GroupBy(g => CalendarWeekKey(seasonStart, g.day)))
+            {
+                if (week.Count() > 4)
+                {
+                    Debug.LogError($"[Schedule] {t.name}: {week.Count()} partidos en una semana natural; no se guarda el calendario.");
+                    invalid = true;
+                    break;
                 }
             }
         }
@@ -415,6 +378,182 @@ public static class ScheduleGenerator
         }
     }
 
+    static (List<(int day, int home, int away)> scheduled, List<(int home, int away)> unplaced)
+    TryArrangeRegularGames(
+        List<(int home, int away)> matchups,
+        List<(int day, int home, int away, string group)> cupAssignments,
+        List<TeamData> teams,
+        int totalDays,
+        DateTime seasonStart,
+        HashSet<int> blockedDayIndexes)
+    {
+        var teamDaySet      = teams.ToDictionary(t => t.id, _ => new HashSet<int>());
+        var dayGamesCount   = new Dictionary<int, int>();
+        var scheduled       = new List<(int day, int home, int away)>();
+        var unplaced        = new List<(int home, int away)>();
+        var teamsById       = teams.ToDictionary(t => t.id);
+        var lastGameDay     = teams.ToDictionary(t => t.id, _ => -1);
+        var lastVenue       = teams.ToDictionary(t => t.id, _ => 0);
+        var venueByTeamDay  = new Dictionary<(int team, int day), int>();
+
+        foreach (var (dayIdx, homePk, awayPk, _) in cupAssignments)
+        {
+            scheduled.Add((dayIdx, homePk, awayPk));
+            teamDaySet[homePk].Add(dayIdx);
+            teamDaySet[awayPk].Add(dayIdx);
+            dayGamesCount[dayIdx] = dayGamesCount.GetValueOrDefault(dayIdx, 0) + 1;
+            RecordGame(homePk, awayPk, dayIdx, lastGameDay, lastVenue, venueByTeamDay);
+        }
+
+        // Cada partido es una entrada individual: no se deduplica por pareja
+        // orientada (dos partidos idénticos son dos partidos distintos).
+        foreach (var (homePk, awayPk) in matchups.OrderBy(_ => Random.value))
+        {
+            int day = FindDay(homePk, awayPk, totalDays, teamDaySet, dayGamesCount,
+                seasonStart, teamsById, lastGameDay, lastVenue, venueByTeamDay, blockedDayIndexes);
+            if (day >= 0)
+            {
+                scheduled.Add((day, homePk, awayPk));
+                teamDaySet[homePk].Add(day);
+                teamDaySet[awayPk].Add(day);
+                dayGamesCount[day] = dayGamesCount.GetValueOrDefault(day, 0) + 1;
+                RecordGame(homePk, awayPk, day, lastGameDay, lastVenue, venueByTeamDay);
+            }
+            else
+            {
+                unplaced.Add((homePk, awayPk));
+            }
+        }
+
+        var stillUnplaced = new List<(int home, int away)>();
+        foreach (var (homePk, awayPk) in unplaced)
+        {
+            bool placed = false;
+            for (int d = 0; d < totalDays; d++)
+            {
+                var date = seasonStart.AddDays(d);
+                if (date.Month == 2 && date.Day >= 8 && date.Day <= 14)
+                    continue;
+                if (blockedDayIndexes.Contains(d))
+                    continue;
+
+                if (!teamDaySet[homePk].Contains(d) && !teamDaySet[awayPk].Contains(d)
+                    && CanPlayOnDay(homePk, d, teamDaySet)
+                    && CanPlayOnDay(awayPk, d, teamDaySet)
+                    && !ImpossibleBackToBack(homePk, d, homePk, teamsById, venueByTeamDay)
+                    && !ImpossibleBackToBack(awayPk, d, homePk, teamsById, venueByTeamDay))
+                {
+                    scheduled.Add((d, homePk, awayPk));
+                    teamDaySet[homePk].Add(d);
+                    teamDaySet[awayPk].Add(d);
+                    dayGamesCount[d] = dayGamesCount.GetValueOrDefault(d, 0) + 1;
+                    RecordGame(homePk, awayPk, d, lastGameDay, lastVenue, venueByTeamDay);
+                    placed = true;
+                    break;
+                }
+            }
+            if (!placed) stillUnplaced.Add((homePk, awayPk));
+        }
+
+        // El reparto anterior garantiza 4 por bloque de temporada; las semanas
+        // naturales (lunes-domingo) pueden quedar desalineadas. Mover un partido
+        // regular a otra semana corrige esos picos sin tocar los partidos de Cup.
+        RepairActualWeekOverloads(scheduled, cupAssignments, teams, totalDays, seasonStart, blockedDayIndexes);
+
+        return (scheduled, stillUnplaced);
+    }
+
+    static void RepairActualWeekOverloads(
+        List<(int day, int home, int away)> scheduled,
+        List<(int day, int home, int away, string group)> cupAssignments,
+        List<TeamData> teams,
+        int totalDays,
+        DateTime seasonStart,
+        HashSet<int> blockedDayIndexes)
+    {
+        var cupKeys = new HashSet<(int day, int home, int away)>(
+            cupAssignments.Select(c => (c.day, c.home, c.away)));
+        var teamDays = teams.ToDictionary(t => t.id, _ => new HashSet<int>());
+        var dayGamesCount = new Dictionary<int, int>();
+        var venueByTeamDay = new Dictionary<(int team, int day), int>();
+        var teamsById = teams.ToDictionary(t => t.id);
+
+        void AddGame((int day, int home, int away) game)
+        {
+            scheduled.Add(game);
+            teamDays[game.home].Add(game.day);
+            teamDays[game.away].Add(game.day);
+            dayGamesCount[game.day] = dayGamesCount.GetValueOrDefault(game.day, 0) + 1;
+            venueByTeamDay[(game.home, game.day)] = game.home;
+            venueByTeamDay[(game.away, game.day)] = game.home;
+        }
+
+        void RemoveGame((int day, int home, int away) game)
+        {
+            scheduled.Remove(game);
+            teamDays[game.home].Remove(game.day);
+            teamDays[game.away].Remove(game.day);
+            dayGamesCount[game.day] = Math.Max(0, dayGamesCount.GetValueOrDefault(game.day, 1) - 1);
+            venueByTeamDay.Remove((game.home, game.day));
+            venueByTeamDay.Remove((game.away, game.day));
+        }
+
+        var initial = scheduled.ToList();
+        scheduled.Clear();
+        foreach (var game in initial)
+            AddGame(game);
+
+        for (int guard = 0; guard < 400; guard++)
+        {
+            bool moved = false;
+            foreach (var team in teams)
+            {
+                int overloadedWeek = -1;
+                foreach (var week in teamDays[team.id].GroupBy(d => CalendarWeekKey(seasonStart, d)))
+                {
+                    if (week.Count() > 4) { overloadedWeek = week.Key; break; }
+                }
+                if (overloadedWeek < 0) continue;
+
+                var candidates = scheduled
+                    .Where(g => (g.home == team.id || g.away == team.id)
+                                && CalendarWeekKey(seasonStart, g.day) == overloadedWeek
+                                && !cupKeys.Contains((g.day, g.home, g.away)))
+                    .ToList();
+
+                foreach (var game in candidates)
+                {
+                    RemoveGame(game);
+                    bool placed = false;
+                    for (int day = 0; day < totalDays; day++)
+                    {
+                        if (CalendarWeekKey(seasonStart, day) == overloadedWeek) continue;
+                        var date = seasonStart.AddDays(day);
+                        if (date.Month == 2 && date.Day >= 8 && date.Day <= 14) continue;
+                        if (blockedDayIndexes.Contains(day)) continue;
+                        if (dayGamesCount.GetValueOrDefault(day, 0) >= 15) continue;
+                        if (teamDays[game.home].Contains(day) || teamDays[game.away].Contains(day)) continue;
+                        if (WouldCreateThreeInARow(game.home, day, teamDays)
+                            || WouldCreateThreeInARow(game.away, day, teamDays)) continue;
+                        if (GamesInActualWeek(game.home, day, teamDays, seasonStart) >= 4
+                            || GamesInActualWeek(game.away, day, teamDays, seasonStart) >= 4) continue;
+                        if (ImpossibleBackToBack(game.home, day, game.home, teamsById, venueByTeamDay)
+                            || ImpossibleBackToBack(game.away, day, game.home, teamsById, venueByTeamDay)) continue;
+
+                        AddGame((day, game.home, game.away));
+                        placed = true;
+                        moved = true;
+                        break;
+                    }
+                    if (placed) break;
+                    AddGame(game);
+                }
+                if (moved) break;
+            }
+            if (!moved) break;
+        }
+    }
+
     static int FindDay(int homePk, int awayPk, int totalDays,
         Dictionary<int, HashSet<int>> teamDaySet,
         Dictionary<int, int> dayGamesCount,
@@ -446,9 +585,14 @@ public static class ScheduleGenerator
                 || ImpossibleBackToBack(awayPk, d, homePk, teamsById, venueByTeamDay))
                 continue;
 
-            int hWeek = TeamWeekCount(homePk, d, teamDaySet);
-            int aWeek = TeamWeekCount(awayPk, d, teamDaySet);
-            if (hWeek >= 5 || aWeek >= 5) continue;
+            // Descanso: máximo 2 días consecutivos y 4 partidos por bloque de 7 días.
+            // La reparación final alinea además las semanas naturales lunes-domingo.
+            if (!CanPlayOnDay(homePk, d, teamDaySet)
+                || !CanPlayOnDay(awayPk, d, teamDaySet))
+                continue;
+
+            int hWeek = GamesInCalendarWeek(homePk, d, teamDaySet);
+            int aWeek = GamesInCalendarWeek(awayPk, d, teamDaySet);
 
             int homeTravel = TravelMiles(homePk, d, homePk, teamsById, lastGameDay, lastVenue);
             int awayTravel = TravelMiles(awayPk, d, homePk, teamsById, lastGameDay, lastVenue);
@@ -458,7 +602,7 @@ public static class ScheduleGenerator
             int score = 100;
             if (homeB2B) score -= 50;
             if (awayB2B) score -= 50;
-            if (hWeek >= 4 || aWeek >= 4) score -= 30;
+            if (hWeek >= 3 || aWeek >= 3) score -= 30;
             score -= dayGamesCount.GetValueOrDefault(d, 0) * 2;
             score -= Math.Min(25, homeTravel / 100);
             score -= Math.Min(25, awayTravel / 100);
@@ -523,11 +667,39 @@ public static class ScheduleGenerator
         return false;
     }
 
-    static int TeamWeekCount(int teamPk, int dayIdx, Dictionary<int, HashSet<int>> teamDaySet)
+    static bool CanPlayOnDay(int teamPk, int dayIdx, Dictionary<int, HashSet<int>> teamDaySet)
+    {
+        if (teamDaySet[teamPk].Contains(dayIdx)) return false;
+        if (WouldCreateThreeInARow(teamPk, dayIdx, teamDaySet)) return false;
+        return GamesInCalendarWeek(teamPk, dayIdx, teamDaySet) < 4;
+    }
+
+    static bool WouldCreateThreeInARow(int teamPk, int dayIdx,
+        Dictionary<int, HashSet<int>> teamDaySet)
+    {
+        var days = teamDaySet[teamPk];
+        int before = 0;
+        for (int d = dayIdx - 1; days.Contains(d); d--) before++;
+        int after = 0;
+        for (int d = dayIdx + 1; days.Contains(d); d++) after++;
+        return before + after + 1 > 2;
+    }
+
+    static int GamesInCalendarWeek(int teamPk, int dayIdx, Dictionary<int, HashSet<int>> teamDaySet)
     {
         int week = dayIdx / 7;
         return teamDaySet[teamPk].Count(d => d / 7 == week);
     }
+
+    static int GamesInActualWeek(int teamPk, int dayIdx,
+        Dictionary<int, HashSet<int>> teamDaySet, DateTime seasonStart)
+    {
+        int week = CalendarWeekKey(seasonStart, dayIdx);
+        return teamDaySet[teamPk].Count(d => CalendarWeekKey(seasonStart, d) == week);
+    }
+
+    static int CalendarWeekKey(DateTime seasonStart, int dayIdx)
+        => (dayIdx + ((int)seasonStart.DayOfWeek + 6) % 7) / 7;
 
     static bool HasB2B(int teamPk, int dayIdx, Dictionary<int, HashSet<int>> teamDaySet)
         => teamDaySet[teamPk].Contains(dayIdx - 1) || teamDaySet[teamPk].Contains(dayIdx + 1);
