@@ -183,7 +183,7 @@
 
 ## S18. Advanced analytics & fog of war
 
-- **AdvancedStatsHelper:** eFG%, TS%, EFI/48 (eficiencia propia por 48, no el PER oficial), `CalcEff`. **F6-03:** `StatsTrendHelper` deriva PTS/P, TS% y EFI/48 por temporada desde `PlayerCareerSeasonRow`/`LeagueSeasonAggregateRow`; `GetLeagueSeasonAggregates` une archivo y temporada en curso. Consumers: `StatsController` y `TrajectoryController`.
+- **AdvancedStatsHelper:** eFG%, TS%, EFI/48 (eficiencia propia por 48, no el PER oficial), `CalcEff`. **F6-03:** `StatsTrendHelper` deriva PTS/P, TS% y EFI/48 por temporada desde `PlayerCareerSeasonRow`/`LeagueSeasonAggregateRow`; `GetLeagueSeasonAggregates` une archivo y temporada en curso. Consumers: `TrajectoryController` (Stats ya no muestra las tarjetas de liga).
 - **FogOfWarHelper:** hides OVR (band), role, and attributes for un-scouted players; scouted ids set by completed scouts (`CarteraController`); consumers: `CarteraController`, `PlayerProfileController`.
 - **MatchupPreview:** forecast ratings + win probability + favorites + stars; consumer: `MatchDayController`.
 
