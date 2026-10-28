@@ -427,7 +427,7 @@
 
 .ns-summer-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 32px;
+    font-size: 34px;
     letter-spacing: 2px;
     color: rgb(255, 255, 255);
     text-transform: uppercase;
@@ -435,7 +435,7 @@
 
 .ns-summer-subtitle {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 15px;
+    font-size: 17px;
     color: rgb(179, 190, 214);
     white-space: normal;
     margin-top: 6px;
@@ -443,7 +443,7 @@
 
 .ns-summer-counter {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 18px;
+    font-size: 20px;
     letter-spacing: 1px;
     color: rgb(212, 160, 23);
     padding: 12px 28px 0;
@@ -452,7 +452,7 @@
 
 .ns-summer-legend {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 14px;
+    font-size: 16px;
     color: rgb(122, 138, 170);
     padding: 4px 28px 10px;
     flex-shrink: 0;
@@ -484,13 +484,13 @@
 
 .ns-summer-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 18px;
+    font-size: 20px;
     color: rgb(208, 216, 232);
 }
 
 .ns-summer-meta {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 14px;
+    font-size: 16px;
     color: rgb(122, 138, 170);
     margin-top: 2px;
     white-space: normal;
@@ -498,7 +498,7 @@
 
 .ns-summer-toggle {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 16px;
     letter-spacing: 1px;
     min-width: 140px;
     flex-shrink: 0;
@@ -542,7 +542,7 @@
 
 .ns-summer-btn {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 18px;
     letter-spacing: 1px;
     padding: 11px 20px;
     border-width: 2px;
@@ -594,7 +594,7 @@
 
 .ns-summer-summary-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 17px;
+    font-size: 19px;
     color: rgb(208, 216, 232);
     flex-shrink: 0;
     margin-right: 16px;
@@ -602,7 +602,7 @@
 
 .ns-summer-summary-stats {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 14px;
+    font-size: 16px;
     color: rgb(179, 190, 214);
     flex-grow: 1;
     -unity-text-align: middle-right;
