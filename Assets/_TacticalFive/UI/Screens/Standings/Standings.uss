@@ -314,7 +314,7 @@
     color: rgb(39, 174, 96);
 }
 .standings-cup-ko-result {
-    width: 150px;
+    width: 180px;
     flex-shrink: 0;
     flex-direction: row;
     align-items: center;
@@ -322,15 +322,18 @@
 }
 .standings-cup-ko-score {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 18px;
+    font-size: 24px;
     color: rgb(208, 216, 232);
 }
 .standings-cup-ko-score--winner {
     color: rgb(39, 174, 96);
 }
 .standings-cup-ko-dash {
-    font-size: 15px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 24px;
     color: rgb(122, 138, 170);
+    margin-left: 8px;
+    margin-right: 8px;
 }
 .standings-cup-message {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");

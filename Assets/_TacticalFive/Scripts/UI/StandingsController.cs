@@ -516,7 +516,7 @@ using System.Linq;
         homeScore.AddToClassList("standings-cup-ko-score");
         if (homeWon) homeScore.AddToClassList("standings-cup-ko-score--winner");
 
-        var dash = new Label(" - ");
+        var dash = new Label("-");
         dash.AddToClassList("standings-cup-ko-dash");
 
         var awayScore = new Label(game.away_score.ToString());
