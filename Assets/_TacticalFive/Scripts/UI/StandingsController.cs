@@ -490,7 +490,7 @@ using System.Linq;
 
         var logo = new VisualElement();
         logo.AddToClassList("standings-cup-ko-logo");
-        if (team != null) SetTeamLogo(logo, team.logo);
+        if (team != null) SetCupTeamLogo(logo, team.logo);
         block.Add(logo);
 
         var name = new Label(team?.name.ToUpper() ?? "—");
@@ -516,7 +516,7 @@ using System.Linq;
         homeScore.AddToClassList("standings-cup-ko-score");
         if (homeWon) homeScore.AddToClassList("standings-cup-ko-score--winner");
 
-        var dash = new Label("-");
+        var dash = new Label(" - ");
         dash.AddToClassList("standings-cup-ko-dash");
 
         var awayScore = new Label(game.away_score.ToString());
@@ -632,6 +632,15 @@ using System.Linq;
         var last10 = games.Skip(Mathf.Max(0, games.Count - 10)).ToList();
         int wins = last10.Count(g => g);
         return $"{wins}-{last10.Count - wins}";
+    }
+
+    void SetCupTeamLogo(VisualElement elem, string logoName)
+    {
+        if (elem == null || string.IsNullOrEmpty(logoName)) return;
+        if (_logoSprites64.TryGetValue(logoName, out var sprite))
+            elem.style.backgroundImage = new StyleBackground(sprite);
+        else
+            SetTeamLogo(elem, logoName);
     }
 
     void SetTeamLogo(VisualElement elem, string logoName)

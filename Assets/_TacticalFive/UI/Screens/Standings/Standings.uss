@@ -263,7 +263,7 @@
     background-color: rgb(17, 24, 34);
 }
 .standings-cup-ko-row {
-    min-height: 46px;
+    min-height: 76px;
     padding: 6px 16px;
 }
 .standings-cup-ko-header-team {
@@ -294,9 +294,9 @@
     margin-left: 12px;
 }
 .standings-cup-ko-logo {
-    width: 30px;
-    height: 30px;
-    margin-right: 8px;
+    width: 64px;
+    height: 64px;
+    margin-right: 12px;
     flex-shrink: 0;
     background-size: contain;
     background-repeat: no-repeat;
@@ -304,7 +304,7 @@
 }
 .standings-cup-ko-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 15px;
+    font-size: 20px;
     color: rgb(208, 216, 232);
     white-space: normal;
     flex-shrink: 1;
@@ -331,7 +331,6 @@
 .standings-cup-ko-dash {
     font-size: 15px;
     color: rgb(122, 138, 170);
-    margin: 0 5px;
 }
 .standings-cup-message {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
