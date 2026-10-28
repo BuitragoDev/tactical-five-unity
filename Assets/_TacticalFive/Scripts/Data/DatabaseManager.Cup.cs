@@ -65,6 +65,42 @@ public partial class DatabaseManager
         if (edition != null) _db.Update(edition);
     }
 
+    /// <summary>
+    /// Rellena finalista y marcador en ediciones antiguas usando la final que
+    /// todavía exista en `games` (las temporadas ya purgadas no se pueden recuperar).
+    /// </summary>
+    public void BackfillCupFinalDetails()
+    {
+        if (!EnsureDb()) return;
+        var editions = _db.Table<TournamentEditionData>()
+            .Where(e => e.champion_team_id > 0
+                        && (e.finalist_team_id == 0 || e.final_score == null || e.final_score == ""))
+            .ToList();
+        foreach (var edition in editions)
+        {
+            var final = _db.Table<GameData>()
+                .Where(g => g.season_id == edition.season_id
+                            && g.series_label == CupHelper.FinalLabel
+                            && g.is_played == 1)
+                .OrderByDescending(g => g.game_day)
+                .FirstOrDefault();
+            if (final == null) continue;
+
+            int champion = final.home_score >= final.away_score
+                ? final.home_team_id
+                : final.away_team_id;
+            if (champion != edition.champion_team_id) continue;
+
+            edition.finalist_team_id = final.home_team_id == champion
+                ? final.away_team_id
+                : final.home_team_id;
+            int championScore = final.home_team_id == champion ? final.home_score : final.away_score;
+            int finalistScore = final.home_team_id == champion ? final.away_score : final.home_score;
+            edition.final_score = $"{championScore}-{finalistScore}";
+            _db.Update(edition);
+        }
+    }
+
     public List<TournamentGroupData> GetCupGroups(int editionId)
         => _db.Table<TournamentGroupData>()
               .Where(g => g.edition_id == editionId)
