@@ -450,9 +450,12 @@ using System.Linq;
     {
         var row = new VisualElement();
         row.AddToClassList("standings-cup-ko-header");
-        row.Add(MakeCupKnockoutLabel(LocalizationService.T("ui.standings.cup_ko_home"), "standings-cup-ko-team"));
-        row.Add(MakeCupKnockoutLabel(LocalizationService.T("ui.standings.cup_ko_score"), "standings-cup-ko-score"));
-        row.Add(MakeCupKnockoutLabel(LocalizationService.T("ui.standings.cup_ko_away"), "standings-cup-ko-team"));
+        var header = new Label(
+            $"{LocalizationService.T("ui.standings.cup_ko_home")}   ·   " +
+            $"{LocalizationService.T("ui.standings.cup_ko_score")}   ·   " +
+            $"{LocalizationService.T("ui.standings.cup_ko_away")}");
+        header.AddToClassList("standings-cup-ko-line");
+        row.Add(header);
         _standingsBody.Add(row);
     }
 
@@ -463,18 +466,11 @@ using System.Linq;
         var row = new VisualElement();
         row.AddToClassList("standings-cup-ko-row");
 
-        row.Add(MakeCupKnockoutLabel(home?.name.ToUpper() ?? "—", "standings-cup-ko-team"));
         string score = game.is_played == 1 ? $"{game.home_score} - {game.away_score}" : "—";
-        row.Add(MakeCupKnockoutLabel(score, "standings-cup-ko-score"));
-        row.Add(MakeCupKnockoutLabel(away?.name.ToUpper() ?? "—", "standings-cup-ko-team"));
+        var line = new Label($"{home?.name.ToUpper() ?? "—"}   ·   {score}   ·   {away?.name.ToUpper() ?? "—"}");
+        line.AddToClassList("standings-cup-ko-line");
+        row.Add(line);
         _standingsBody.Add(row);
-    }
-
-    static Label MakeCupKnockoutLabel(string text, string className)
-    {
-        var label = new Label(text);
-        label.AddToClassList(className);
-        return label;
     }
 
     List<StandingRow> BuildStandings(List<TeamData> teams)

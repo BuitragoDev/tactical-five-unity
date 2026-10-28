@@ -265,25 +265,18 @@
 .standings-cup-ko-row {
     min-height: 38px;
 }
-.standings-cup-ko-team {
+.standings-cup-ko-line {
     flex-grow: 1;
-    flex-basis: 0;
-    font-size: 15px;
-    color: rgb(208, 216, 232);
-    -unity-text-align: middle-left;
-}
-.standings-cup-ko-score {
-    width: 120px;
-    flex-shrink: 0;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 16px;
-    color: rgb(212, 160, 23);
-    -unity-text-align: middle-center;
+    color: rgb(208, 216, 232);
+    white-space: normal;
 }
-.standings-cup-ko-header .standings-cup-ko-team,
-.standings-cup-ko-header .standings-cup-ko-score {
+.standings-cup-ko-header .standings-cup-ko-line {
     font-size: 13px;
     color: rgb(122, 138, 170);
     letter-spacing: 1px;
+    text-transform: uppercase;
 }
 .standings-cup-message {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
