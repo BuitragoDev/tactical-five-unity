@@ -351,26 +351,44 @@
     font-size: 14px;
     color: rgb(122, 138, 170);
 }
+.ns-roster-complete-box {
+    width: 1700px;
+    max-width: 100%;
+    max-height: 100%;
+    padding: 0;
+}
+.ns-roster-complete-box .modal-body {
+    flex-grow: 1;
+    min-height: 0;
+}
+.ns-roster-grid {
+    flex-grow: 1;
+    min-height: 0;
+}
 .ns-roster-btn {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    width: 100%;
+    min-width: 0;
     font-size: 14px;
     letter-spacing: 1px;
-    color: rgb(255, 255, 255);
-    background-color: rgb(192, 57, 43);
-    border-width: 0;
-    padding: 5px 10px;
+    padding: 9px 12px;
     text-transform: uppercase;
+    white-space: normal;
     -unity-text-align: middle-center;
 }
-.ns-roster-btn:hover {
-    background-color: rgb(220, 80, 66);
-}
 .ns-roster-btn--dismissed {
-    background-color: rgb(42, 51, 71);
-    color: rgb(86, 103, 143);
+    background-color: rgb(26, 30, 38);
+    border-color: rgb(100, 110, 130);
+    color: rgb(160, 170, 190);
 }
 .ns-roster-btn--dismissed:hover {
-    background-color: rgb(42, 51, 71);
+    background-color: rgb(38, 43, 54);
+    color: rgb(200, 210, 230);
+}
+.ns-roster-complete-box .modal-btn--primary:disabled {
+    background-color: rgb(26, 30, 38);
+    border-color: rgb(100, 110, 130);
+    color: rgb(100, 110, 130);
 }
 .ns-roster-continue {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");

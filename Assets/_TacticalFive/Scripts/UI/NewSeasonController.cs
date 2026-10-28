@@ -57,7 +57,7 @@ public class NewSeasonController : UIScreenController
         base.OnEnable();
 
         _rosterOverlay = new VisualElement();
-        _rosterOverlay.AddToClassList("ns-roster-overlay");
+        _rosterOverlay.AddToClassList("modal-overlay");
         _root.Add(_rosterOverlay);
 
         _teamOptionOverlay = new VisualElement();
@@ -754,24 +754,32 @@ public class NewSeasonController : UIScreenController
         _rosterOverlay.style.display = DisplayStyle.Flex;
 
         var box = new VisualElement();
-        box.AddToClassList("ns-roster-box");
+        box.AddToClassList("modal-box");
+        box.AddToClassList("modal-box--visible");
+        box.AddToClassList("modal-box--danger");
+        box.AddToClassList("ns-roster-complete-box");
         _rosterOverlay.Add(box);
 
         var title = new Label(LocalizationService.T("ui.code.new_season_controller.plantilla_completa"));
-        title.AddToClassList("ns-roster-title");
+        title.AddToClassList("modal-title");
         box.Add(title);
 
+        var body = new VisualElement();
+        body.AddToClassList("modal-body");
+        box.Add(body);
+
         var subtitle = new Label($"La plantilla supera uno de sus límites. Libera contratos de la categoría excedida: estándar ({TradeHelper.MAX_STANDARD_ROSTER}) o two-way ({TradeHelper.MAX_TWO_WAY}).");
-        subtitle.AddToClassList("ns-roster-subtitle");
-        box.Add(subtitle);
+        subtitle.AddToClassList("modal-paragraph");
+        body.Add(subtitle);
 
         _rosterCountLabel = new Label($"Estándar: {_rosterActiveCount}/{TradeHelper.MAX_STANDARD_ROSTER} · Two-way: {DatabaseManager.Instance.GetTwoWayCount(_selectedTeamId)}/{TradeHelper.MAX_TWO_WAY}");
-        _rosterCountLabel.AddToClassList("ns-roster-count");
-        box.Add(_rosterCountLabel);
+        _rosterCountLabel.AddToClassList("modal-paragraph");
+        _rosterCountLabel.AddToClassList("modal-paragraph--gold");
+        body.Add(_rosterCountLabel);
 
         var grid = new VisualElement();
         grid.AddToClassList("ns-roster-grid");
-        box.Add(grid);
+        body.Add(grid);
 
         var col1 = new VisualElement();
         col1.AddToClassList("ns-roster-col");
@@ -797,8 +805,13 @@ public class NewSeasonController : UIScreenController
             target.Add(BuildPlayerCard(_rosterPlayers[i]));
         }
 
+        var actions = new VisualElement();
+        actions.AddToClassList("modal-actions");
+        body.Add(actions);
+
         _btnRosterContinue = new Button();
-        _btnRosterContinue.AddToClassList("ns-roster-continue");
+        _btnRosterContinue.AddToClassList("modal-btn");
+        _btnRosterContinue.AddToClassList("modal-btn--primary");
         _btnRosterContinue.text = LocalizationService.T("ui.code.new_season_controller.continuar_a_la_siguiente_temporada");
         _btnRosterContinue.SetEnabled(_rosterActiveCount <= TradeHelper.MAX_STANDARD_ROSTER
             && DatabaseManager.Instance.GetTwoWayCount(_selectedTeamId) <= TradeHelper.MAX_TWO_WAY);
@@ -809,7 +822,7 @@ public class NewSeasonController : UIScreenController
             // Las opciones ya se resolvieron antes del control de plantilla (CheckRosterAndStart)
             BeginSummerLeagueOrStart();
         });
-        box.Add(_btnRosterContinue);
+        actions.Add(_btnRosterContinue);
 
         CursorManager.Instance?.RegisterHandCursor(_btnRosterContinue);
     }
@@ -870,6 +883,8 @@ public class NewSeasonController : UIScreenController
 
         var btn = new Button();
         btn.AddToClassList("ns-roster-btn");
+        btn.AddToClassList("modal-btn");
+        btn.AddToClassList("modal-btn--danger");
         btn.text = LocalizationService.T("ui.code.new_season_controller.rescindir_contrato");
         int capturedId = p.id;
         btn.RegisterCallback<ClickEvent>(_ =>

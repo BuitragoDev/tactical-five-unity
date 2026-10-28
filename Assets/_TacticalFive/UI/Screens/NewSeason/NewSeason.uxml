@@ -1,4 +1,5 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="../LegalNotice/LegalNotice.uss" />
     <Style src="project://database/Assets/_TacticalFive/UI/Screens/NewSeason/NewSeason.uss?fileID=7433441132597879392&amp;guid=00000000000000000000000000000000&amp;type=3#NewSeason"/>
     <ui:VisualElement name="NewSeasonRoot" class="new-season-root">
         <ui:VisualElement name="TopHeader" class="top-header">
