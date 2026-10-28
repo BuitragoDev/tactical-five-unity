@@ -82,11 +82,17 @@ public static class ScheduleGenerator
 
         // F5-04: separar los 60 partidos de grupo de la NBA Cup antes de repartir
         // el resto del calendario. Se jugarán en las noches fijas de noviembre.
-        var cupGames = TakeCupGames(matchups, teams);
-        if (cupGames.Count != 60)
+        bool fullLeague = teams.Count == 30
+            && teams.GroupBy(t => new { t.conference, t.division }).All(g => g.Count() == 5);
+        var cupGames = new List<(int home, int away, string group)>();
+        if (fullLeague)
         {
-            Debug.LogError($"[Schedule] NBA Cup: se seleccionaron {cupGames.Count} partidos de grupo; se esperaban 60.");
-            return -1;
+            cupGames = TakeCupGames(matchups, teams);
+            if (cupGames.Count != 60)
+            {
+                Debug.LogError($"[Schedule] NBA Cup: se seleccionaron {cupGames.Count} partidos de grupo; se esperaban 60.");
+                return -1;
+            }
         }
 
         // Shuffle
@@ -103,8 +109,8 @@ public static class ScheduleGenerator
         var cupDays         = CupHelper.GroupPlayDays(season);
         var blockedDayIndexes = new HashSet<int>(CupHelper.BlockedRegularDays(season).Select(d => d - 1));
         var cupGameLabels   = new Dictionary<(int day, int home, int away), string>();
-        var cupAssignments  = AssignCupGames(cupGames, cupDays, teams);
-        if (cupAssignments.Count != 60)
+        var cupAssignments  = fullLeague ? AssignCupGames(cupGames, cupDays, teams) : new List<(int day, int home, int away, string group)>();
+        if (fullLeague && cupAssignments.Count != 60)
         {
             Debug.LogError($"[Schedule] NBA Cup: no se pudieron colocar los 60 partidos en las noches de grupo.");
             return -1;
