@@ -19,8 +19,10 @@ public class EditorController : UIScreenController
     }
     private Button _btnReset;
     private VisualElement _loadingSpinner;
+    private VisualElement _loadingBlocker;
     private IVisualElementScheduledItem _spinScheduler;
     private bool _isLoading;
+    private bool _loadingTookNavigationLock;
     private volatile bool _templateReady;
     private string _loadError;
 
@@ -159,7 +161,13 @@ public class EditorController : UIScreenController
         _root.Add(_toast);
 
         _loadingSpinner = _root.Q<VisualElement>("LoadingSpinner");
-        _loadingSpinner.style.display = DisplayStyle.None;
+        if (_loadingSpinner != null)
+            _loadingSpinner.style.display = DisplayStyle.None;
+
+        // Bloquea todos los clics de la pantalla mientras dura el reseteo.
+        _loadingBlocker = new VisualElement();
+        _loadingBlocker.AddToClassList("editor-loading-blocker");
+        _root.Add(_loadingBlocker);
 
         if (!string.IsNullOrEmpty(_loadError))
         {
@@ -360,53 +368,53 @@ public class EditorController : UIScreenController
 
     IEnumerator ResetToDefaultsCoroutine()
     {
+        if (_isLoading) yield break;
         ShowLoading();
         yield return null;
 
-        // Restaurar imágenes originales: borrar el overlay custom (los logos y
-        // pabellones empaquetados en Resources nunca se modifican).
-        TeamImages.ClearCustom();
-
-        DatabaseManager.Instance.CloseTemplateSession();
-
-        // Ya no se borra el template antes de construir: el nuevo se genera en `.tmp`,
-        // se audita y solo entonces sustituye al anterior (que queda como `.bak`). Si
-        // el seed es inválido, el template que había sigue ahí.
-        _templateReady = false;
         string errorMsg = null;
-
-        // Application.persistentDataPath solo se puede consultar en el main thread.
-        // Resolvemos la ruta aquí y el hilo de fondo solo recibe el path ya calculado.
-        string templatePath = DatabaseManager.Instance.TemplateDbPath;
-
-        Task.Run(() =>
-        {
-            try
-            {
-                DatabaseManager.Instance.RebuildTemplateDb(templatePath);
-            }
-            catch (System.Exception ex)
-            {
-                errorMsg = DescribeSeedError(ex);
-                Debug.LogError($"[Editor] Error building template: {ex}");
-            }
-            finally
-            {
-                _templateReady = true;
-            }
-        });
-
-        yield return new WaitWhile(() => !_templateReady);
-
-        if (!string.IsNullOrEmpty(errorMsg))
-        {
-            HideLoading();
-            ShowToast("Error al restablecer la base de datos: " + errorMsg, isError: true);
-            yield break;
-        }
-
         try
         {
+            // Restaurar imágenes originales: borrar el overlay custom (los logos y
+            // pabellones empaquetados en Resources nunca se modifican).
+            TeamImages.ClearCustom();
+
+            DatabaseManager.Instance.CloseTemplateSession();
+
+            // Ya no se borra el template antes de construir: el nuevo se genera en `.tmp`,
+            // se audita y solo entonces sustituye al anterior (que queda como `.bak`). Si
+            // el seed es inválido, el template que había sigue ahí.
+            _templateReady = false;
+
+            // Application.persistentDataPath solo se puede consultar en el main thread.
+            // Resolvemos la ruta aquí y el hilo de fondo solo recibe el path ya calculado.
+            string templatePath = DatabaseManager.Instance.TemplateDbPath;
+
+            Task.Run(() =>
+            {
+                try
+                {
+                    DatabaseManager.Instance.RebuildTemplateDb(templatePath);
+                }
+                catch (System.Exception ex)
+                {
+                    errorMsg = DescribeSeedError(ex);
+                    Debug.LogError($"[Editor] Error building template: {ex}");
+                }
+                finally
+                {
+                    _templateReady = true;
+                }
+            });
+
+            yield return new WaitWhile(() => !_templateReady);
+
+            if (!string.IsNullOrEmpty(errorMsg))
+            {
+                ShowToast("Error al restablecer la base de datos: " + errorMsg, isError: true);
+                yield break;
+            }
+
             DatabaseManager.Instance.InitTemplateSession();
             LoadData();
             if (!string.IsNullOrEmpty(_loadError))
@@ -415,6 +423,7 @@ public class EditorController : UIScreenController
                 _loadError = null;
                 yield break;
             }
+
             Refresh();
             ShowToast("Base de datos restablecida correctamente");
         }
@@ -428,25 +437,46 @@ public class EditorController : UIScreenController
     {
         if (_isLoading) return;
         _isLoading = true;
-        if (_btnReset != null) _btnReset.SetEnabled(false);
-        _loadingSpinner.style.display = DisplayStyle.Flex;
 
-        _spinScheduler = _root.schedule.Execute(() =>
+        _btnReset?.SetEnabled(false);
+        _btnAction?.SetEnabled(false);
+
+        _loadingTookNavigationLock = !ScreenManager.NavigationLocked;
+        ScreenManager.NavigationLocked = true;
+
+        if (_loadingBlocker != null)
+            _loadingBlocker.style.display = DisplayStyle.Flex;
+
+        if (_loadingSpinner != null)
         {
-            if (_loadingSpinner == null) return;
-            var current = _loadingSpinner.style.rotate;
-            float angle = current.value.angle.value + 15f;
-            if (angle >= 360f) angle -= 360f;
-            _loadingSpinner.style.rotate = new Rotate(Angle.Degrees(angle));
-        }).Every(30);
+            _loadingSpinner.style.display = DisplayStyle.Flex;
+            _spinScheduler = _root.schedule.Execute(() =>
+            {
+                if (_loadingSpinner == null) return;
+                var current = _loadingSpinner.style.rotate;
+                float angle = current.value.angle.value + 15f;
+                if (angle >= 360f) angle -= 360f;
+                _loadingSpinner.style.rotate = new Rotate(Angle.Degrees(angle));
+            }).Every(30);
+        }
     }
 
     void HideLoading()
     {
         _spinScheduler?.Pause();
         _spinScheduler = null;
-        _loadingSpinner.style.display = DisplayStyle.None;
-        if (_btnReset != null) _btnReset.SetEnabled(true);
+
+        if (_loadingSpinner != null)
+            _loadingSpinner.style.display = DisplayStyle.None;
+        if (_loadingBlocker != null)
+            _loadingBlocker.style.display = DisplayStyle.None;
+
+        _btnReset?.SetEnabled(true);
+        _btnAction?.SetEnabled(true);
+
+        if (_loadingTookNavigationLock)
+            ScreenManager.NavigationLocked = false;
+        _loadingTookNavigationLock = false;
         _isLoading = false;
     }
 
