@@ -31,9 +31,6 @@
                     <ui:VisualElement class="standings-tabs">
                         <ui:Button name="TabEast" class="standings-tab" text="{loc:ui.standings.tab_east}" />
                         <ui:Button name="TabWest" class="standings-tab" text="{loc:ui.standings.tab_west}" />
-                        <ui:Button name="TabCup" class="standings-tab" text="{loc:ui.standings.tab_cup}" />
-                    </ui:VisualElement>
-                    <ui:VisualElement name="CupTabs" class="standings-cup-tabs" style="display:none">
                         <ui:Button name="CupTabEast" class="standings-tab standings-cup-tab" text="{loc:ui.standings.cup_tab_east}" />
                         <ui:Button name="CupTabWest" class="standings-tab standings-cup-tab" text="{loc:ui.standings.cup_tab_west}" />
                         <ui:Button name="CupTabKnockout" class="standings-tab standings-cup-tab" text="{loc:ui.standings.cup_tab_knockout}" />

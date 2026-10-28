@@ -184,18 +184,10 @@
     background-color: transparent;
 }
 
-/* Subpestañas de la NBA Cup */
-.standings-cup-tabs {
-    flex-direction: row;
-    margin-top: -8px;
-    margin-bottom: 12px;
-    flex-shrink: 0;
-    border-bottom-width: 1px;
-    border-bottom-color: rgb(28, 33, 48);
-}
+/* Pestañas NBA Cup: comparten fila con las de conferencia. */
 .standings-cup-tab {
     font-size: 14px;
-    padding: 7px 12px;
+    padding: 10px 12px;
     letter-spacing: 1px;
 }
 

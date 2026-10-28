@@ -7,8 +7,6 @@ using System.Linq;
     protected override GameScreen ScreenId => GameScreen.Standings;
     private Button _tabEast;
     private Button _tabWest;
-    private Button _tabCup;
-    private VisualElement _cupTabs;
     private Button _cupTabEast, _cupTabWest, _cupTabKnockout;
     private VisualElement _standingsHeaderRow;
     private VisualElement _standingsBody;
@@ -37,8 +35,6 @@ using System.Linq;
     {
         _tabEast = _root.Q<Button>("TabEast");
         _tabWest = _root.Q<Button>("TabWest");
-        _tabCup = _root.Q<Button>("TabCup");
-        _cupTabs = _root.Q<VisualElement>("CupTabs");
         _cupTabEast = _root.Q<Button>("CupTabEast");
         _cupTabWest = _root.Q<Button>("CupTabWest");
         _cupTabKnockout = _root.Q<Button>("CupTabKnockout");
@@ -91,10 +87,9 @@ using System.Linq;
         base.RegisterCallbacks();
         _tabEast?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowStandings("East"); });
         _tabWest?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowStandings("West"); });
-        _tabCup?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowStandings("Cup"); });
-        _cupTabEast?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowCupFilter("East"); });
-        _cupTabWest?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowCupFilter("West"); });
-        _cupTabKnockout?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowCupFilter("Knockout"); });
+        _cupTabEast?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowStandings("CupEast"); });
+        _cupTabWest?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowStandings("CupWest"); });
+        _cupTabKnockout?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowStandings("CupKnockout"); });
     }
     protected override void Refresh()
     {
@@ -286,57 +281,42 @@ using System.Linq;
 
         _tabEast.RemoveFromClassList("standings-tab--active");
         _tabWest.RemoveFromClassList("standings-tab--active");
-        _tabCup?.RemoveFromClassList("standings-tab--active");
-
-        if (filter == "East") _tabEast.AddToClassList("standings-tab--active");
-        else if (filter == "West") _tabWest.AddToClassList("standings-tab--active");
-        else _tabCup?.AddToClassList("standings-tab--active");
-
-        bool isCup = filter == "Cup";
-        if (_cupTabs != null)
-            _cupTabs.style.display = isCup ? DisplayStyle.Flex : DisplayStyle.None;
-        if (isCup)
-        {
-            UpdateCupTabState();
-            ShowCupStandings();
-            return;
-        }
-
-        if (_standingsHeaderRow != null)
-            _standingsHeaderRow.style.display = DisplayStyle.Flex;
-
-        var subtitleLabel = _root.Q<Label>("StandingsSubtitle");
-        if (subtitleLabel != null)
-            subtitleLabel.text = filter == "East" ? "CONFERENCIA ESTE" : "CONFERENCIA OESTE";
-
-        var filtered = _allTeams.FindAll(t => t.conference == filter);
-        var standings = BuildStandings(filtered);
-        _standingsBody.Clear();
-
-        foreach (var row in standings)
-        {
-            var team = _allTeams.Find(t => t.id == row.teamId);
-            var rowElem = CreateStandingsRow(row, team);
-            _standingsBody.Add(rowElem);
-        }
-    }
-
-    void ShowCupFilter(string filter)
-    {
-        _cupFilter = filter;
-        UpdateCupTabState();
-        ShowCupStandings();
-    }
-
-    void UpdateCupTabState()
-    {
         _cupTabEast?.RemoveFromClassList("standings-tab--active");
         _cupTabWest?.RemoveFromClassList("standings-tab--active");
         _cupTabKnockout?.RemoveFromClassList("standings-tab--active");
 
+        if (filter == "East" || filter == "West")
+        {
+            if (filter == "East") _tabEast.AddToClassList("standings-tab--active");
+            else _tabWest.AddToClassList("standings-tab--active");
+
+            if (_standingsHeaderRow != null)
+                _standingsHeaderRow.style.display = DisplayStyle.Flex;
+
+            var subtitleLabel = _root.Q<Label>("StandingsSubtitle");
+            if (subtitleLabel != null)
+                subtitleLabel.text = filter == "East" ? "CONFERENCIA ESTE" : "CONFERENCIA OESTE";
+
+            var filtered = _allTeams.FindAll(t => t.conference == filter);
+            var standings = BuildStandings(filtered);
+            _standingsBody.Clear();
+
+            foreach (var row in standings)
+            {
+                var team = _allTeams.Find(t => t.id == row.teamId);
+                _standingsBody.Add(CreateStandingsRow(row, team));
+            }
+            return;
+        }
+
+        _cupFilter = filter == "CupWest" ? "West"
+                   : filter == "CupKnockout" ? "Knockout"
+                   : "East";
         if (_cupFilter == "East") _cupTabEast?.AddToClassList("standings-tab--active");
         else if (_cupFilter == "West") _cupTabWest?.AddToClassList("standings-tab--active");
         else _cupTabKnockout?.AddToClassList("standings-tab--active");
+
+        ShowCupStandings();
     }
 
     void ShowCupStandings()
