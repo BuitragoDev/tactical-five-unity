@@ -16,6 +16,39 @@ public static class CupHelper
     public const string SfPrefix = "cup-sf-";
     public const string FinalLabel = "cup-final";
 
+    /// <summary>Noches de la fase de grupos (1-based, igual que GameData.game_day).</summary>
+    public static List<int> GroupPlayDays(SeasonData season)
+    {
+        var start = new DateTime(season.year_start, 10, 22);
+        int Day(int month, int day) => (int)(new DateTime(season.year_start, month, day) - start).TotalDays + 1;
+        return new List<int>
+        {
+            Day(10, 30), Day(11, 6), Day(11, 13), Day(11, 20),
+            Day(11, 24), Day(11, 25), Day(11, 27)
+        };
+    }
+
+    public static int QuarterfinalDay(SeasonData season) => CupDay(season, 12, 4);
+    public static int SemifinalDay(SeasonData season) => CupDay(season, 12, 8);
+    public static int FinalDay(SeasonData season) => CupDay(season, 12, 11);
+
+    public static HashSet<int> BlockedRegularDays(SeasonData season)
+    {
+        var days = new HashSet<int>(GroupPlayDays(season))
+        {
+            QuarterfinalDay(season),
+            SemifinalDay(season),
+            FinalDay(season)
+        };
+        return days;
+    }
+
+    static int CupDay(SeasonData season, int month, int day)
+    {
+        var start = new DateTime(season.year_start, 10, 22);
+        return (int)(new DateTime(season.year_start, month, day) - start).TotalDays + 1;
+    }
+
     /// <summary>Grupo de la Cup: una división (5 equipos).</summary>
     public static string GroupName(TeamData team)
         => team == null ? "" : $"{team.conference} · {team.division}";
@@ -194,7 +227,7 @@ public static class CupHelper
                 (seeds[2], seeds[5], QfPrefix + "3"),
                 (seeds[3], seeds[4], QfPrefix + "4"),
             };
-            int minDay = groupGames.Max(g => g.game_day) + 3;
+            int minDay = QuarterfinalDay(season);
             int created = CreateGames(season, games, qf, minDay);
             if (created == 0) return 0;
 
@@ -219,14 +252,14 @@ public static class CupHelper
                     (winners[0], winners[3], SfPrefix + "1"),
                     (winners[1], winners[2], SfPrefix + "2"),
                 };
-                int minDay = qfGames.Max(g => g.game_day) + 3;
+                int minDay = SemifinalDay(season);
                 return CreateGames(season, games, sf, minDay);
             }
 
             if (sfGames.Count == 2 && sfGames.All(g => g.is_played == 1) && finalGames.Count == 0)
             {
                 var winners = sfGames.Select(Winner).ToList();
-                int minDay = sfGames.Max(g => g.game_day) + 3;
+                int minDay = FinalDay(season);
                 return CreateGames(season, games,
                     new List<(int home, int away, string label)> { (winners[0], winners[1], FinalLabel) },
                     minDay);

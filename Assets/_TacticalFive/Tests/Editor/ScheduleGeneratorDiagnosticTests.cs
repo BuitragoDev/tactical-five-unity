@@ -150,6 +150,11 @@ public class ScheduleGeneratorDiagnosticTests
         var cupGames = games.Where(g => (g.series_label ?? "").StartsWith(CupHelper.GroupLabelPrefix)).ToList();
         Assert.That(cupGames, Has.Count.EqualTo(60), "NBA Cup: 60 partidos de grupo");
         TestContext.WriteLine($"NBA Cup: {cupGames.Count} partidos de grupo; último día {cupGames.Max(g => g.game_day)}.");
+        var cupDays = CupHelper.GroupPlayDays(season);
+        Assert.That(cupGames.All(g => cupDays.Contains(g.game_day)), Is.True,
+            "NBA Cup: todos los partidos de grupo deben caer en las noches de Cup.");
+        Assert.That(cupGames.Max(g => g.game_day), Is.LessThanOrEqualTo(cupDays.Max()),
+            "NBA Cup: la fase de grupos debe terminar antes de diciembre.");
         foreach (var team in teams)
         {
             var ownCup = cupGames.Where(g => g.home_team_id == team.id || g.away_team_id == team.id).ToList();

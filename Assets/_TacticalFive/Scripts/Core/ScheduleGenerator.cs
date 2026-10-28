@@ -80,6 +80,15 @@ public static class ScheduleGenerator
         var seasonEnd   = new DateTime(season.year_end,   4, 15);
         int totalDays   = (int)(seasonEnd - seasonStart).TotalDays + 1;
 
+        // F5-04: separar los 60 partidos de grupo de la NBA Cup antes de repartir
+        // el resto del calendario. Se jugarán en las noches fijas de noviembre.
+        var cupGames = TakeCupGames(matchups, teams);
+        if (cupGames.Count != 60)
+        {
+            Debug.LogError($"[Schedule] NBA Cup: se seleccionaron {cupGames.Count} partidos de grupo; se esperaban 60.");
+            return -1;
+        }
+
         // Shuffle
         matchups = matchups.OrderBy(_ => Random.value).ToList();
 
@@ -91,13 +100,40 @@ public static class ScheduleGenerator
         var lastGameDay     = teams.ToDictionary(t => t.id, _ => -1);
         var lastVenue       = teams.ToDictionary(t => t.id, _ => 0);
         var venueByTeamDay  = new Dictionary<(int team, int day), int>();
+        var cupDays         = CupHelper.GroupPlayDays(season);
+        var blockedDayIndexes = new HashSet<int>(CupHelper.BlockedRegularDays(season).Select(d => d - 1));
+        var cupGameLabels   = new Dictionary<(int day, int home, int away), string>();
+        var cupAssignments  = AssignCupGames(cupGames, cupDays, teams);
+        if (cupAssignments.Count != 60)
+        {
+            Debug.LogError($"[Schedule] NBA Cup: no se pudieron colocar los 60 partidos en las noches de grupo.");
+            return -1;
+        }
+        foreach (var (dayIdx, homePk, awayPk, groupName) in cupAssignments)
+        {
+            scheduled.Add((dayIdx, homePk, awayPk));
+            teamDaySet[homePk].Add(dayIdx);
+            teamDaySet[awayPk].Add(dayIdx);
+            // Reservar también el día anterior y el siguiente para que un partido
+            // regular no cree un back-to-back con la Cup.
+            if (dayIdx > 0)
+            {
+                teamDaySet[homePk].Add(dayIdx - 1);
+                teamDaySet[awayPk].Add(dayIdx - 1);
+            }
+            teamDaySet[homePk].Add(dayIdx + 1);
+            teamDaySet[awayPk].Add(dayIdx + 1);
+            dayGamesCount[dayIdx] = dayGamesCount.GetValueOrDefault(dayIdx, 0) + 1;
+            cupGameLabels[(dayIdx, homePk, awayPk)] = groupName;
+            RecordGame(homePk, awayPk, dayIdx, lastGameDay, lastVenue, venueByTeamDay);
+        }
 
         // Cada partido es una entrada individual: no se deduplica por pareja
         // orientada (dos partidos idénticos son dos partidos distintos).
         foreach (var (homePk, awayPk) in matchups)
         {
             int day = FindDay(homePk, awayPk, totalDays, teamDaySet, dayGamesCount,
-                seasonStart, teamsById, lastGameDay, lastVenue, venueByTeamDay);
+                seasonStart, teamsById, lastGameDay, lastVenue, venueByTeamDay, blockedDayIndexes);
             if (day >= 0)
             {
                 scheduled.Add((day, homePk, awayPk));
@@ -122,6 +158,8 @@ public static class ScheduleGenerator
             {
                 var date = seasonStart.AddDays(d);
                 if (date.Month == 2 && date.Day >= 8 && date.Day <= 14)
+                    continue;
+                if (blockedDayIndexes.Contains(d))
                     continue;
 
                 if (!teamDaySet[homePk].Contains(d) && !teamDaySet[awayPk].Contains(d)
@@ -219,17 +257,17 @@ public static class ScheduleGenerator
                 away_team_id = awayPk,
                 is_played    = 0,
                 game_type    = "regular",
-                series_label = "",
+                series_label = cupGameLabels.TryGetValue((dayIdx, homePk, awayPk), out string groupName)
+                    ? CupHelper.GroupLabelPrefix + groupName
+                    : "",
                 home_score   = 0,
                 away_score   = 0,
                 is_home      = 0
             });
         }
 
-        // F5-04: los partidos de grupo de la NBA Cup son partidos de división ya
-        // existentes; se marcan para que cuenten una sola vez en la temporada.
-        int cupGames = CupHelper.MarkGroupGames(games, teams);
-        Debug.Log($"[Schedule] NBA Cup: {cupGames} partidos de grupo marcados.");
+        // Los partidos de grupo ya se han colocado en sus noches de Cup.
+        Debug.Log($"[Schedule] NBA Cup: {cupGameLabels.Count} partidos de grupo programados.");
 
         // Si el guardado falla, devolvemos -1 para que el llamador NO marque la
         // temporada como generada (de lo contrario quedaría sin partidos).
@@ -265,6 +303,67 @@ public static class ScheduleGenerator
         Debug.Log($"[Schedule] All-Star Game creado: {allStarDate:yyyy-MM-dd}");
 
         return games.Count;
+    }
+
+    static List<(int home, int away, string group)> TakeCupGames(
+        List<(int home, int away)> matchups, List<TeamData> teams)
+    {
+        var result = new List<(int home, int away, string group)>();
+        foreach (var division in teams.GroupBy(t => new { t.conference, t.division }))
+        {
+            var clubs = division.OrderBy(t => t.id).ToList();
+            if (clubs.Count != 5) continue;
+            string groupName = CupHelper.GroupName(clubs[0]);
+
+            foreach (var (homeIndex, awayIndex) in CupHelper.GroupPairings())
+            {
+                int index = matchups.FindIndex(m =>
+                    m.home == clubs[homeIndex].id && m.away == clubs[awayIndex].id);
+                if (index < 0)
+                {
+                    Debug.LogError($"[Schedule] NBA Cup: falta el partido {clubs[homeIndex].abbreviation}-" +
+                                   $"{clubs[awayIndex].abbreviation} en {groupName}.");
+                    return result;
+                }
+                var game = matchups[index];
+                matchups.RemoveAt(index);
+                result.Add((game.home, game.away, groupName));
+            }
+        }
+        return result;
+    }
+
+    static List<(int day, int home, int away, string group)> AssignCupGames(
+        List<(int home, int away, string group)> cupGames,
+        List<int> cupDays, List<TeamData> teams)
+    {
+        var result = new List<(int day, int home, int away, string group)>();
+        var teamNights = teams.ToDictionary(t => t.id, _ => new HashSet<int>());
+        var nightCounts = new int[cupDays.Count];
+
+        foreach (var game in cupGames)
+        {
+            int chosen = -1;
+            for (int n = 0; n < cupDays.Count; n++)
+            {
+                if (teamNights[game.home].Contains(n) || teamNights[game.away].Contains(n))
+                    continue;
+                if (nightCounts[n] >= 15) continue;
+                chosen = n;
+                break;
+            }
+            if (chosen < 0)
+            {
+                Debug.LogError($"[Schedule] NBA Cup: no hay noche para {game.home}-{game.away}.");
+                return result;
+            }
+
+            teamNights[game.home].Add(chosen);
+            teamNights[game.away].Add(chosen);
+            nightCounts[chosen]++;
+            result.Add((cupDays[chosen] - 1, game.home, game.away, game.group));
+        }
+        return result;
     }
 
     /// <summary>
@@ -317,7 +416,8 @@ public static class ScheduleGenerator
         IReadOnlyDictionary<int, TeamData> teamsById,
         Dictionary<int, int> lastGameDay,
         Dictionary<int, int> lastVenue,
-        Dictionary<(int team, int day), int> venueByTeamDay)
+        Dictionary<(int team, int day), int> venueByTeamDay,
+        HashSet<int> blockedDays = null)
     {
         int bestDay   = -1;
         int bestScore = -1000;
@@ -326,6 +426,8 @@ public static class ScheduleGenerator
         {
             var date = seasonStart.AddDays(d);
             if (date.Month == 2 && date.Day >= 8 && date.Day <= 14)
+                continue;
+            if (blockedDays != null && blockedDays.Contains(d))
                 continue;
 
             if (teamDaySet[homePk].Contains(d) || teamDaySet[awayPk].Contains(d))
