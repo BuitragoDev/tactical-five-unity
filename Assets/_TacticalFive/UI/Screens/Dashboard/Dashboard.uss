@@ -700,7 +700,7 @@
 }
 .game-meta-arena {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 18px;
+    font-size: 16px;
     color: rgb(122, 138, 170);
     -unity-text-align: middle-left;
     flex-grow: 1;
