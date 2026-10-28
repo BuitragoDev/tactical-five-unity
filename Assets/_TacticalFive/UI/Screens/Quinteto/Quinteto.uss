@@ -537,7 +537,7 @@
 .detail-top {
     flex-direction: row;
     align-items: center;
-    padding: 18px;
+    padding: 10px 14px;
     border-bottom-width: 1px;
     border-bottom-color: rgb(120, 95, 30);
     border-top-width: 0;
@@ -566,7 +566,7 @@
     font-size: 16px;
     color: rgb(122, 138, 170);
     margin-top: 2px;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
 }
 
 .detail-pos-badge {
@@ -629,7 +629,7 @@
 .detail-attrs {
     flex-direction: row;
     flex-wrap: wrap;
-    padding: 8px 16px;
+    padding: 4px 12px;
     flex-shrink: 0;
 }
 
@@ -638,9 +638,9 @@
     align-items: center;
     justify-content: center;
     width: 100px;
-    height: 46px;
-    padding: 6px 4px;
-    margin: 3px;
+    height: 42px;
+    padding: 4px 3px;
+    margin: 2px;
     border-radius: 4px;
     background-color: rgb(39, 174, 96);
     flex-shrink: 0;
@@ -676,7 +676,7 @@
     flex-direction: row;
     justify-content: center;
     flex-shrink: 0;
-    margin: 12px 16px;
+    margin: 6px 12px;
 }
 
 .season-stat-card {
@@ -686,7 +686,7 @@
     border-width: 1px;
     border-color: rgb(42, 95, 201);
     border-radius: 4px;
-    padding: 6px 10px;
+    padding: 4px 8px;
     margin-right: 6px;
     width: 90px;
 }
