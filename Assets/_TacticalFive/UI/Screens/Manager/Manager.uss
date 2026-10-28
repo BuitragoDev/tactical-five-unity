@@ -249,22 +249,27 @@
 
 .manager-btn-logros {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf?fileID=4800000&guid=0b839cefea68a5446946e734e71a15b2&type=3#Saira_Condensed-Bold");
-    font-size: 14px;
-    color: rgb(15, 17, 23);
-    background-color: rgb(255, 183, 77);
-    border-radius: 6px;
-    border-width: 0;
-    padding: 8px 12px;
+    font-size: 16px;
+    letter-spacing: 1px;
+    color: rgb(212, 160, 23);
+    background-color: rgb(47, 42, 27);
+    border-width: 2px;
+    border-color: rgb(212, 160, 23);
+    border-radius: 8px;
+    padding: 10px 18px;
     margin-top: 12px;
     align-self: flex-start;
+    text-transform: uppercase;
+    cursor: pointer;
 }
 
 .manager-btn-logros:hover {
-    background-color: rgb(255, 198, 102);
+    background-color: rgb(66, 56, 27);
+    color: rgb(240, 192, 64);
 }
 
 .manager-btn-logros:active {
-    background-color: rgb(224, 152, 44);
+    background-color: rgb(37, 35, 28);
 }
 
 .manager-rings-row {
