@@ -636,6 +636,10 @@
 }
 
 .ns-summer-badge--gold {
+    width: 92px;
+    min-width: 92px;
+    flex-shrink: 0;
+    justify-content: center;
     background-color: rgb(33, 32, 28);
     border-color: rgb(212, 160, 23);
 }
@@ -651,12 +655,14 @@
     letter-spacing: 1px;
     color: rgb(212, 160, 23);
     margin-right: 4px;
+    white-space: nowrap;
 }
 
 .ns-summer-badge-value {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 16px;
     color: rgb(255, 255, 255);
+    white-space: nowrap;
 }
 
 .ns-summer-badge--green .ns-summer-badge-value {
