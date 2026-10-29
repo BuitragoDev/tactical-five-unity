@@ -513,6 +513,9 @@ public class MessagesController : UIScreenController
 
     void SetNewsImage(VisualElement icon, MessageData msg)
     {
+        // Imagen de respaldo por categoría: ninguna noticia debe quedar vacía.
+        SetNewsImageFallback(icon, msg);
+
         // Prioridad: news_type (nuevo) → lógica por título (retrocompatibilidad)
         if (!string.IsNullOrEmpty(msg.news_type))
         {
@@ -522,9 +525,68 @@ public class MessagesController : UIScreenController
         SetNewsImageByTitle(icon, msg);
     }
 
+    void SetNewsImageFallback(VisualElement icon, MessageData msg)
+    {
+        string path = GetCategory(msg) switch
+        {
+            "LIGA" => "Icons/resultados128px",
+            "TRASPASOS" => "Noticias/traspaso",
+            "LESIONES" => "Noticias/lesionados",
+            "PRENSA" => "Noticias/quejas",
+            _ => "Icons/noticias_icon"
+        };
+        TrySetIcon(icon, path);
+    }
+
+    bool TrySetIcon(VisualElement icon, string resourcePath)
+    {
+        if (string.IsNullOrEmpty(resourcePath)) return false;
+        var tex = Resources.Load<Texture2D>(resourcePath);
+        if (tex == null) return false;
+        icon.style.backgroundImage = new StyleBackground(tex);
+        return true;
+    }
+
+    bool TrySetPlayerProtagonist(VisualElement icon, MessageData msg)
+    {
+        string playerName = ExtractFirstFromBody(msg.body, _playerByName.Keys)
+            ?? ExtractFirstFromBody(msg.title, _playerByName.Keys);
+        if (playerName != null && _playerByName.TryGetValue(playerName, out var p))
+        {
+            var tex = PlayerPhotoHelper.Load(p.id, p.photo);
+            if (tex != null)
+            {
+                icon.style.backgroundImage = new StyleBackground(tex);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static bool IsPlayerProtagonistType(string nt)
+    {
+        return nt == NewsType.TRIPLE_DOBLE || nt == NewsType.EXPLOSION
+            || nt == NewsType.FICHAJE || nt == NewsType.HARD_CAP
+            || nt == NewsType.SEQUIA || nt == NewsType.BAJA_ESTRELLA
+            || nt == NewsType.RUMOR_TRASPASO || nt == NewsType.DESCONTENTO
+            || nt == NewsType.LESION || nt == NewsType.RECUPERACION
+            || nt == NewsType.RESERVA_IR || nt == NewsType.QUEJA
+            || nt == NewsType.PREOCUPACION || nt == NewsType.HITO
+            || nt == NewsType.LEGADO || nt == NewsType.FICHAJE_RECHAZADO
+            || nt == NewsType.FICHAJE_CANCELADO || nt == NewsType.OFERTA_RECHAZADA
+            || nt == NewsType.REFIRMA_CANCELADA || nt == NewsType.RENOVACION
+            || nt == NewsType.REFIRMA_ENVIADA || nt == NewsType.AGENTE_LIBRE
+            || nt == NewsType.DESPEDIDO || nt == NewsType.BUYOUT;
+    }
+
     bool SetNewsImageByType(VisualElement icon, MessageData msg)
     {
         string nt = msg.news_type;
+
+        // El protagonista jugador manda sobre la imagen temática; si no se
+        // encuentra, cada rama conserva su icono de respaldo de Icons.
+        if (IsPlayerProtagonistType(nt) && TrySetPlayerProtagonist(icon, msg))
+            return true;
 
         // Hitos de legado (E1): icono de récord/trofeo.
         if (nt == NewsType.LEGADO)
@@ -533,6 +595,13 @@ public class MessagesController : UIScreenController
             if (legacyTex != null) { icon.style.backgroundImage = new StyleBackground(legacyTex); return true; }
             return false;
         }
+
+        if (nt == NewsType.CUP_CHAMPION)
+            return TrySetIcon(icon, "Icons/trofeoNBA_big");
+        if (nt == NewsType.PROYECTO_CIUDAD || nt == NewsType.EVENTO_CIUDAD)
+            return TrySetIcon(icon, "Icons/ciudad_icon");
+        if (nt == NewsType.PREMIOS_MES)
+            return TrySetIcon(icon, "Icons/premios_icon");
 
         if (nt == NewsType.HITO || nt == NewsType.RACHA_VICTORIAS || nt == NewsType.MALA_RACHA
             || nt == NewsType.CAMPANADA || nt == NewsType.RESULTADO || nt == NewsType.GLEAGUE_CHAMPION
@@ -548,6 +617,12 @@ public class MessagesController : UIScreenController
                     return true;
                 }
             }
+            if (nt == NewsType.GLEAGUE_CHAMPION)
+                return TrySetIcon(icon, "Icons/trofeoGLeague_big");
+            if (nt == NewsType.HITO || nt == NewsType.REVANCHA || nt == NewsType.DINASTIA)
+                return TrySetIcon(icon, "Icons/record_icon");
+            if (nt == NewsType.RESULTADO)
+                return TrySetIcon(icon, "Icons/resultados128px");
             if (nt == NewsType.CAMPANADA)
             {
                 var tex = _noticiasSprites.GetValueOrDefault("rechazado");
@@ -563,7 +638,7 @@ public class MessagesController : UIScreenController
                 icon.style.backgroundImage = new StyleBackground(allStarSprite);
                 return true;
             }
-            return false;
+            return TrySetIcon(icon, "Icons/estrella64px");
         }
 
         if (nt == NewsType.TRIPLE_DOBLE || nt == NewsType.EXPLOSION
@@ -704,26 +779,44 @@ public class MessagesController : UIScreenController
                     return true;
                 }
             }
-            return true;
+            return TrySetIcon(icon, "Icons/eliminatorias_icon");
         }
 
         if (nt == NewsType.PREMIOS_MES)
-        {
-            var tex = _noticiasSprites.GetValueOrDefault("premios");
-            if (tex != null) { icon.style.backgroundImage = new StyleBackground(tex); return true; }
-        }
+            return TrySetIcon(icon, "Icons/premios_icon");
 
-        if (nt == NewsType.QUEJA || nt == NewsType.PREOCUPACION)
+        if (nt == NewsType.QUEJA || nt == NewsType.PREOCUPACION || nt == NewsType.DESCONTENTO)
         {
             var tex = _noticiasSprites.GetValueOrDefault("quejas");
             if (tex != null) { icon.style.backgroundImage = new StyleBackground(tex); return true; }
         }
+
+        if (nt == NewsType.FICHAJE || nt == NewsType.FICHAJE_RECHAZADO
+            || nt == NewsType.FICHAJE_CANCELADO)
+            return TrySetIcon(icon, "Noticias/contratado");
+        if (nt == NewsType.HARD_CAP || nt == NewsType.RUMOR_TRASPASO)
+            return TrySetIcon(icon, "Noticias/traspaso");
+        if (nt == NewsType.SEQUIA || nt == NewsType.BAJA_ESTRELLA)
+            return TrySetIcon(icon, "Noticias/lesionados");
 
         return false;
     }
 
     void SetNewsImageByTitle(VisualElement icon, MessageData msg)
     {
+        if (msg.title != null && msg.title.IndexOf("NBA CUP", StringComparison.OrdinalIgnoreCase) >= 0)
+        {
+            if (TrySetIcon(icon, "Icons/trofeoNBA_big")) return;
+        }
+        if (msg.title != null && msg.title.IndexOf("ciudad", StringComparison.OrdinalIgnoreCase) >= 0)
+        {
+            if (TrySetIcon(icon, "Icons/ciudad_icon")) return;
+        }
+        if (msg.title != null && msg.title.StartsWith("Premios del Mes"))
+        {
+            if (TrySetIcon(icon, "Icons/premios_icon")) return;
+        }
+
         if (msg.sender_type == 1 && msg.title != null && msg.title.StartsWith("Resultado:"))
         {
             string rivalName = msg.title.Substring("Resultado: ".Length);
