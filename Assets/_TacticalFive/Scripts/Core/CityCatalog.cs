@@ -209,6 +209,10 @@ public static class CityCatalog
         return null;
     }
 
+    /// <summary>Formato monetario de la ciudad: punto de millares y símbolo al final.</summary>
+    public static string FormatMoney(long value)
+        => value.ToString("N0", StatFormat.Culture) + " $";
+
     /// <summary>Coste del siguiente nivel (el nivel empieza en 1).</summary>
     public static long ProjectCost(ProjectDefinition definition, int nextLevel)
     {
@@ -246,7 +250,7 @@ public static class CityCatalog
     {
         if (choice == null) return "";
         var parts = new List<string>();
-        if (choice.cost > 0) parts.Add($"Coste ${choice.cost:N0}");
+        if (choice.cost > 0) parts.Add($"Coste: {FormatMoney(choice.cost)}");
         if (choice.fanConfidence != 0) parts.Add($"Afición {(choice.fanConfidence > 0 ? "+" : "")}{choice.fanConfidence}");
         if (choice.morale != 0) parts.Add($"Moral {(choice.morale > 0 ? "+" : "")}{choice.morale}");
         if (choice.fisico != 0) parts.Add($"Físico {(choice.fisico > 0 ? "+" : "")}{choice.fisico}");

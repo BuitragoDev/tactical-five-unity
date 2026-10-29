@@ -53,7 +53,7 @@ public static class CityService
         long cost = CityCatalog.ProjectCost(definition, nextLevel);
         if (team.budget < cost)
         {
-            error = $"Presupuesto insuficiente: faltan ${cost - team.budget:N0}.";
+            error = $"Presupuesto insuficiente: faltan {CityCatalog.FormatMoney(cost - team.budget)}.";
             return false;
         }
 
@@ -75,10 +75,14 @@ public static class CityService
             created_at = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
         });
 
+        string effect = CityCatalog.ProjectEffectSummary(projectKey, nextLevel);
         AddMessage(manager, season, day,
             "Obra de ciudad iniciada",
-            $"{definition.name} (nivel {nextLevel}) estará lista en {definition.days} días. " +
-            $"Coste: ${cost:N0}.",
+            $"{team.name} impulsa la construcción de {definition.name} (nivel {nextLevel}) con una inversión de " +
+            $"{CityCatalog.FormatMoney(cost)}. Las obras arrancarán de inmediato y se prolongarán durante " +
+            $"{definition.days} días, con seguimiento diario por parte del club.\n\n" +
+            $"{definition.description} Cuando concluyan los trabajos, el proyecto aportará {effect} " +
+            $"La entidad informará de cualquier avance relevante a través de sus canales oficiales.",
             NewsType.PROYECTO_CIUDAD);
 
         return true;
@@ -136,7 +140,11 @@ public static class CityService
 
         AddMessage(manager, season, gameDay,
             $"Proyecto completado: {definition.name}",
-            $"Nivel {project.level} terminado. {effect}",
+            $"La obra de {definition.name} (nivel {project.level}) ha quedado terminada tras " +
+            $"{definition.days} días de trabajos. La inversión final ascendió a " +
+            $"{CityCatalog.FormatMoney(project.cost)}.\n\n" +
+            $"{effect} La ciudad ya disfruta de la mejora y el club estudia el siguiente paso para " +
+            $"seguir creciendo. Los aficionados notarán el cambio en las próximas jornadas.",
             NewsType.PROYECTO_CIUDAD);
     }
 
@@ -217,7 +225,7 @@ public static class CityService
         var choice = definition.choices[choiceIndex];
         if (choice.cost > team.budget)
         {
-            error = $"Presupuesto insuficiente: faltan ${choice.cost - team.budget:N0}.";
+            error = $"Presupuesto insuficiente: faltan {CityCatalog.FormatMoney(choice.cost - team.budget)}.";
             return false;
         }
 

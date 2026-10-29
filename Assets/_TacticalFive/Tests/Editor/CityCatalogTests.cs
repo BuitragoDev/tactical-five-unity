@@ -83,12 +83,19 @@ public class CityCatalogTests
     }
 
     [Test]
+    public void MoneyFormat_UsesDotThousandsAndTrailingDollar()
+    {
+        Assert.That(CityCatalog.FormatMoney(3_000_000), Is.EqualTo("3.000.000 $"));
+        Assert.That(CityCatalog.FormatMoney(500_000), Is.EqualTo("500.000 $"));
+    }
+
+    [Test]
     public void EventEffectSummary_ShowsCostAndAtLeastOneEffect()
     {
         var choice = CityCatalog.Event("queja_vecinal").choices[0];
         string summary = CityCatalog.EventEffectSummary(choice);
 
-        Assert.That(summary, Does.Contain("Coste"));
+        Assert.That(summary, Does.Contain("Coste: 500.000 $"));
         Assert.That(summary, Does.Contain("Afición"));
     }
 }
