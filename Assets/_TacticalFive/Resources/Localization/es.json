@@ -2270,6 +2270,14 @@
       "value": "SIMULACIÓN"
     },
     {
+      "key": "ui.dashboard.preparando_partido",
+      "value": "PREPARANDO PARTIDO"
+    },
+    {
+      "key": "ui.dashboard.simulando_encuentro",
+      "value": "Simulando el encuentro…"
+    },
+    {
       "key": "ui.dashboard.stat_assister_icon",
       "value": "AS"
     },

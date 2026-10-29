@@ -26,6 +26,8 @@ using System.Threading.Tasks;
     private Label _headerSeason;
     private Label _headerDate;
     private VisualElement _loadingSpinner;
+    private VisualElement _matchTransitionOverlay;
+    private VisualElement _matchTransitionSpinner;
     private IVisualElementScheduledItem _spinScheduler;
     private bool _isLoading;
 
@@ -195,6 +197,13 @@ using System.Threading.Tasks;
     protected override void OnEnable()
     {
         base.OnEnable();
+
+        // En el flujo Previa → IR AL PARTIDO, el Dashboard se activa solo para
+        // ejecutar la simulación. Se cubre inmediatamente para que el jugador no
+        // vea sus botones antes de saltar a MatchDay.
+        if (_simulateFromPreGame)
+            ShowMatchTransitionOverlay();
+
         _deadlineDayActive = false;
         _firedOverlay = new VisualElement();
         _firedOverlay.AddToClassList("fired-modal-overlay");
@@ -276,9 +285,22 @@ using System.Threading.Tasks;
         _spinScheduler?.Pause();
         _spinScheduler = null;
         if (_loadingSpinner != null) _loadingSpinner.style.display = DisplayStyle.None;
+        HideMatchTransitionOverlay();
         _btnAction?.SetEnabled(true);
         SetSidebarNavigationEnabled(true);
         ScreenManager.NavigationLocked = false;
+    }
+
+    void ShowMatchTransitionOverlay()
+    {
+        if (_matchTransitionOverlay != null)
+            _matchTransitionOverlay.style.display = DisplayStyle.Flex;
+    }
+
+    void HideMatchTransitionOverlay()
+    {
+        if (_matchTransitionOverlay != null)
+            _matchTransitionOverlay.style.display = DisplayStyle.None;
     }
 
     void Update()
@@ -396,7 +418,10 @@ using System.Threading.Tasks;
         _headerSeason = _root.Q<Label>("HeaderSeason");
         _headerDate = _root.Q<Label>("HeaderDate");
         _loadingSpinner = _root.Q<VisualElement>("LoadingSpinner");
-        _loadingSpinner.style.display = DisplayStyle.None;
+        if (_loadingSpinner != null) _loadingSpinner.style.display = DisplayStyle.None;
+        _matchTransitionOverlay = _root.Q<VisualElement>("MatchTransitionOverlay");
+        _matchTransitionSpinner = _root.Q<VisualElement>("MatchTransitionSpinner");
+        HideMatchTransitionOverlay();
 
         // Último partido
         _noLastGame = _root.Q<Label>("NoLastGame");

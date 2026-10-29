@@ -321,6 +321,17 @@
                 </ui:VisualElement>
             </ui:ScrollView>
         </ui:VisualElement>
+
+        <!-- Transición visual Previa → MatchDay: evita mostrar el Dashboard
+             interactivo mientras se simula el día. Los modales siguen por encima. -->
+        <ui:VisualElement name="MatchTransitionOverlay" class="match-transition-overlay">
+            <ui:VisualElement class="match-transition-content">
+                <ui:VisualElement name="MatchTransitionSpinner" class="loading-spinner match-transition-spinner"/>
+                <ui:Label text="{loc:ui.dashboard.preparando_partido}" class="match-transition-title"/>
+                <ui:Label text="{loc:ui.dashboard.simulando_encuentro}" class="match-transition-subtitle"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
         <ui:VisualElement name="ConfigModalOverlay" class="modal-overlay">
             <ui:VisualElement name="ConfigModalBox" class="modal-box">
                 <ui:Label text="{loc:ui.dashboard.configuracion}" class="modal-title"/>

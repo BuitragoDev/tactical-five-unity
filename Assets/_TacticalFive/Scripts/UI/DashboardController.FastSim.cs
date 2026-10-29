@@ -471,11 +471,21 @@ public partial class DashboardController
 
         _spinScheduler = _root.schedule.Execute(() =>
         {
-            if (_loadingSpinner == null) return;
-            var current = _loadingSpinner.style.rotate;
-            float angle = current.value.angle.value + 15f;
-            if (angle >= 360f) angle -= 360f;
-            _loadingSpinner.style.rotate = new Rotate(Angle.Degrees(angle));
+            float angle;
+            if (_loadingSpinner != null)
+            {
+                var current = _loadingSpinner.style.rotate;
+                angle = current.value.angle.value + 15f;
+                if (angle >= 360f) angle -= 360f;
+                _loadingSpinner.style.rotate = new Rotate(Angle.Degrees(angle));
+            }
+            if (_matchTransitionSpinner != null)
+            {
+                var currentTransition = _matchTransitionSpinner.style.rotate;
+                float transitionAngle = currentTransition.value.angle.value + 15f;
+                if (transitionAngle >= 360f) transitionAngle -= 360f;
+                _matchTransitionSpinner.style.rotate = new Rotate(Angle.Degrees(transitionAngle));
+            }
         }).Every(30);
     }
 
@@ -484,6 +494,7 @@ public partial class DashboardController
         _spinScheduler?.Pause();
         _spinScheduler = null;
         _loadingSpinner.style.display = DisplayStyle.None;
+        HideMatchTransitionOverlay();
         _btnAction.SetEnabled(true);
         _isLoading = false;
         SetSidebarNavigationEnabled(true);
