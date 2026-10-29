@@ -916,7 +916,8 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    background-color: rgb(40, 48, 60);
+    border-right-color: rgb(28, 40, 56);
+    border-width: 1px;
     align-self: stretch;
 }
 
