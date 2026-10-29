@@ -8,9 +8,24 @@ using NUnit.Framework;
 public class BuyoutMarketRulesTests
 {
     static BuyoutCandidate Team(int id, TeamStrategy strategy, int samePos = 0, float avg = 70f,
-                                bool room = true, int reputation = 3)
+                                bool room = true, int reputation = 3, long margin = 0)
         => new BuyoutCandidate { teamId = id, strategy = strategy, samePosCount = samePos,
-                                 teamAvg = avg, hasRoom = room, reputation = reputation };
+                                 teamAvg = avg, hasRoom = room, reputation = reputation,
+                                 salaryMargin = margin };
+
+    static PlayerData Player(int id, int overall, int age = 27, int potential = 0,
+                             long salary = 2_000_000, int years = 1,
+                             PlayerRole role = PlayerRole.UltimoRecurso)
+        => new PlayerData
+        {
+            id = id,
+            overall = overall,
+            age = age,
+            potential = potential > 0 ? potential : overall,
+            salary = salary,
+            contract_years = years,
+            role = role
+        };
 
     [Test]
     public void BestDestination_PrefersContender()
@@ -124,5 +139,49 @@ public class BuyoutMarketRulesTests
         Assert.That(BuyoutMarketRules.PickSuitor(0, rng), Is.EqualTo(-1));
         Assert.That(BuyoutMarketRules.PickSuitor(1, rng), Is.EqualTo(0), "con un solo postor no hay sorteo");
         Assert.That(BuyoutMarketRules.PickSuitor(2, rng), Is.InRange(0, 1));
+    }
+
+    [Test]
+    public void RankDestinations_PrioritizesCapMargin()
+    {
+        var ranked = BuyoutMarketRules.RankDestinations(new List<BuyoutCandidate>
+        {
+            Team(1, TeamStrategy.Contend, margin: 5_000_000),
+            Team(2, TeamStrategy.Rebuild, margin: 30_000_000)
+        });
+
+        Assert.That(ranked[0].teamId, Is.EqualTo(2),
+            "con hueco, el mayor margen salarial debe pasar por delante de la estrategia");
+    }
+
+    [Test]
+    public void CanCutFor_RequiresAStarAndAClearUpgrade()
+    {
+        var incoming = Player(1, 90, salary: 2_000_000, years: 1);
+        var lowBench = Player(2, 70, age: 27, salary: 2_000_000, years: 1);
+
+        Assert.That(BuyoutMarketRules.CanCutFor(incoming, lowBench, 140_000_000), Is.True,
+            "una estrella puede reemplazar a un jugador de banquillo");
+        Assert.That(BuyoutMarketRules.CanCutFor(Player(3, 80), Player(4, 78), 140_000_000),
+            Is.False, "un 80 no debe cortar a un 78: no hay mejora clara");
+        Assert.That(BuyoutMarketRules.CanCutFor(incoming,
+            Player(5, 70, role: PlayerRole.Titular), 140_000_000), Is.False,
+            "no se corta a un titular para meter a una estrella");
+        Assert.That(BuyoutMarketRules.CanCutFor(Player(6, 79), lowBench, 140_000_000),
+            Is.False, "por debajo de 80 no se abre plantilla");
+    }
+
+    [Test]
+    public void SelectCutCandidate_PrefersExpiringAndLowValue()
+    {
+        var incoming = Player(1, 92, salary: 2_000_000);
+        var expiring = Player(2, 68, age: 24, salary: 2_000_000, years: 1);
+        var longDeal = Player(3, 72, age: 26, salary: 3_000_000, years: 3);
+
+        var cut = BuyoutMarketRules.SelectCutCandidate(
+            new List<PlayerData> { longDeal, expiring }, incoming, 140_000_000);
+
+        Assert.That(cut, Is.SameAs(expiring),
+            "se prefiere el contrato de 1 año y el menor valor de plantilla");
     }
 }

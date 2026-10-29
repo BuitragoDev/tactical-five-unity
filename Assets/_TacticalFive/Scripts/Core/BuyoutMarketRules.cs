@@ -12,6 +12,8 @@ public class BuyoutCandidate
     public int reputation;
     /// <summary>Puede firmarle: hueco de plantilla y encaje en cap/excepciones (el mínimo siempre cabe).</summary>
     public bool hasRoom;
+    /// <summary>Margen de cap proyectado después de liberar al jugador que hace hueco.</summary>
+    public long salaryMargin;
 }
 
 /// <summary>
@@ -54,8 +56,10 @@ public static class BuyoutMarketRules
 
         return candidates
             .Where(c => c != null && c.hasRoom)
+            // Capacidad económica: el que deja más margen de cap es el primero.
+            .OrderByDescending(c => c.salaryMargin)
             // El jugador quiere competir: contender > balanced > rebuild.
-            .OrderByDescending(c => Priority(c.strategy))
+            .ThenByDescending(c => Priority(c.strategy))
             // Minutos disponibles: menos jugadores en su posición = más hueco.
             .ThenBy(c => c.samePosCount)
             // Proyecto: mejor plantilla y más prestigio atraen más.
@@ -94,6 +98,46 @@ public static class BuyoutMarketRules
             if (roll <= acc) return i;
         }
         return 0;
+    }
+
+    /// <summary>
+    /// Media mínima del agente libre para justificar que la IA libere una plaza.
+    /// Por debajo, solo se ficha si ya hay hueco natural.
+    /// </summary>
+    public const int MinOverallForRosterCut = 80;
+    public const int MinOvrGapForRosterCut = 5;
+    public const double MinValueRatioForRosterCut = 1.25;
+
+    /// <summary>
+    /// ¿Merece la pena cortar a `candidate` para firmar a `incoming`? Solo se toca
+    /// plantilla de rotación baja/media y el jugador entrante debe ser claramente mejor.
+    /// </summary>
+    public static bool CanCutFor(PlayerData incoming, PlayerData candidate, long salaryCap)
+    {
+        if (incoming == null || candidate == null) return false;
+        if (incoming.overall < MinOverallForRosterCut) return false;
+        if (candidate.role == PlayerRole.Estrella || candidate.role == PlayerRole.Titular) return false;
+        if (incoming.overall < candidate.overall + MinOvrGapForRosterCut) return false;
+
+        double incomingValue = TradeValueHelper.PlayerValue(incoming, salaryCap);
+        double candidateValue = TradeValueHelper.PlayerValue(candidate, salaryCap);
+        return incomingValue >= candidateValue * MinValueRatioForRosterCut;
+    }
+
+    /// <summary>Jugador de menor valor que se puede sacrificar para abrir una plaza.</summary>
+    public static PlayerData SelectCutCandidate(IEnumerable<PlayerData> roster, PlayerData incoming,
+        long salaryCap)
+    {
+        if (roster == null || incoming == null) return null;
+        return roster
+            .Where(p => p != null && p.is_on_ir == 0 && p.is_two_way == 0)
+            .Where(p => CanCutFor(incoming, p, salaryCap))
+            // Preferir contratos de 1 año para no generar deuda muerta futura.
+            .OrderBy(p => p.contract_years <= 1 ? 0 : 1)
+            .ThenBy(p => TradeValueHelper.PlayerValue(p, salaryCap))
+            .ThenBy(p => p.overall)
+            .ThenBy(p => p.id)
+            .FirstOrDefault();
     }
 
     /// <summary>¿Puede la IA firmarle en esta jornada? (el mismo día de la rescisión o después)</summary>

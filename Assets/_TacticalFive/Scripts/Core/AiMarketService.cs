@@ -20,6 +20,7 @@ public sealed class AiMarketService
     readonly Action _rebuildStrategies;
     readonly Func<TeamData, bool> _isContenderProvider;
     readonly Func<bool> _isDeadlineWeekProvider;
+    readonly HashSet<int> _rosterCutsToday = new HashSet<int>();
 
     public AiMarketService(ManagerData manager, TeamData myTeam, SeasonData season,
         System.Random aiRng, Dictionary<int, int> teamTradeCooldown,
@@ -264,9 +265,7 @@ public sealed class AiMarketService
             foreach (var t in teams)
             {
                 var roster = DatabaseManager.Instance.GetPlayersByTeam(t.id);
-                long payroll = DatabaseManager.Instance.GetEffectiveTeamPayroll(t.id);
-                bool hasRoom = DatabaseManager.Instance.GetRosterCount(t.id) < TradeHelper.MAX_STANDARD_ROSTER
-                            && TradeHelper.CanAISignExternal(payroll, minSalary, settings, p.years_of_service);
+                bool hasRoom = CanOpenSpotFor(t, p, minSalary, out _, out long salaryMargin);
 
                 candidates.Add(new BuyoutCandidate
                 {
@@ -275,7 +274,8 @@ public sealed class AiMarketService
                     teamAvg = roster.Count > 0 ? (float)roster.Average(x => x.GetCalculatedAverage()) : 0f,
                     samePosCount = roster.Count(x => x.position == p.position),
                     reputation = t.reputation,
-                    hasRoom = hasRoom
+                    hasRoom = hasRoom,
+                    salaryMargin = salaryMargin
                 });
             }
 
@@ -288,6 +288,15 @@ public sealed class AiMarketService
 
             var team = teams.FirstOrDefault(t => t.id == ranked[pick].teamId);
             if (team == null) continue;
+
+            if (DatabaseManager.Instance.GetRosterCount(team.id) >= TradeHelper.MAX_STANDARD_ROSTER)
+            {
+                var cut = BuyoutMarketRules.SelectCutCandidate(
+                    DatabaseManager.Instance.GetPlayersByTeam(team.id), p,
+                    settings?.salary_cap ?? TradeHelper.SALARY_CAP);
+                if (cut == null) continue;
+                ReleaseForRosterSpot(cut, team, gameDay);
+            }
 
             p.team_id = team.id;
             p.last_team_id = team.id;
@@ -333,6 +342,85 @@ public sealed class AiMarketService
             Debug.Log($"[BuyoutMarket] {team.name} firma a {playerName} (OVR {p.GetCalculatedAverage()}) por el mínimo " +
                       $"[postor {pick + 1}/{ranked.Count}]");
         }
+    }
+
+    /// <summary>
+    /// ¿Puede el equipo firmar a este agente libre, abriendo plaza si hace falta?
+    /// Devuelve el jugador que habría que cortar (null si ya hay hueco).
+    /// </summary>
+    bool CanOpenSpotFor(TeamData team, PlayerData incoming, long newSalary,
+        out PlayerData cut, out long salaryMargin)
+    {
+        cut = null;
+        var settings = DatabaseManager.Instance.GetLeagueSettings();
+        long cap = settings?.salary_cap ?? TradeHelper.SALARY_CAP;
+        long payroll = DatabaseManager.Instance.GetEffectiveTeamPayroll(team.id);
+
+        if (DatabaseManager.Instance.GetRosterCount(team.id) >= TradeHelper.MAX_STANDARD_ROSTER)
+        {
+            if (_rosterCutsToday.Contains(team.id))
+            {
+                salaryMargin = cap - payroll;
+                return false;
+            }
+            cut = BuyoutMarketRules.SelectCutCandidate(
+                DatabaseManager.Instance.GetPlayersByTeam(team.id), incoming, cap);
+            if (cut == null)
+            {
+                salaryMargin = cap - payroll;
+                return false;
+            }
+            payroll -= cut.salary;
+        }
+
+        bool canSign = TradeHelper.CanAISignExternal(payroll, newSalary, settings,
+            incoming.years_of_service);
+        salaryMargin = cap - payroll;
+        if (!canSign) cut = null;
+        return canSign;
+    }
+
+    /// <summary>
+    /// Libera una plaza para una estrella: el jugador cortado queda como agente libre
+    /// de buyout. Si le quedaban años, se registra la deuda muerta futura.
+    /// </summary>
+    void ReleaseForRosterSpot(PlayerData cut, TeamData team, int gameDay)
+    {
+        if (cut == null || team == null) return;
+
+        int futureYears = Math.Max(0, cut.contract_years - 1);
+        if (futureYears > 0)
+        {
+            DatabaseManager.Instance.Db.Insert(new DeadMoneyData
+            {
+                team_id = team.id,
+                player_name = $"{cut.first_name} {cut.last_name}",
+                origin_season_id = _season?.id ?? 0,
+                annual_amount = cut.salary,
+                years_remaining = futureYears
+            });
+        }
+
+        DatabaseManager.Instance.RemoveCapHold(cut.id);
+        cut.team_id = 0;
+        cut.last_team_id = 0;
+        cut.seasons_with_team = 0;
+        cut.is_on_ir = 0;
+        cut.is_two_way = 0;
+        cut.g_league_assigned = 0;
+        cut.on_trade_block = 0;
+        cut.free_agent_type = "";
+        cut.qualifying_offer_salary = 0;
+        cut.salary = TradeHelper.MinimumSalary(
+            DatabaseManager.Instance.GetLeagueSettings(), cut.years_of_service);
+        cut.contract_years = 0;
+        cut.guaranteed_years = 0;
+        cut.has_team_option = 0;
+        cut.has_player_option = 0;
+        cut.waived_game_day = gameDay;
+        cut.renewal_cooldown_day = 0;
+        DatabaseManager.Instance.UpdatePlayer(cut);
+        _rosterCutsToday.Add(team.id);
     }
 
     /// <summary>
@@ -438,16 +526,20 @@ public sealed class AiMarketService
 
         var teamAvgs = new Dictionary<int, float>();
         var teamStrategies = new Dictionary<int, TeamStrategy>();
+        var teamMargins = new Dictionary<int, long>();
+        long salaryCap = leagueSettings?.salary_cap ?? TradeHelper.SALARY_CAP;
         foreach (var team in allTeams)
         {
             var roster = DatabaseManager.Instance.GetPlayersByTeam(team.id);
             teamAvgs[team.id] = roster.Count > 0 ? (float)roster.Average(p => p.GetCalculatedAverage()) : 0f;
             teamStrategies[team.id] = GetTeamStrategy(team.id);
+            teamMargins[team.id] = salaryCap - DatabaseManager.Instance.GetEffectiveTeamPayroll(team.id);
         }
-        // Prioridad de destino: contender > balanced > rebuild (los rebuild tankean y
-        // preservan el pick alto del draft).
+        // Prioridad de destino: primero el mejor margen salarial; después el proyecto
+        // (contender > balanced > rebuild).
         var teamsByPriority = allTeams
-            .OrderByDescending(t => teamStrategies[t.id] == TeamStrategy.Contend ? 3
+            .OrderByDescending(t => teamMargins[t.id])
+            .ThenByDescending(t => teamStrategies[t.id] == TeamStrategy.Contend ? 3
                                    : teamStrategies[t.id] == TeamStrategy.Balanced ? 2 : 1)
             .ThenByDescending(t => teamAvgs[t.id])
             .ToList();
@@ -473,12 +565,10 @@ public sealed class AiMarketService
             foreach (var team in teamsByPriority)
             {
                 var roster = DatabaseManager.Instance.GetPlayersByTeam(team.id);
-                if (DatabaseManager.Instance.GetRosterCount(team.id) >= TradeHelper.MAX_STANDARD_ROSTER) continue;
 
                 // Un equipo en reconstrucción no ficha estrellas top (tankea para el draft)
                 if (star.GetCalculatedAverage() >= 85 && teamStrategies[team.id] == TeamStrategy.Rebuild) continue;
 
-                long payroll = DatabaseManager.Instance.GetEffectiveTeamPayroll(team.id);
                 bool fromBuyout = star.waived_game_day >= 0;
 
                 // Salario nuevo: un rescindido firma por el mínimo (mercado de buyout); el
@@ -489,6 +579,11 @@ public sealed class AiMarketService
                     ? BuyoutMarketRules.WaivedSalary(starMinimum)
                     : star.salary + 2_000_000;
                 if (newSalary < starMinimum) newSalary = starMinimum;
+
+                // Si está lleno, busca un jugador de rotación baja/media que libere plaza.
+                if (!CanOpenSpotFor(team, star, newSalary, out var cut, out _)) continue;
+                long payroll = DatabaseManager.Instance.GetEffectiveTeamPayroll(team.id)
+                               - (cut?.salary ?? 0);
 
                 int years = fromBuyout ? BuyoutMarketRules.ContractYears
                           : star.age > 35 ? 1 : star.age > 32 ? 2 : star.age > 28 ? 3 : star.age > 25 ? 4 : 5;
@@ -523,6 +618,9 @@ public sealed class AiMarketService
                 // La IA ficha con sus excepciones (espacio → MLE → mínimo), no solo con
                 // espacio de tope: antes ninguna estrella por encima del cap podía firmar.
                 if (!matchedRFA && !TradeHelper.CanAISignExternal(payroll, newSalary, leagueSettings, star.years_of_service)) continue;
+
+                if (!matchedRFA && cut != null)
+                    ReleaseForRosterSpot(cut, team, gameDay);
 
                 star.team_id = signingTeam.id;
                 star.last_team_id = signingTeam.id;

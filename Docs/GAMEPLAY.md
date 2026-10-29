@@ -283,7 +283,7 @@ TheCity aporta una capa ligera de gestión, no una economía paralela. Los proye
 ## 9. League AI
 
 - `AiMarketService.ProcessAITransfers` (cycle every ≥10 game days, **3-5 game days during deadline week Feb 1-8**; transfer window Sep 1–Feb 8): AI teams fill weak spots — <12 players sign FA; otherwise attempt an AI trade (max 3 per cycle). Each team has a **strategy** (`TeamStrategy`: Contend / Balanced / Rebuild via `GetTeamStrategy`): Contend (top 4 conference or 2+ stars OVR≥85) denser (0.45, 6-day cooldown), hunts upgrades up to OVR 90 including a future pick, protects young (age<26, OVR≥82); Rebuild (bottom 4 or young without stars) sells veterans ≥30 for young/picks (`TrySellVeteran`), 8-day cooldown; Balanced 15-day cooldown. Offers to the player strategy-aware (`PickTradeTarget`/`BuildOfferPackage`). Deadline contenders offer extra picks; titles prefixed `[DEADLINE]`.
-- `AiMarketService.ProcessStarFreeAgentSignings`: top FAs (avg > 80) sign with strongest teams; priority Contend > Balanced > Rebuild; Rebuild never signs OVR≥85.
+- `AiMarketService.ProcessStarFreeAgentSignings`: top FAs (avg > 80) sign with teams ordered by **margen salarial** y después por proyecto (Contend > Balanced > Rebuild); Rebuild nunca ficha OVR≥85. Si el equipo está a 16/16, puede abrir plaza cortando a un jugador de rol Banquillo/Último recurso cuando la estrella es claramente superior (`BuyoutMarketRules.CanCutFor`: OVR≥80, +5 sobre el cortado y 1,25× su valor).
 - `EndSeasonController.ProcessAITeamRenewals`: AI renews its expiring players.
 - `StartNewSeason` refills AI rosters to 16 standard (best teams first), trims to 16 standard max (+2 two-way = 18 activos), aging/progression, updates caps from `CbaTable`, re-signs TV/sponsors. **En NewSeasonController**, antes del control de plantilla >16 estándar o >2 two-way del equipo del manager, `CheckRosterAndStart` decrementa un año de contrato y pasa a FA a los no renovados (misma semántica que `StartNewSeason`, que salta ese decremento para el equipo nuevo del manager).
 
@@ -513,9 +513,13 @@ Los **hilos narrativos** convierten los resultados reales en situaciones con con
 - **La IA le busca destino de inmediato** (`DashboardController.ProcessBuyoutMarket`, en el
   lote de fondo) **solo si tiene 75+ de media** (`BuyoutMarketRules.MinOverall`); por debajo
   queda como agente libre normal y decide el mercado general (los equipos con hueco eligen
-  antes a los mejores de cada posición). A partir de esa jornada, los destinos —**contender &gt; balanced &gt;
-  rebuild**; a igual estrategia, el equipo con menos jugadores en su posición; luego mejor
-  plantilla y más **prestigio**— se ordenan con `BuyoutMarketRules.RankDestinations` y entre
+  antes a los mejores de cada posición). A partir de esa jornada, los destinos se ordenan
+  por **margen salarial** y después por **contender &gt; balanced &gt; rebuild**; a igualdad,
+  el equipo con menos jugadores en su posición, mejor plantilla y más **prestigio**
+  (`BuyoutMarketRules.RankDestinations`). Si un equipo está a 16/16, puede abrir plaza
+  cortando a un jugador de rotación baja/media (`CanCutFor`/`SelectCutCandidate`) siempre que
+  la estrella sea claramente mejor; el cortado pasa al mercado de buyout y, si le quedaban
+  años, genera `dead_money`. Entre
   los **3 mejores postores** se sortea el destino de forma **ponderada** (`PickSuitor`: el 1º
   tiene el doble de probabilidad que el 2º y el triple que el 3º). El elegido le firma **por el
   mínimo** (hueco de plantilla y encaje en `TradeHelper.CanAISignExternal`), genera el
