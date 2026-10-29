@@ -42,7 +42,14 @@
                     <!-- RIGHT COLUMN -->
                     <ui:VisualElement class="cartera-right">
                         <ui:Label name="SelectedTeamLabel" class="section-title" text="" style="margin-top: 18px;" />
-                        <ui:VisualElement name="PlayerList" class="player-list" />
+                        <ui:VisualElement class="cartera-player-scroll-row">
+                            <ui:VisualElement name="PlayerListViewport" class="cartera-player-viewport">
+                                <ui:VisualElement name="PlayerList" class="player-list" />
+                            </ui:VisualElement>
+                            <ui:VisualElement name="PlayerListScrollTrack" class="cartera-player-scrollbar">
+                                <ui:VisualElement name="PlayerListScrollThumb" class="cartera-player-scrollbar-thumb" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
 

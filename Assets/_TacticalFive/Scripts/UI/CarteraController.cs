@@ -20,11 +20,13 @@ public class CarteraController : UIScreenController
     private Button _tabInformes;
     private VisualElement _informesTableHeader;
     private VisualElement _informesTableBody;
+    private VisualElement _playerListViewport, _playerListScrollTrack, _playerListScrollThumb;
 
-    // ── Informes scrollbar ──
+    // ── Informes / jugadores scrollbar ──
     private List<(PlayerData player, int scoutedDay)> _informesData = new();
     private VisualElement _informesViewport, _informesScrollTrack, _informesScrollThumb;
     private ScrollBarData _informesBar;
+    private ScrollBarData _playerListBar;
 
     private List<TeamData> _allTeams;
     private List<ScoutData> _scouts;
@@ -58,7 +60,11 @@ public class CarteraController : UIScreenController
         _informesViewport = _root.Q<VisualElement>("InformesViewport");
         _informesScrollTrack = _root.Q<VisualElement>("InformesScrollTrack");
         _informesScrollThumb = _root.Q<VisualElement>("InformesScrollThumb");
+        _playerListViewport = _root.Q<VisualElement>("PlayerListViewport");
+        _playerListScrollTrack = _root.Q<VisualElement>("PlayerListScrollTrack");
+        _playerListScrollThumb = _root.Q<VisualElement>("PlayerListScrollThumb");
         if (_informesViewport != null) _informesViewport.style.overflow = Overflow.Hidden;
+        if (_playerListViewport != null) _playerListViewport.style.overflow = Overflow.Hidden;
     }
 
     protected override void LoadData()
@@ -315,6 +321,7 @@ public class CarteraController : UIScreenController
         if (_selectedTeam == null)
         {
             _selectedTeamLabel.text = LocalizationService.T("ui.code.cartera_controller.selecciona_un_equipo_para_ver_sus_jugado_15b38775");
+            BindPlayerListScrollbar();
             return;
         }
 
@@ -328,6 +335,15 @@ public class CarteraController : UIScreenController
         {
             _playerList.Add(BuildPlayerRow(players[i]));
         }
+
+        BindPlayerListScrollbar();
+    }
+
+    void BindPlayerListScrollbar()
+    {
+        CustomScrollbar.Reset(_playerListBar);
+        _playerListBar = BindScrollBar(_playerListViewport, _playerList,
+            _playerListScrollTrack, _playerListScrollThumb);
     }
 
     VisualElement BuildPlayerRow(PlayerData p)
