@@ -13,6 +13,11 @@ public static class TeamEconomyService
 {
     public static readonly int[] PayrollDays = { 1, 16, 31, 46, 61, 76, 91, 106, 121, 136, 151, 166 };
 
+    // Reparto fijo de derechos de liga/televisión nacional. Se paga junto a la
+    // nómina para que la caja no dependa solo de los partidos en casa.
+    public const long LeagueDistributionAnnual = 60_000_000;
+    public static long LeagueDistributionShare => MonthlyShare(LeagueDistributionAnnual);
+
     // ── REGLAS PURAS ──────────────────────────────────────
 
     public static bool IsPayrollDay(int gameDay) => PayrollDays.Contains(gameDay);
@@ -198,6 +203,7 @@ public static class TeamEconomyService
         {
             ProcessTeamPlayerPayroll(team, gameDay, manager, myTeam, season);
             ProcessTeamLuxuryTax(team, gameDay, myTeam, season);
+            ProcessTeamLeagueDistribution(team, gameDay, myTeam, season);
         }
 
         ProcessEmployeePayroll(gameDay, myTeam, season);
@@ -243,6 +249,17 @@ public static class TeamEconomyService
         {
             Debug.LogError($"[Payroll] Error creating message: {ex.Message}\n{ex.StackTrace}");
         }
+    }
+
+    static void ProcessTeamLeagueDistribution(TeamData team, int gameDay,
+        TeamData myTeam, SeasonData season)
+    {
+        var db = DatabaseManager.Instance;
+        if (db.GetFinanceRecord(team.id, season.id, FinanceRecord.TYPE_LEAGUE, gameDay) != null)
+            return;
+
+        ApplyIncome(team, myTeam, season, gameDay,
+            FinanceRecord.TYPE_LEAGUE, LeagueDistributionShare);
     }
 
     static void ProcessEmployeePayroll(int gameDay, TeamData myTeam, SeasonData season)

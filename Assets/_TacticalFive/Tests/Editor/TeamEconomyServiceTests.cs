@@ -30,6 +30,13 @@ public class TeamEconomyServiceTests
     }
 
     [Test]
+    public void LeagueDistribution_IsSixtyMillionPerSeasonInTwelveShares()
+    {
+        Assert.That(TeamEconomyService.LeagueDistributionAnnual, Is.EqualTo(60_000_000));
+        Assert.That(TeamEconomyService.LeagueDistributionShare, Is.EqualTo(5_000_000));
+    }
+
+    [Test]
     public void ArenaTicketMultiplier_ScalesWithPabellonReputation()
     {
         Assert.That(TeamEconomyService.ArenaTicketMultiplier(0), Is.EqualTo(1.0f));

@@ -369,13 +369,15 @@ using System.Linq;
         long subTotal = DatabaseManager.Instance.GetFinanceTotalByType(_myTeam.id, _season.id, FinanceRecord.TYPE_SUBSCRIPTION);
         long sponsorTotal = DatabaseManager.Instance.GetFinanceTotalByType(_myTeam.id, _season.id, FinanceRecord.TYPE_SPONSORSHIP);
         long tvTotal = DatabaseManager.Instance.GetFinanceTotalByType(_myTeam.id, _season.id, FinanceRecord.TYPE_TV);
+        long leagueTotal = DatabaseManager.Instance.GetFinanceTotalByType(_myTeam.id, _season.id, FinanceRecord.TYPE_LEAGUE);
         long loanInTotal = DatabaseManager.Instance.GetFinanceTotalByType(_myTeam.id, _season.id, FinanceRecord.TYPE_LOAN_IN);
-        long total = ticketTotal + subTotal + sponsorTotal + tvTotal + loanInTotal;
+        long total = ticketTotal + subTotal + sponsorTotal + tvTotal + leagueTotal + loanInTotal;
 
         AddTableRow(_incomeTable, "Taquilla", ticketTotal, true);
         AddTableRow(_incomeTable, "Abonos", subTotal, true);
         AddTableRow(_incomeTable, "Patrocinios", sponsorTotal, true);
         AddTableRow(_incomeTable, "Televisión", tvTotal, true);
+        AddTableRow(_incomeTable, "Derechos de liga", leagueTotal, true);
         if (loanInTotal != 0)
             AddTableRow(_incomeTable, "Préstamos", loanInTotal, true);
 
@@ -481,9 +483,9 @@ using System.Linq;
             int idx = GetMonthIndex(date, hasPreseason);
             if (idx < 0 || idx >= 10) continue;
 
-            if (r.record_type <= FinanceRecord.TYPE_TV || r.record_type == FinanceRecord.TYPE_LOAN_IN)
+            if (FinanceRecord.IsIncomeType(r.record_type))
                 totals[idx].inc += r.amount;
-            else
+            else if (FinanceRecord.IsExpenseType(r.record_type))
                 totals[idx].exp += r.amount;
         }
 

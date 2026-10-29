@@ -108,7 +108,7 @@ players 1──1 hof_players (player_id)            teams 1──N retired_numbe
 `id`, `season_id`, `champion_id`, `finalist_id`, `finals_result`, `east/west/div1..6_champion_id`, `finals_mvp_id`, `finals_mvp_rating`, `season_mvp_id/rating/games`, `rookie_of_year_id/rating/games`, `best_defender_id`, `sixth_man_id`, `most_improved_id`, `all_star_pg/sg/sf/pf/c_id`, `first_team_pg..c`, `second_team_pg..c`.
 
 ### finance_records (`FinanceRecord`)
-`id`, `team_id`, `season_id`, `record_type`, `game_day`, `amount`, `created_at`. Types: `1=Taquilla, 2=Abonos, 3=Patrocinios, 4=Televisión, 5=Remodelación, 6=Despido, 7=Sueldos jugadores, 8=Sueldos empleados, 9=Préstamo, 10=Luxury tax, 11=Buyout`. (`GetTotalIncome` = types ≤4; `GetTotalExpenses` = types ≥5.) `ProcessTeamLuxuryTax` escribe type 10 en **positivo** (`ECO-05`); la migración `loan_records_reclassified` normaliza los registros antiguos.
+`id`, `team_id`, `season_id`, `record_type`, `game_day`, `amount`, `created_at`. Types: `1=Taquilla, 2=Abonos, 3=Patrocinios, 4=Televisión, 5=Remodelación, 6=Despido, 7=Sueldos jugadores, 8=Sueldos empleados, 9=Préstamo legacy, 10=Luxury tax, 11=Buyout, 12=Préstamo concedido, 13=Devolución de préstamo, 14=Derechos de liga`. `FinanceRecord.IsIncomeType`/`IsExpenseType` es la clasificación única para totales y gráfico. `ProcessTeamLuxuryTax` escribe type 10 en **positivo** (`ECO-05`); la migración `loan_records_reclassified` normaliza los registros antiguos.
 
 ### storylines (`StorylineData`)
 

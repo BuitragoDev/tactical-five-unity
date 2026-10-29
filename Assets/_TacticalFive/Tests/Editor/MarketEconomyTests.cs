@@ -117,6 +117,17 @@ public class MarketEconomyTests
     }
 
     [Test]
+    public void ContractMarket_RebalanceBoostsInitialAndHomeGameIncome()
+    {
+        Assert.That(ContractMarket.SponsorInitialIncome(10_000_000), Is.EqualTo(15_000_000));
+        Assert.That(ContractMarket.TvInitialIncome(10_000_000), Is.EqualTo(15_000_000));
+
+        long baseHome = ContractMarket.SponsorHomeGameIncome(1_000_000, 5, 100);
+        Assert.That(baseHome, Is.GreaterThan(1_000_000),
+            "el pago por partido debe incorporar el rebalanceo");
+    }
+
+    [Test]
     public void ShouldRenewDeal_BigMarketsMoreLikely()
     {
         // Un gran mercado con prestigio renueva con casi cualquier roll; uno pequeño,

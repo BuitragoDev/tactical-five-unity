@@ -40,6 +40,10 @@ public partial class DatabaseManager
         _db.BeginTransaction();
         try
         {
+        // La economía de todos los equipos debe tener settings antes de renovar
+        // patrocinios/TV o calcular ingresos de la nueva temporada.
+        EnsureTeamSettingsForAllTeams();
+
         // 0. Cargar la temporada anterior. Su archivado histórico de carrera lo hace
         // el Dashboard al llegar a la fase "finished"; aquí NO se repite (duplicaba
         // los totales de carrera).

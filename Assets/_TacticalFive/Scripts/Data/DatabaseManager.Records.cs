@@ -754,9 +754,10 @@ public partial class DatabaseManager
 
         // Add initial income to budget
         var team = GetTeamById(teamId);
+        long initialIncome = ContractMarket.SponsorInitialIncome(sponsor.initial_income);
         if (team != null)
         {
-            team.budget += sponsor.initial_income;
+            team.budget += initialIncome;
             UpdateTeam(team);
         }
 
@@ -766,7 +767,7 @@ public partial class DatabaseManager
             team_id = teamId,
             season_id = seasonId,
             record_type = FinanceRecord.TYPE_SPONSORSHIP,
-            amount = sponsor.initial_income,
+            amount = initialIncome,
             game_day = gameDay,
             created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
         };
@@ -880,9 +881,10 @@ public partial class DatabaseManager
 
         // Add initial income to budget
         var team = GetTeamById(teamId);
+        long initialIncome = ContractMarket.TvInitialIncome(channel.initial_income);
         if (team != null)
         {
-            team.budget += channel.initial_income;
+            team.budget += initialIncome;
             UpdateTeam(team);
         }
 
@@ -892,7 +894,7 @@ public partial class DatabaseManager
             team_id = teamId,
             season_id = seasonId,
             record_type = FinanceRecord.TYPE_TV,
-            amount = channel.initial_income,
+            amount = initialIncome,
             game_day = gameDay,
             created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
         };
@@ -926,22 +928,20 @@ public partial class DatabaseManager
     {
         if (!EnsureDb()) return 0;
         var records = _db.Table<FinanceRecord>()
-                         .Where(r => r.team_id == teamId && r.season_id == seasonId
-                                  && (r.record_type <= FinanceRecord.TYPE_TV
-                                      || r.record_type == FinanceRecord.TYPE_LOAN_IN))
+                         .Where(r => r.team_id == teamId && r.season_id == seasonId)
                          .ToList();
-        return records.Sum(r => r.amount);
+        return records.Where(r => FinanceRecord.IsIncomeType(r.record_type))
+                      .Sum(r => r.amount);
     }
 
     public long GetTotalExpenses(int teamId, int seasonId)
     {
         if (!EnsureDb()) return 0;
         var records = _db.Table<FinanceRecord>()
-                         .Where(r => r.team_id == teamId && r.season_id == seasonId
-                                  && r.record_type >= FinanceRecord.TYPE_RENOVATION
-                                  && r.record_type != FinanceRecord.TYPE_LOAN_IN)
+                         .Where(r => r.team_id == teamId && r.season_id == seasonId)
                          .ToList();
-        return records.Sum(r => r.amount);
+        return records.Where(r => FinanceRecord.IsExpenseType(r.record_type))
+                      .Sum(r => r.amount);
     }
 
     public long GetFinanceTotalByType(int teamId, int seasonId, int recordType)

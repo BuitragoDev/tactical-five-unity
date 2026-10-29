@@ -233,11 +233,17 @@ Proyección de nómina efectiva vs cap/apron/espacio, contratos garantizados/opc
 - `attendance = CalculateAttendance(...)` (fórmula E3 arriba).
 - `ticketRevenue = attendance × ticket_price × arenaMultiplier` (por reputación del PABELLON, 1.03–1.20).
 - Sponsor `home_game_income` y TV `home_game_income` **escalan con fama y mercado**
-  (`ContractMarket.SponsorHomeGameIncome` → 0.70x-1.50x según reputación + mercado).
+  (`ContractMarket.SponsorHomeGameIncome`) y llevan un **+25 %** de rebalanceo.
+  El ingreso inicial al firmar lleva un **+50 %** (`ContractMarket.SponsorInitialIncome` /
+  `TvInitialIncome`) y la UI de Patrocinadores/TV muestra ya el valor efectivo.
 - All recorded as `FinanceRecord` (types 1/3/4) and added to `TeamData.budget`.
+- **Derechos de liga:** `TeamEconomyService.ProcessTeamLeagueDistribution` añade
+  **60 M$/temporada** a cada equipo, en **12 pagos de 5 M$** en los mismos días de nómina
+  (`TYPE_LEAGUE`). Es la base fija que evita que la economía dependa solo de la taquilla.
 
 ### Monthly
-- `ProcessMonthlyPayroll` on `payrollDays = {1,31,61,91,121,151,181}`: player salaries `sum/12` (type 7) + employees `sum/12` (type 8), each guarded against double-pay per day. **Luxury tax on the same days** (`ProcessTeamLuxuryTax`): `annualTax = CalculateLuxuryTax(sum(player salaries), luxury_threshold)`; if >0 deduct `annual/12` (type 10). — `TeamEconomyService.ProcessMonthlyPayroll`/`ProcessTeamLuxuryTax`, invocados desde `DashboardController.GameDay.cs`
+- `ProcessMonthlyPayroll` on `payrollDays = {1,16,31,46,61,76,91,106,121,136,151,166}`: player salaries `sum/12` (type 7) + employees `sum/12` (type 8), each guarded against double-pay per day. **Luxury tax on the same days** (`ProcessTeamLuxuryTax`): `annualTax = CalculateLuxuryTax(sum(player salaries), luxury_threshold)`; if >0 deduct `annual/12` (type 10). **Derechos de liga** (`TYPE_LEAGUE`) se pagan 5 M$ en cada uno de esos días. — `TeamEconomyService.ProcessMonthlyPayroll`/`ProcessTeamLuxuryTax`, invocados desde `DashboardController.GameDay.cs`
+- `EnsureTeamSettingsForAllTeams` crea `team_settings` para los 30 equipos al abrir una partida/rollover, aunque el jugador nunca haya abierto Finanzas; sin ello no se ejecutaban abonos, patrocinio ni TV en equipos IA.
 - `ProcessSubscriptionRevenue` (game days 10–12 ≈ Nov 1): `numSubscribers = clamp(capacity * (0.5 + (2000 − subscription_price)/10000) * (1 + wins_first4*0.05) * (0.7 + reputation/5*0.6) * (0.90 + market/100*0.25) * rand(0.85–1.15), 0, capacity)`; income = subscribers × price (type 2). **E3:** un gran mercado vende más abonos (×0.90-1.15).
 
 ### One-off
@@ -246,7 +252,7 @@ Proyección de nómina efectiva vs cap/apron/espacio, contratos garantizados/opc
 - **Luxury tax** (`TradeHelper.CalculateLuxuryTax`): brackets above threshold — `(5M,1.5),(5M,1.75),(5M,2.5),(5M,3.25),(∞,3.75)`; charged monthly `annual/12` (type 10).
 - **Buyout with stretch** (`RosterController.ConfirmBuyout`): `remaining = salary × contract_years`; `stretchYears = contract_years × 2`; `annual = remaining/stretchYears` (last year takes remainder); player → FA; TYPE_BUYOUT (11) records per year.
 - **Budget warnings:** budget red 3+ times (2 in ProManager) → fired modal (`CheckBudgetWarning`).
-- **Sponsors/TV renegotiation (E3):** max 3 sponsors, max 3 TV; `initial_income` + `home_game_income`; contratos por años. **Al expirar** (`RenewMarketDealsForTeam`, en `StartNewSeason`), el equipo busca sustituto disponible con probabilidad `0.45 + mercado×0.35 + reputación×0.20` (`MarketEconomy.ShouldRenewDeal`): los grandes mercados casi siempre renuevan; los pequeños pueden quedarse sin contrato. Los importes base de la oferta se escalan por fama al firmar.
+- **Sponsors/TV renegotiation (E3):** max 3 sponsors, max 3 TV; `initial_income` + `home_game_income`; contratos por años. **Al expirar** (`RenewMarketDealsForTeam`, en `StartNewSeason`), el equipo busca sustituto disponible con probabilidad `0.45 + mercado×0.35 + reputación×0.20` (`MarketEconomy.ShouldRenewDeal`): los grandes mercados casi siempre renuevan; los pequeños pueden quedarse sin contrato. Los importes iniciales y por partido se escalan con el rebalanceo de `ContractMarket`; el ingreso inicial también se muestra ya bonificado en la UI.
 
 ## 6. Roster management
 

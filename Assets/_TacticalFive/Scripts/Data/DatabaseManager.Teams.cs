@@ -61,6 +61,30 @@ public partial class DatabaseManager
         _db.InsertOrReplace(settings);
     }
 
+    /// <summary>
+    /// Crea la configuración económica por defecto de cualquier equipo que aún no la
+    /// tenga. Es necesaria para que funcionen abonos, patrocinio y TV también en las
+    /// partidas y equipos IA que nunca abrieron la pantalla de Finanzas.
+    /// </summary>
+    public void EnsureTeamSettingsForAllTeams()
+    {
+        if (!EnsureDb()) return;
+        foreach (var team in GetAllTeams())
+        {
+            if (GetTeamSettings(team.id) != null) continue;
+            _db.Insert(new TeamSettingsData
+            {
+                team_id = team.id,
+                arena_name = team.arena,
+                arena_capacity = team.capacity,
+                arena_level = 0,
+                avg_attendance = 0,
+                ticket_price = 50,
+                subscription_price = 2100
+            });
+        }
+    }
+
     public void UpdateTeamBudget(int teamId, long newBudget)
     {
         if (!EnsureDb()) return;

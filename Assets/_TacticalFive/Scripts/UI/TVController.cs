@@ -112,11 +112,14 @@ using System.Linq;
         nameLbl.AddToClassList("tv-card-name");
         card.Add(nameLbl);
 
-        // Ingreso Inicial
-        card.Add(CreateCardRow("Ingreso Inicial", $"${channel.initial_income:N0}"));
+        // Ingreso Inicial y pago por partido en casa (valores efectivos bonificados).
+        long initialIncome = ContractMarket.TvInitialIncome(channel.initial_income);
+        long homeGameIncome = ContractMarket.SponsorHomeGameIncome(
+            channel.home_game_income, _myTeam.reputation, _myTeam.market_size);
+        card.Add(CreateCardRow("Ingreso Inicial", $"${initialIncome:N0}"));
 
         // Por Partido en Casa
-        card.Add(CreateCardRow("Por Partido en Casa", $"${channel.home_game_income:N0}"));
+        card.Add(CreateCardRow("Por Partido en Casa", $"${homeGameIncome:N0}"));
 
         // Duración
         card.Add(CreateCardRow("Duración", $"{channel.contract_years} año{(channel.contract_years > 1 ? "s" : "")}"));
@@ -188,7 +191,8 @@ using System.Linq;
             sender_type = 1,
             sender_id = 0,
             title = $"Derechos televisivos firmados: {channel.name.ToUpper()}",
-            body = NewsTexts.TV(channel.name, _myTeam.name, channel.initial_income),
+            body = NewsTexts.TV(channel.name, _myTeam.name,
+                ContractMarket.TvInitialIncome(channel.initial_income)),
             created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
             is_read = 0,
             category = NewsCategory.CLUB,

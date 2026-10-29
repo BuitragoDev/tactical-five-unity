@@ -113,11 +113,14 @@ using System.Linq;
         nameLbl.AddToClassList("sponsor-card-name");
         card.Add(nameLbl);
 
-        // Ingreso Inicial
-        card.Add(CreateCardRow("Ingreso Inicial", $"${sponsor.initial_income:N0}"));
+        // Ingreso Inicial y pago por partido en casa (valores efectivos bonificados).
+        long initialIncome = ContractMarket.SponsorInitialIncome(sponsor.initial_income);
+        long homeGameIncome = ContractMarket.SponsorHomeGameIncome(
+            sponsor.home_game_income, _myTeam.reputation, _myTeam.market_size);
+        card.Add(CreateCardRow("Ingreso Inicial", $"${initialIncome:N0}"));
 
         // Por Partido en Casa
-        card.Add(CreateCardRow("Por Partido en Casa", $"${sponsor.home_game_income:N0}"));
+        card.Add(CreateCardRow("Por Partido en Casa", $"${homeGameIncome:N0}"));
 
         // Duración
         card.Add(CreateCardRow("Duración", $"{sponsor.contract_years} año{(sponsor.contract_years > 1 ? "s" : "")}"));
@@ -189,7 +192,8 @@ using System.Linq;
             sender_type = 1,
             sender_id = 0,
             title = $"Patrocinador firmado: {sponsor.name.ToUpper()}",
-            body = NewsTexts.Patrocinio(sponsor.name, _myTeam.name, sponsor.initial_income),
+            body = NewsTexts.Patrocinio(sponsor.name, _myTeam.name,
+                ContractMarket.SponsorInitialIncome(sponsor.initial_income)),
             created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
             is_read = 0,
             category = NewsCategory.CLUB,

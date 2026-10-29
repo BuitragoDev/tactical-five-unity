@@ -202,6 +202,10 @@ public partial class DatabaseManager : MonoBehaviour
             // necesitan sus filiales y prospectos.
             EnsureGLeagueSeeded();
 
+            // Economía: cualquier partida antigua debe tener settings para todos los
+            // equipos, aunque el jugador nunca haya abierto Finanzas.
+            EnsureTeamSettingsForAllTeams();
+
             // Imágenes personalizadas por partida: una partida nueva hace snapshot de
             // las imágenes del template (conserva las que había al empezar). Una partida
             // existente anterior a este sistema recibe su snapshot una sola vez.
@@ -1999,6 +2003,10 @@ public partial class DatabaseManager : MonoBehaviour
         }
 
         EnsureGLeagueSeeded();
+
+        // Los settings económicos también son datos estáticos: cada equipo debe tener
+        // precios de entrada/abono desde el inicio de la partida.
+        EnsureTeamSettingsForAllTeams();
 
         SeedActivePlayerCareers();
     }
