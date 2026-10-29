@@ -621,6 +621,22 @@ public class NewSeasonController : UIScreenController
         ShowSummerLeagueSummary(results);
     }
 
+    VisualElement CreateSummerBadge(string titleKey, int value, string variantClass)
+    {
+        var badge = new VisualElement();
+        badge.AddToClassList("ns-summer-badge");
+        badge.AddToClassList(variantClass);
+
+        var title = new Label(LocalizationService.T(titleKey));
+        title.AddToClassList("ns-summer-badge-title");
+        badge.Add(title);
+
+        var valueLbl = new Label(value.ToString());
+        valueLbl.AddToClassList("ns-summer-badge-value");
+        badge.Add(valueLbl);
+        return badge;
+    }
+
     void ShowSummerLeagueSummary(List<SummerLeagueStatData> results)
     {
         _summerLeagueOverlay.Clear();
@@ -647,16 +663,31 @@ public class NewSeasonController : UIScreenController
             name.AddToClassList("ns-summer-summary-name");
             summaryRow.Add(name);
 
-            string gain = row.development_gain > 0
-                ? LocalizationService.T("ui.code.new_season_controller.summer_league_gain")
-                : "";
-            var stats = new Label(LocalizationService.T(
-                "ui.code.new_season_controller.summer_league_summary_line",
-                row.games, row.minutes, row.points, row.rebounds, row.assists, gain));
-            stats.AddToClassList("ns-summer-summary-stats");
+            var badges = new VisualElement();
+            badges.AddToClassList("ns-summer-summary-badges");
+            badges.Add(CreateSummerBadge("ui.code.new_season_controller.summer_league_stat_pj",
+                row.games, "ns-summer-badge--gold"));
+            badges.Add(CreateSummerBadge("ui.code.new_season_controller.summer_league_stat_min",
+                row.minutes, "ns-summer-badge--gold"));
+            badges.Add(CreateSummerBadge("ui.code.new_season_controller.summer_league_stat_pts",
+                row.points, "ns-summer-badge--gold"));
+            badges.Add(CreateSummerBadge("ui.code.new_season_controller.summer_league_stat_reb",
+                row.rebounds, "ns-summer-badge--gold"));
+            badges.Add(CreateSummerBadge("ui.code.new_season_controller.summer_league_stat_asi",
+                row.assists, "ns-summer-badge--gold"));
             if (row.development_gain > 0)
-                stats.AddToClassList("ns-summer-summary-gain");
-            summaryRow.Add(stats);
+            {
+                var gainBadge = new VisualElement();
+                gainBadge.AddToClassList("ns-summer-badge");
+                gainBadge.AddToClassList("ns-summer-badge--green");
+                var gainLbl = new Label(LocalizationService.T(
+                    "ui.code.new_season_controller.summer_league_gain_badge",
+                    row.development_gain));
+                gainLbl.AddToClassList("ns-summer-badge-value");
+                gainBadge.Add(gainLbl);
+                badges.Add(gainBadge);
+            }
+            summaryRow.Add(badges);
             scroll.Add(summaryRow);
         }
 

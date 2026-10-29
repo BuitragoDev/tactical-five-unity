@@ -618,15 +618,48 @@
     margin-right: 16px;
 }
 
-.ns-summer-summary-stats {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 16px;
-    color: rgb(179, 190, 214);
+.ns-summer-summary-badges {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
     flex-grow: 1;
-    -unity-text-align: middle-right;
+    flex-wrap: wrap;
 }
 
-.ns-summer-summary-gain {
+.ns-summer-badge {
+    flex-direction: row;
+    align-items: center;
+    padding: 4px 9px;
+    margin-left: 6px;
+    border-width: 1px;
+    border-radius: 6px;
+}
+
+.ns-summer-badge--gold {
+    background-color: rgb(33, 32, 28);
+    border-color: rgb(212, 160, 23);
+}
+
+.ns-summer-badge--green {
+    background-color: rgb(20, 36, 35);
+    border-color: rgb(39, 174, 96);
+}
+
+.ns-summer-badge-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 12px;
+    letter-spacing: 1px;
+    color: rgb(212, 160, 23);
+    margin-right: 4px;
+}
+
+.ns-summer-badge-value {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 16px;
+    color: rgb(255, 255, 255);
+}
+
+.ns-summer-badge--green .ns-summer-badge-value {
     color: rgb(100, 200, 140);
 }
 

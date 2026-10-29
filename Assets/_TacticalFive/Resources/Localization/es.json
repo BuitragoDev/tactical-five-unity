@@ -8526,6 +8526,30 @@
       "value": " · +1 ATRIBUTO"
     },
     {
+      "key": "ui.code.new_season_controller.summer_league_stat_pj",
+      "value": "PJ"
+    },
+    {
+      "key": "ui.code.new_season_controller.summer_league_stat_min",
+      "value": "MIN"
+    },
+    {
+      "key": "ui.code.new_season_controller.summer_league_stat_pts",
+      "value": "PTS"
+    },
+    {
+      "key": "ui.code.new_season_controller.summer_league_stat_reb",
+      "value": "REB"
+    },
+    {
+      "key": "ui.code.new_season_controller.summer_league_stat_asi",
+      "value": "ASI"
+    },
+    {
+      "key": "ui.code.new_season_controller.summer_league_gain_badge",
+      "value": "+{0} ATRIBUTO"
+    },
+    {
       "key": "ui.standings.cup_tab_east",
       "value": "NBA CUP ESTE"
     },
