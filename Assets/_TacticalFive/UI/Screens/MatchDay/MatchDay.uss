@@ -1229,9 +1229,9 @@
 }
 
 .sim2d-player-photo {
-    width: 50px;
-    height: 50px;
-    border-radius: 25px;
+    width: 64px;
+    height: 64px;
+    border-radius: 32px;
     background-color: rgb(38, 47, 65);
     background-size: cover;
     background-position: center;
