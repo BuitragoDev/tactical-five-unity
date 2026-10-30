@@ -171,6 +171,7 @@
                         <ui:VisualElement name="Sim2DHomeLayer" class="sim2d-player-layer" />
                         <ui:VisualElement name="Sim2DAwayLayer" class="sim2d-player-layer" />
                         <ui:VisualElement name="Sim2DBall" class="sim2d-ball" />
+                        <ui:VisualElement name="Sim2DEffectsLayer" class="sim2d-effects-layer" />
                     </ui:VisualElement>
                     <ui:VisualElement class="sim2d-hoop-owners">
                         <ui:VisualElement class="sim2d-hoop-owner sim2d-hoop-owner--left">

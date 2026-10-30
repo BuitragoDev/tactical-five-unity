@@ -1126,6 +1126,33 @@
     overflow: hidden;
 }
 
+.sim2d-effects-layer {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    overflow: visible;
+}
+
+.sim2d-score-ring {
+    position: absolute;
+    border-width: 3px;
+    border-color: rgb(255, 214, 90);
+    border-radius: 50%;
+    opacity: 0;
+}
+
+.sim2d-score-ring--three {
+    border-color: rgb(255, 242, 170);
+}
+
+.sim2d-score-particle {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0;
+}
+
 .sim2d-hoop-owners {
     flex-direction: row;
     justify-content: space-between;

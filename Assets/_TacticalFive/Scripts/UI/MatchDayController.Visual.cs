@@ -11,8 +11,19 @@ public partial class MatchDayController
 {
     private const string SIM2D_SPEED_PREF = "TF_Sim2DSpeed";
     private const float SIM2D_COURT_ASPECT = 28f / 15f;
+    // Centros de los aros en la imagen de la cancha (1400x750, margen 20 px).
+    private const float SIM2D_LEFT_HOOP_X = 0.069f;
+    private const float SIM2D_RIGHT_HOOP_X = 0.931f;
+    private const float SIM2D_HOOP_Y = 0.5f;
+    private static readonly Color32[] Sim2DScoreParticleColors =
+    {
+        new Color32(255, 214, 90, 255),
+        new Color32(255, 166, 61, 255),
+        new Color32(255, 245, 200, 255)
+    };
 
     private VisualElement _sim2DOverlay, _sim2DCourt, _sim2DHomeLayer, _sim2DAwayLayer, _sim2DBall;
+    private VisualElement _sim2DEffectsLayer;
     private VisualElement _sim2DHomeLogo, _sim2DAwayLogo, _sim2DTeamList;
     private VisualElement _sim2DLeftHoopLogo, _sim2DRightHoopLogo;
     private VisualElement _sim2DLeftAttackArrow, _sim2DRightAttackArrow;
@@ -26,6 +37,7 @@ public partial class MatchDayController
 
     private Coroutine _sim2DRoutine;
     private List<GameSimulator.PlayByPlayEvent> _sim2DLog;
+    private readonly List<Coroutine> _sim2DScoreEffectRoutines = new();
     private bool _sim2DActive, _sim2DFinished, _sim2DPaused;
     private int _sim2DGameId, _sim2DHomeTeamId, _sim2DAwayTeamId, _sim2DSelectedTeamId;
     private int _sim2DSpeed = 1;
@@ -52,6 +64,12 @@ public partial class MatchDayController
         public bool OnCourt;
     }
 
+    private class Sim2DScoreParticle
+    {
+        public VisualElement Element;
+        public float X, Y, Vx, Vy;
+    }
+
     void CacheSimVisualReferences()
     {
         _sim2DOverlay = _root.Q<VisualElement>("SimVisualOverlay");
@@ -61,6 +79,9 @@ public partial class MatchDayController
         _sim2DHomeLayer = _root.Q<VisualElement>("Sim2DHomeLayer");
         _sim2DAwayLayer = _root.Q<VisualElement>("Sim2DAwayLayer");
         _sim2DBall = _root.Q<VisualElement>("Sim2DBall");
+        _sim2DEffectsLayer = _root.Q<VisualElement>("Sim2DEffectsLayer");
+        if (_sim2DEffectsLayer != null)
+            _sim2DEffectsLayer.pickingMode = PickingMode.Ignore;
         if (_sim2DCourt != null)
         {
             var courtTexture = Resources.Load<Texture2D>("Courts/court_lines");
@@ -235,6 +256,7 @@ public partial class MatchDayController
     {
         if (_sim2DOverlay == null) return;
 
+        ClearSim2DScoreEffects();
         _sim2DGameId = gameId;
         _sim2DLog = log;
         _sim2DActive = true;
@@ -590,6 +612,10 @@ public partial class MatchDayController
             float clockTarget = GetSim2DClockTarget(ev, next);
             yield return AnimateSim2DPositions(ev.quarter, ev.timeElapsed, clockTarget,
                 eventDuration);
+
+            // El aro se enciende cuando el balón ya ha llegado a la canasta.
+            if (Sim2DIsFieldGoalMade(ev))
+                PlaySim2DScoreEffect(ev.homeOnOffense, Sim2DIsThreePointer(ev));
         }
         OnSim2DComplete();
     }
@@ -806,8 +832,10 @@ public partial class MatchDayController
         }
         else if (shotAttempt && shooterId > 0 && _sim2DPlayers.TryGetValue(shooterId, out var shooterForBall))
         {
-            _sim2DBallTargetX = madeShot ? (attackRight ? 0.97f : 0.03f) : shooterForBall.TargetX;
-            _sim2DBallTargetY = 0.5f;
+            _sim2DBallTargetX = madeShot
+                ? (attackRight ? SIM2D_RIGHT_HOOP_X : SIM2D_LEFT_HOOP_X)
+                : shooterForBall.TargetX;
+            _sim2DBallTargetY = SIM2D_HOOP_Y;
         }
         else if (turnoverId > 0 && _sim2DPlayers.TryGetValue(turnoverId, out var ballLost))
         {
@@ -1015,6 +1043,121 @@ public partial class MatchDayController
         _sim2DBall.style.top = new Length(_sim2DBallY * 100f, LengthUnit.Percent);
     }
 
+    static bool Sim2DIsFieldGoalMade(GameSimulator.PlayByPlayEvent ev)
+    {
+        return ev?.deltas != null && ev.deltas.Any(d => d.stat == "fgm" && d.amount > 0);
+    }
+
+    static bool Sim2DIsThreePointer(GameSimulator.PlayByPlayEvent ev)
+    {
+        return ev?.deltas != null && ev.deltas.Any(d =>
+            (d.stat == "fg3m" || d.stat == "fg3a") && d.amount > 0);
+    }
+
+    void PlaySim2DScoreEffect(bool attackRight, bool threePointer)
+    {
+        if (!_sim2DActive || _sim2DEffectsLayer == null) return;
+
+        float hoopX = attackRight ? SIM2D_RIGHT_HOOP_X : SIM2D_LEFT_HOOP_X;
+        float hoopY = SIM2D_HOOP_Y;
+        float duration = threePointer ? 0.62f : 0.52f;
+
+        var ring = new VisualElement { pickingMode = PickingMode.Ignore };
+        ring.AddToClassList("sim2d-score-ring");
+        ring.EnableInClassList("sim2d-score-ring--three", threePointer);
+        SetSim2DScorePosition(ring, hoopX, hoopY);
+        ring.style.width = 28f;
+        ring.style.height = 28f;
+        ring.style.marginLeft = -14f;
+        ring.style.marginTop = -14f;
+        ring.style.opacity = 1f;
+        _sim2DEffectsLayer.Add(ring);
+
+        int count = threePointer ? 16 : 11;
+        var particles = new List<Sim2DScoreParticle>(count);
+        for (int i = 0; i < count; i++)
+        {
+            float size = UnityEngine.Random.Range(4.5f, 8.5f);
+            var element = new VisualElement { pickingMode = PickingMode.Ignore };
+            element.AddToClassList("sim2d-score-particle");
+            element.style.width = size;
+            element.style.height = size;
+            element.style.marginLeft = -size * 0.5f;
+            element.style.marginTop = -size * 0.5f;
+            element.style.backgroundColor = new StyleColor(
+                Sim2DScoreParticleColors[UnityEngine.Random.Range(0, Sim2DScoreParticleColors.Length)]);
+            SetSim2DScorePosition(element, hoopX, hoopY);
+            element.style.opacity = 1f;
+            _sim2DEffectsLayer.Add(element);
+
+            float angle = UnityEngine.Random.Range(0f, Mathf.PI * 2f);
+            float speed = UnityEngine.Random.Range(0.055f, 0.14f);
+            particles.Add(new Sim2DScoreParticle
+            {
+                Element = element,
+                X = hoopX,
+                Y = hoopY,
+                Vx = Mathf.Cos(angle) * speed + (attackRight ? -0.035f : 0.035f),
+                Vy = Mathf.Sin(angle) * speed - 0.045f
+            });
+        }
+
+        _sim2DScoreEffectRoutines.Add(StartCoroutine(
+            AnimateSim2DScoreEffect(ring, particles, duration)));
+    }
+
+    IEnumerator AnimateSim2DScoreEffect(VisualElement ring, List<Sim2DScoreParticle> particles,
+                                       float duration)
+    {
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            while (_sim2DPaused && !_sim2DFinished)
+                yield return null;
+
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+
+            float ringSize = Mathf.Lerp(26f, 82f, t);
+            ring.style.width = ringSize;
+            ring.style.height = ringSize;
+            ring.style.marginLeft = -ringSize * 0.5f;
+            ring.style.marginTop = -ringSize * 0.5f;
+            ring.style.opacity = 1f - t;
+
+            float fade = Mathf.Clamp01(1f - Mathf.InverseLerp(0.35f, 1f, t));
+            foreach (var particle in particles)
+            {
+                float x = particle.X + particle.Vx * elapsed;
+                float y = particle.Y + particle.Vy * elapsed + 0.20f * elapsed * elapsed;
+                SetSim2DScorePosition(particle.Element, x, y);
+                particle.Element.style.opacity = fade;
+            }
+            yield return null;
+        }
+
+        ring.RemoveFromHierarchy();
+        foreach (var particle in particles)
+            particle.Element.RemoveFromHierarchy();
+    }
+
+    static void SetSim2DScorePosition(VisualElement element, float x, float y)
+    {
+        if (element == null) return;
+        element.style.left = new Length(x * 100f, LengthUnit.Percent);
+        element.style.top = new Length(y * 100f, LengthUnit.Percent);
+    }
+
+    void ClearSim2DScoreEffects()
+    {
+        foreach (var routine in _sim2DScoreEffectRoutines)
+        {
+            if (routine != null) StopCoroutine(routine);
+        }
+        _sim2DScoreEffectRoutines.Clear();
+        _sim2DEffectsLayer?.Clear();
+    }
+
     void OnSim2DComplete()
     {
         _sim2DFinished = true;
@@ -1034,6 +1177,7 @@ public partial class MatchDayController
     void JumpToSimVisualEnd()
     {
         if (_sim2DRoutine != null) { StopCoroutine(_sim2DRoutine); _sim2DRoutine = null; }
+        ClearSim2DScoreEffects();
         if (_sim2DLog == null || _sim2DLog.Count == 0) { OnSim2DComplete(); return; }
 
         foreach (var state in _sim2DPlayers.Values)
@@ -1089,6 +1233,7 @@ public partial class MatchDayController
     {
         _sim2DActive = false;
         if (_sim2DRoutine != null) { StopCoroutine(_sim2DRoutine); _sim2DRoutine = null; }
+        ClearSim2DScoreEffects();
         if (_sim2DOverlay != null) _sim2DOverlay.style.display = DisplayStyle.None;
     }
 

@@ -26,6 +26,7 @@ public class MatchDayVisualUiTests
         Assert.That(root.Q<VisualElement>("Sim2DRightHoopLogo"), Is.Not.Null);
         Assert.That(root.Q<VisualElement>("Sim2DLeftAttackArrow"), Is.Not.Null);
         Assert.That(root.Q<VisualElement>("Sim2DRightAttackArrow"), Is.Not.Null);
+        Assert.That(root.Q<VisualElement>("Sim2DEffectsLayer"), Is.Not.Null);
         Assert.That(root.Q<Label>("Sim2DScore"), Is.Not.Null);
         Assert.That(root.Q<Label>("Sim2DTickerText"), Is.Not.Null);
         Assert.That(root.Q<VisualElement>("Sim2DTickerIcon"), Is.Not.Null);
