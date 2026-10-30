@@ -589,6 +589,9 @@ public partial class MatchDayController
 
         _sim2DCourt.style.flexGrow = 0;
         _sim2DCourt.style.flexShrink = 0;
+        // El USS usa flex:1 (flex-basis:0). Si solo se cambia height, el layout
+        // sigue midiendo por flex-basis y la cancha se queda a 0 px.
+        _sim2DCourt.style.flexBasis = targetHeight;
         _sim2DCourt.style.height = targetHeight;
     }
 
