@@ -987,7 +987,7 @@
     align-items: center;
     flex-shrink: 0;
     min-height: 42px;
-    padding: 8px 12px;
+    padding: 8px;
     background-color: rgb(24, 30, 44);
     border-bottom-width: 1px;
     border-bottom-color: rgb(45, 56, 78);
@@ -1220,11 +1220,11 @@
 
 .sim2d-player {
     position: absolute;
-    width: 58px;
+    width: 140px;
     height: 72px;
     align-items: center;
     flex-direction: column;
-    margin-left: -29px;
+    margin-left: -70px;
     margin-top: -36px;
 }
 
@@ -1261,11 +1261,13 @@
     flex-direction: row;
     align-items: center;
     justify-content: center;
+    align-self: center;
+    flex-shrink: 0;
     background-color: rgb(20, 24, 33);
     border-radius: 4px;
     padding: 1px 5px;
     margin-top: -2px;
-    max-width: 84px;
+    max-width: none;
 }
 
 .sim2d-player-number {
@@ -1276,11 +1278,12 @@
 }
 
 .sim2d-player-name {
+    flex-shrink: 0;
     font-size: 11px;
     color: rgb(220, 226, 238);
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    overflow: visible;
+    text-overflow: clip;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
 }
 

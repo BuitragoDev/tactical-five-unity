@@ -115,7 +115,11 @@ public partial class MatchDayController
         label.style.flexShrink = grow ? 1 : 0;
         if (grow)
         {
-            label.style.width = new Length(50f, LengthUnit.Percent);
+            // La cabecera usa las mismas columnas que las filas: foto (50+10),
+            // posición (24+8) y nombre (47%). Así PTS/REB/ASI caen exactamente
+            // sobre sus valores.
+            label.style.width = new Length(47f, LengthUnit.Percent);
+            label.style.marginLeft = 92;
             label.style.flexGrow = 0;
             label.style.flexShrink = 0;
             label.style.minWidth = 0;
@@ -284,11 +288,6 @@ public partial class MatchDayController
         name.AddToClassList("sim2d-player-name");
         plate.Add(number);
         plate.Add(name);
-        plate.style.position = Position.Absolute;
-        plate.style.left = 0;
-        plate.style.right = 0;
-        plate.style.top = 46;
-        plate.style.marginTop = 0;
         plate.style.display = DisplayStyle.Flex;
         plate.style.visibility = Visibility.Visible;
         number.style.color = new StyleColor(new Color32(212, 160, 23, 255));
