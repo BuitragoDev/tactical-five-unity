@@ -1085,6 +1085,7 @@
 .sim2d-court-wrap {
     flex: 1;
     flex-direction: column;
+    justify-content: center;
     min-width: 0;
     width: 60%;
 }
@@ -1118,96 +1119,11 @@
     flex: 1;
     min-height: 0;
     background-color: rgb(91, 62, 38);
-    border-width: 3px;
-    border-color: rgb(211, 174, 112);
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position: center;
     border-radius: 8px;
     overflow: hidden;
-}
-
-.sim2d-court-line {
-    position: absolute;
-    background-color: rgb(226, 197, 145);
-    opacity: 0.75;
-}
-
-.sim2d-center-line {
-    left: 50%;
-    top: 0;
-    width: 2px;
-    height: 100%;
-}
-
-.sim2d-court-circle {
-    position: absolute;
-    border-width: 2px;
-    border-color: rgb(226, 197, 145);
-    border-radius: 45px;
-    opacity: 0.75;
-}
-
-.sim2d-center-circle {
-    left: 50%;
-    top: 50%;
-    width: 90px;
-    height: 90px;
-    margin-left: -45px;
-    margin-top: -45px;
-}
-
-.sim2d-paint {
-    position: absolute;
-    top: 28%;
-    width: 17%;
-    height: 44%;
-    border-width: 2px;
-    border-color: rgb(226, 197, 145);
-    opacity: 0.75;
-}
-
-.sim2d-paint--left {
-    left: 0;
-}
-
-.sim2d-paint--right {
-    right: 0;
-}
-
-.sim2d-three {
-    position: absolute;
-    top: 18%;
-    width: 22%;
-    height: 64%;
-    border-width: 2px;
-    border-color: rgb(226, 197, 145);
-    border-radius: 100px;
-    opacity: 0.65;
-}
-
-.sim2d-three--left {
-    left: -10%;
-}
-
-.sim2d-three--right {
-    right: -10%;
-}
-
-.sim2d-hoop {
-    position: absolute;
-    top: 47%;
-    width: 18px;
-    height: 18px;
-    border-width: 3px;
-    border-color: rgb(240, 140, 60);
-    border-radius: 9px;
-    background-color: rgb(120, 45, 30);
-}
-
-.sim2d-hoop--left {
-    left: 2%;
-}
-
-.sim2d-hoop--right {
-    right: 2%;
 }
 
 .sim2d-player-layer {

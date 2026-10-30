@@ -168,14 +168,6 @@
                         <ui:Label name="Sim2DVenue" class="sim2d-venue" text="" />
                     </ui:VisualElement>
                     <ui:VisualElement name="Sim2DCourt" class="sim2d-court">
-                        <ui:VisualElement class="sim2d-court-line sim2d-center-line" />
-                        <ui:VisualElement class="sim2d-court-circle sim2d-center-circle" />
-                        <ui:VisualElement class="sim2d-paint sim2d-paint--left" />
-                        <ui:VisualElement class="sim2d-paint sim2d-paint--right" />
-                        <ui:VisualElement class="sim2d-three sim2d-three--left" />
-                        <ui:VisualElement class="sim2d-three sim2d-three--right" />
-                        <ui:VisualElement class="sim2d-hoop sim2d-hoop--left" />
-                        <ui:VisualElement class="sim2d-hoop sim2d-hoop--right" />
                         <ui:VisualElement name="Sim2DHomeLayer" class="sim2d-player-layer" />
                         <ui:VisualElement name="Sim2DAwayLayer" class="sim2d-player-layer" />
                         <ui:VisualElement name="Sim2DBall" class="sim2d-ball" />

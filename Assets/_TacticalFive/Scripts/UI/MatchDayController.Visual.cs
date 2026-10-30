@@ -10,8 +10,9 @@ using System.Linq;
 public partial class MatchDayController
 {
     private const string SIM2D_SPEED_PREF = "TF_Sim2DSpeed";
+    private const float SIM2D_COURT_ASPECT = 28f / 15f;
 
-    private VisualElement _sim2DOverlay, _sim2DHomeLayer, _sim2DAwayLayer, _sim2DBall;
+    private VisualElement _sim2DOverlay, _sim2DCourt, _sim2DHomeLayer, _sim2DAwayLayer, _sim2DBall;
     private VisualElement _sim2DHomeLogo, _sim2DAwayLogo, _sim2DTeamList;
     private Label _sim2DHomeAbbr, _sim2DAwayAbbr, _sim2DHomeName, _sim2DAwayName;
     private Label _sim2DScore, _sim2DQuarter, _sim2DClock, _sim2DTickerText;
@@ -54,9 +55,17 @@ public partial class MatchDayController
         _sim2DOverlay = _root.Q<VisualElement>("SimVisualOverlay");
         if (_sim2DOverlay == null) return;
 
+        _sim2DCourt = _root.Q<VisualElement>("Sim2DCourt");
         _sim2DHomeLayer = _root.Q<VisualElement>("Sim2DHomeLayer");
         _sim2DAwayLayer = _root.Q<VisualElement>("Sim2DAwayLayer");
         _sim2DBall = _root.Q<VisualElement>("Sim2DBall");
+        if (_sim2DCourt != null)
+        {
+            var courtTexture = Resources.Load<Texture2D>("Courts/court_lines");
+            if (courtTexture != null)
+                _sim2DCourt.style.backgroundImage = new StyleBackground(courtTexture);
+            _sim2DCourt.RegisterCallback<GeometryChangedEvent>(OnSim2DCourtGeometryChanged);
+        }
         if (_sim2DBall != null)
         {
             var ballSprite = Resources.Load<Sprite>("Icons/pelota");
@@ -565,6 +574,22 @@ public partial class MatchDayController
         return ev.quarter <= 4
             ? (ev.quarter - 1) * 12f + ev.timeElapsed
             : 48f + (ev.quarter - 5) * 5f + ev.timeElapsed;
+    }
+
+    // Mantiene la proporción real 28:15 de la cancha (FIBA) para que aros,
+    // círculos y triples no se vean ovalados al estirar la imagen.
+    void OnSim2DCourtGeometryChanged(GeometryChangedEvent evt)
+    {
+        if (_sim2DCourt == null) return;
+        float width = evt.newRect.width;
+        if (width < 10f) return;
+
+        float targetHeight = width / SIM2D_COURT_ASPECT;
+        if (Mathf.Abs(_sim2DCourt.resolvedStyle.height - targetHeight) < 0.5f) return;
+
+        _sim2DCourt.style.flexGrow = 0;
+        _sim2DCourt.style.flexShrink = 0;
+        _sim2DCourt.style.height = targetHeight;
     }
 
     void LayoutSim2DTargets(GameSimulator.PlayByPlayEvent ev, int eventIndex, bool animate)
