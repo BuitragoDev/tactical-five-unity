@@ -1348,6 +1348,21 @@ public partial class DatabaseManager : MonoBehaviour
         if (cupFinalistAdded || cupScoreAdded)
             BackfillCupFinalDetails();
 
+        // El ranking de entrenadores nunca debe mostrar puntuaciones negativas.
+        if (!IsMigrationApplied("coach_scores_non_negative"))
+        {
+            try
+            {
+                _db.Execute("UPDATE coach_rankings SET score = 0 WHERE score < 0");
+                MarkMigrationApplied("coach_scores_non_negative");
+                Debug.Log("[DB] Migration: coach ranking scores clamped to >= 0");
+            }
+            catch (System.Exception ex)
+            {
+                throw new DatabaseMigrationException("coach_scores_non_negative", ex);
+            }
+        }
+
         // E3: tamaño de mercado (economía). Las partidas antiguas no lo traen: se rellena por
         // reputación (proxy) para que la asistencia/patrocinios no arranquen a cero.
         if (AddColumnIfMissing("teams", "market_size", "market_size INTEGER DEFAULT 0"))

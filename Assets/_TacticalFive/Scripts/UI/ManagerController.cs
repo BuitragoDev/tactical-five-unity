@@ -445,7 +445,7 @@ using System.Globalization;
             teamLabel.AddToClassList("ranking-col-team");
             row.Add(teamLabel);
 
-            var scoreLabel = new Label(coach.score.ToString());
+            var scoreLabel = new Label(System.Math.Max(0, coach.score).ToString());
             scoreLabel.AddToClassList("ranking-col-score");
             row.Add(scoreLabel);
 

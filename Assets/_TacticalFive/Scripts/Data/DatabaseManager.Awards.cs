@@ -808,7 +808,7 @@ public partial class DatabaseManager
             var coach = _db.Table<CoachRankingData>().FirstOrDefault(c => c.team_id == topManager.team_id.Value);
             if (coach != null && coach.status != "historical")
             {
-                coach.score += 10;
+                coach.score = System.Math.Max(0, coach.score + 10);
                 _db.Update(coach);
             }
         }

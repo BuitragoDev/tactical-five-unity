@@ -456,7 +456,7 @@ public partial class DatabaseManager
         EnsureDb();
         var coach = _db.Find<CoachRankingData>(coachId);
         if (coach == null || coach.status == "historical") return;
-        coach.score += scoreDelta;
+        coach.score = System.Math.Max(0, coach.score + scoreDelta);
         _db.Update(coach);
     }
 
