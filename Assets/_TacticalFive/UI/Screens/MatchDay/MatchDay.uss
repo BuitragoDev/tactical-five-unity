@@ -1316,7 +1316,20 @@
 .sim2d-ticker {
     flex: 1;
     min-width: 0;
+    align-self: stretch;
+    flex-direction: row;
+    align-items: center;
     padding: 0 12px;
+}
+
+.sim2d-ticker-icon {
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
+    margin-right: 10px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
 .sim2d-ticker-text {

@@ -16,6 +16,7 @@ public partial class MatchDayController
     private Label _sim2DHomeAbbr, _sim2DAwayAbbr, _sim2DHomeName, _sim2DAwayName;
     private Label _sim2DScore, _sim2DQuarter, _sim2DClock, _sim2DTickerText;
     private Label _sim2DPossession, _sim2DVenue;
+    private VisualElement _sim2DTickerIcon;
     private Label _sim2DHeaderPlayer, _sim2DHeaderPts, _sim2DHeaderReb, _sim2DHeaderAsi;
     private Button _sim2DHomeTab, _sim2DAwayTab, _sim2DPause, _sim2DSkip;
     private Button _sim2DSpeed1, _sim2DSpeed5, _sim2DSpeed10, _sim2DSpeed20;
@@ -84,6 +85,21 @@ public partial class MatchDayController
         _sim2DQuarter = _root.Q<Label>("Sim2DQuarter");
         _sim2DClock = _root.Q<Label>("Sim2DClock");
         _sim2DTickerText = _root.Q<Label>("Sim2DTickerText");
+        _sim2DTickerIcon = _root.Q<VisualElement>("Sim2DTickerIcon");
+        if (_sim2DTickerIcon != null)
+        {
+            var actionSprite = Resources.Load<Sprite>("Icons/accion");
+            if (actionSprite != null)
+            {
+                _sim2DTickerIcon.style.backgroundImage = new StyleBackground(actionSprite);
+            }
+            else
+            {
+                var actionTexture = Resources.Load<Texture2D>("Icons/accion");
+                if (actionTexture != null)
+                    _sim2DTickerIcon.style.backgroundImage = new StyleBackground(actionTexture);
+            }
+        }
         _sim2DPossession = _root.Q<Label>("Sim2DPossession");
         _sim2DVenue = _root.Q<Label>("Sim2DVenue");
         _sim2DHeaderPlayer = _root.Q<Label>("Sim2DHeaderPlayer");

@@ -24,6 +24,7 @@ public class MatchDayVisualUiTests
         Assert.That(root.Q<VisualElement>("Sim2DTeamList"), Is.Not.Null);
         Assert.That(root.Q<Label>("Sim2DScore"), Is.Not.Null);
         Assert.That(root.Q<Label>("Sim2DTickerText"), Is.Not.Null);
+        Assert.That(root.Q<VisualElement>("Sim2DTickerIcon"), Is.Not.Null);
         Assert.That(root.Q<Button>("Sim2DHomeTab"), Is.Not.Null);
         Assert.That(root.Q<Button>("Sim2DAwayTab"), Is.Not.Null);
         Assert.That(root.Q<Button>("Sim2DSpeed1"), Is.Not.Null,

@@ -185,6 +185,7 @@
 
             <ui:VisualElement class="sim2d-footer">
                 <ui:VisualElement class="sim2d-ticker">
+                    <ui:VisualElement name="Sim2DTickerIcon" class="sim2d-ticker-icon" />
                     <ui:Label name="Sim2DTickerText" class="sim2d-ticker-text" text="" />
                 </ui:VisualElement>
                 <ui:VisualElement class="sim2d-controls">
