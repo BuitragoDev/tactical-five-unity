@@ -958,9 +958,9 @@ public partial class MatchDayController
         if (shotAttempt && shooterId > 0 && _sim2DPlayers.TryGetValue(shooterId, out var shooter))
         {
             bool afterInbound = _sim2DInboundType != Sim2DInboundType.None;
-            float passTime = afterInbound ? 0.76f : 0.52f;
-            float shooterTime = afterInbound ? 0.84f : 0.70f;
-            float shotContactTime = afterInbound ? 0.94f : 0.82f;
+            float passTime = afterInbound ? 0.86f : 0.52f;
+            float shooterTime = afterInbound ? 0.92f : 0.70f;
+            float shotContactTime = afterInbound ? 0.97f : 0.82f;
             Vector2 shotSpot = GetSim2DShotPosition(threePointAttempt, attackRight, eventIndex, shooter.Player.position);
             SetSim2DFormationTarget(shooter, shotSpot, shooterTime);
             shooter.Node?.EnableInClassList("sim2d-player--action", true);
@@ -977,8 +977,10 @@ public partial class MatchDayController
 
             if (afterInbound && _sim2DInboundType != Sim2DInboundType.TipOff)
             {
-                float advanceX = attackRight ? 0.42f : 0.58f;
-                AddSim2DBallWaypoint(new Vector2(advanceX, 0.5f), 0.62f);
+                // El punto representa al propio base al terminar de subir el balón,
+                // no una coordenada intermedia inventada en la pista.
+                if (ballHandler != null)
+                    AddSim2DBallWaypoint(new Vector2(ballHandler.TargetX, ballHandler.TargetY), 0.78f);
             }
             else if (ballHandler != null && _sim2DBallHandlerId != shooterId)
                 AddSim2DBallWaypoint(new Vector2(ballHandler.TargetX, ballHandler.TargetY), 0.24f);
@@ -1008,7 +1010,7 @@ public partial class MatchDayController
             else if (blockId > 0 && _sim2DPlayers.TryGetValue(blockId, out var blocker))
             {
                 AddSim2DBallWaypoint(new Vector2(blocker.TargetX, blocker.TargetY),
-                    afterInbound ? 0.97f : 0.94f);
+                    afterInbound ? 0.985f : 0.94f);
                 blocker.Node?.EnableInClassList("sim2d-player--action", true);
                 _sim2DBallHandlerId = blockId;
                 _sim2DBallFollowsHandler = true;
