@@ -147,13 +147,11 @@ public partial class MatchDayController
         label.style.flexShrink = grow ? 1 : 0;
         if (grow)
         {
-            // La cabecera usa las mismas columnas que las filas: foto (50+10),
-            // posición (24+8) y nombre (47%). Así PTS/REB/ASI caen exactamente
-            // sobre sus valores.
-            label.style.width = new Length(39f, LengthUnit.Percent);
+            // La cabecera usa las mismas columnas que las filas: foto (80+10),
+            // posición (30+8), nombre flexible y estadísticas fijas a la derecha.
             label.style.marginLeft = 128;
-            label.style.flexGrow = 0;
-            label.style.flexShrink = 0;
+            label.style.flexGrow = 1;
+            label.style.flexShrink = 1;
             label.style.minWidth = 0;
         }
         else
@@ -460,9 +458,8 @@ public partial class MatchDayController
                 tooltip = FullName(state.Player)
             };
             name.AddToClassList("sim2d-roster-name");
-            name.style.width = new Length(39f, LengthUnit.Percent);
-            name.style.flexGrow = 0;
-            name.style.flexShrink = 0;
+            name.style.flexGrow = 1;
+            name.style.flexShrink = 1;
             name.style.minWidth = 0;
             name.style.height = 80;
             name.style.fontSize = 24;
