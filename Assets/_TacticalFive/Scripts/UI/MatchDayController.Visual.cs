@@ -150,8 +150,8 @@ public partial class MatchDayController
             // La cabecera usa las mismas columnas que las filas: foto (50+10),
             // posición (24+8) y nombre (47%). Así PTS/REB/ASI caen exactamente
             // sobre sus valores.
-            label.style.width = new Length(47f, LengthUnit.Percent);
-            label.style.marginLeft = 92;
+            label.style.width = new Length(39f, LengthUnit.Percent);
+            label.style.marginLeft = 128;
             label.style.flexGrow = 0;
             label.style.flexShrink = 0;
             label.style.minWidth = 0;
@@ -460,12 +460,12 @@ public partial class MatchDayController
                 tooltip = FullName(state.Player)
             };
             name.AddToClassList("sim2d-roster-name");
-            name.style.width = new Length(47f, LengthUnit.Percent);
+            name.style.width = new Length(39f, LengthUnit.Percent);
             name.style.flexGrow = 0;
             name.style.flexShrink = 0;
             name.style.minWidth = 0;
-            name.style.height = 50;
-            name.style.fontSize = 18;
+            name.style.height = 80;
+            name.style.fontSize = 24;
             name.style.color = new StyleColor(new Color32(235, 239, 247, 255));
             name.style.unityTextAlign = TextAnchor.MiddleLeft;
             name.style.display = DisplayStyle.Flex;
@@ -520,9 +520,10 @@ public partial class MatchDayController
     {
         if (_sim2DPossession == null) return;
         int teamId = _sim2DHomeOnOffense ? _sim2DHomeTeamId : _sim2DAwayTeamId;
-        var team = _allTeams?.Find(t => t.id == teamId);
+        var team = _allTeams?.Find(t => t.id == teamId)
+                   ?? DatabaseManager.Instance.GetTeamById(teamId);
         _sim2DPossession.text = LocalizationService.T(
-            "ui.code.match_day_controller.sim_ataque", team?.abbreviation ?? "");
+            "ui.code.match_day_controller.sim_ataque", team?.name ?? "");
     }
 
     IEnumerator Sim2DCoroutine(List<GameSimulator.PlayByPlayEvent> log)
