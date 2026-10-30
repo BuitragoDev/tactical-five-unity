@@ -1114,17 +1114,72 @@ public partial class DatabaseManager
         var allPlayers = _db.Table<PlayerData>().ToList();
         if (allPlayers.Count == 0) return;
 
+        // El seeder histórico ya contiene la carrera real de los jugadores que siguen
+        // activos. Esa fila es la fuente correcta; la carrera sintética solo se usa para
+        // jugadores que no aparecen en el histórico.
+        var countsByName = allPlayers
+            .GroupBy(p => SeededCareerRules.NameKey(p.first_name, p.last_name))
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        var unowned = _db.Table<HistoricalPlayerStatsData>()
+            .Where(h => h.player_id <= 0)
+            .ToList();
+        var gameTotals = BuildCareerGameTotals(includeCurrentSeason: false);
+
+        int adopted = 0;
         int seeded = 0;
         foreach (var p in allPlayers)
         {
-            if (p.is_rookie == 1) continue;
             if (GetHistoricalPlayerStats(p.id) != null) continue;
 
+            string key = SeededCareerRules.NameKey(p.first_name, p.last_name);
+            HistoricalPlayerStatsData seedRow =
+                countsByName.TryGetValue(key, out int sameName) && sameName == 1
+                    ? SeededCareerRules.FindUniqueSeedRow(unowned, p.first_name, p.last_name)
+                    : null;
+
+            if (seedRow != null)
+            {
+                if (seedRow.games > 0)
+                {
+                    gameTotals.TryGetValue(p.id, out var played);
+                    var merged = SeededCareerRules.Merge(seedRow, played);
+                    merged.id = 0;
+                    merged.player_id = p.id;
+                    merged.first_name = p.first_name;
+                    merged.last_name = p.last_name;
+                    merged.position = string.IsNullOrEmpty(p.position) ? seedRow.position : p.position;
+                    merged.overall = p.overall;
+
+                    var team = GetTeamById(p.team_id);
+                    if (team != null)
+                    {
+                        merged.team_name = team.name;
+                        merged.team_abbreviation = team.abbreviation;
+                        merged.team_logo = team.logo;
+                    }
+
+                    SaveHistoricalPlayerStats(merged);
+                    _db.Delete(seedRow);
+                    unowned.Remove(seedRow);
+                    adopted++;
+                    continue;
+                }
+
+                // Fila del seeder sin partidos (p. ej. un rookie sin carrera NBA):
+                // se elimina el duplicado y el jugador empieza desde cero.
+                _db.Delete(seedRow);
+                unowned.Remove(seedRow);
+            }
+
+            if (p.is_rookie == 1) continue;
             ApplyInitialCareer(p);
             seeded++;
         }
-        if (seeded > 0)
-            Debug.Log($"[DB] {seeded} carreras iniciales sembradas para jugadores activos.");
+
+        if (adopted > 0 || seeded > 0)
+            Debug.Log($"[DB] Carreras iniciales: {adopted} adoptadas del histórico real, " +
+                      $"{seeded} sintéticas para jugadores sin carrera sembrada.");
     }
 
     void ApplyInitialCareer(PlayerData p)

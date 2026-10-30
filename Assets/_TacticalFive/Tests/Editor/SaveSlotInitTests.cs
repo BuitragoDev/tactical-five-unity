@@ -76,6 +76,158 @@ public class SaveSlotInitTests
     }
 
     [Test]
+    public void InitSaveSlot_CarreraSembrada_UsaLaCarreraRealDelHistorial()
+    {
+        var db = DatabaseManager.Instance;
+        Assert.That(db.InitSaveSlot(1), Is.True, db.LastInitError);
+
+        var lebron = db.Db.Table<PlayerData>()
+            .FirstOrDefault(p => p.first_name == "LeBron" && p.last_name == "James");
+        Assert.That(lebron, Is.Not.Null, "El seed debe incluir a LeBron James");
+
+        var hist = db.GetHistoricalPlayerStats(lebron.id);
+        Assert.That(hist, Is.Not.Null, "La carrera debe quedar asociada al player_id real");
+        Assert.That(hist.games, Is.EqualTo(1492));
+        Assert.That(hist.total_points, Is.EqualTo(40474));
+        Assert.That(hist.total_rebounds, Is.EqualTo(11185));
+        Assert.That(hist.total_assists, Is.EqualTo(11009));
+        Assert.That(hist.team_abbreviation, Is.EqualTo("PHI"));
+        Assert.That(db.GetHistoricalPlayerStats("LeBron", "James"), Is.Null,
+            "La fila duplicada del seeder debe desaparecer al adoptar la carrera real.");
+    }
+
+    [Test]
+    public void InitSaveSlot_MigraCarreraSinteticaYActualizaHof()
+    {
+        var db = DatabaseManager.Instance;
+        Assert.That(db.InitSaveSlot(1), Is.True, db.LastInitError);
+
+        var lebron = db.Db.Table<PlayerData>()
+            .FirstOrDefault(p => p.first_name == "LeBron" && p.last_name == "James");
+        Assert.That(lebron, Is.Not.Null);
+
+        var hist = db.GetHistoricalPlayerStats(lebron.id);
+        Assert.That(hist, Is.Not.Null);
+
+        // Reproducir el estado anterior al fix: base sintética (1.470 PJ) + 78 PJ en PHI.
+        hist.games = 1548;
+        hist.total_points = 17049;
+        hist.total_rebounds = 4599;
+        hist.total_assists = 4350;
+        hist.total_steals = 104;
+        hist.total_blocks = 47;
+        hist.total_turnovers = 250;
+        hist.total_fgm = 527;
+        hist.total_fga = 1130;
+        hist.total_fg3m = 220;
+        hist.total_fg3a = 592;
+        hist.total_ftm = 240;
+        hist.total_fta = 324;
+        hist.total_oreb = 142;
+        hist.total_dreb = 337;
+        hist.total_double_doubles = 12;
+        hist.total_triple_doubles = 0;
+        hist.total_minutes = 55622;
+        hist.total_rating = 1360;
+        db.Db.Update(hist);
+
+        db.Db.Insert(new HistoricalPlayerStatsData
+        {
+            player_id = HistoricalStatsRules.LEGEND_ID,
+            first_name = "LeBron",
+            last_name = "James",
+            position = "SF",
+            team_name = "Los Angeles Lakers",
+            team_abbreviation = "LAL",
+            team_logo = "lakers",
+            games = 1492,
+            total_points = 40474,
+            total_rebounds = 11185,
+            total_assists = 11009,
+            total_steals = 2275,
+            total_blocks = 1111,
+            total_turnovers = 5021,
+            total_fgm = 15111,
+            total_fga = 30976,
+            total_fg3m = 2410,
+            total_fg3a = 7101,
+            total_ftm = 7842,
+            total_fta = 10789,
+            total_double_doubles = 620,
+            total_triple_doubles = 125,
+            total_minutes = 44760
+        });
+
+        db.Db.Insert(new PlayerSeasonStatRow
+        {
+            player_id = lebron.id,
+            season_id = 999,
+            year_start = 2026,
+            year_end = 2027,
+            team_id = lebron.team_id,
+            team_abbreviation = "PHI",
+            team_name = "Philadelphia 76ers",
+            games = 78,
+            total_minutes = 2702,
+            total_points = 1514,
+            total_rebounds = 479,
+            total_assists = 372,
+            total_steals = 104,
+            total_blocks = 47,
+            total_rating = 1360,
+            total_fgm = 527,
+            total_fga = 1130,
+            total_fg3m = 220,
+            total_fg3a = 592,
+            total_ftm = 240,
+            total_fta = 324,
+            total_turnovers = 250,
+            total_oreb = 142,
+            total_dreb = 337
+        });
+
+        db.Db.Insert(new HallOfFameData
+        {
+            player_id = lebron.id,
+            first_name = "LeBron",
+            last_name = "James",
+            position = "SF",
+            team_abbreviation = "PHI",
+            rings = 4,
+            career_points = 17049,
+            career_rebounds = 4599,
+            career_assists = 4350,
+            career_games = 1548,
+            finals_mvps = 10,
+            induction_season = "2027"
+        });
+
+        db.Db.Execute("DELETE FROM schema_migrations WHERE name = ?", "seeded_player_careers");
+        db.CloseActiveSlot();
+
+        Assert.That(db.InitSaveSlot(1), Is.True, db.LastInitError);
+
+        var migrated = db.GetHistoricalPlayerStats(lebron.id);
+        Assert.That(migrated, Is.Not.Null);
+        Assert.That(migrated.games, Is.EqualTo(1570));
+        Assert.That(migrated.total_points, Is.EqualTo(41988));
+        Assert.That(migrated.total_rebounds, Is.EqualTo(11664));
+        Assert.That(migrated.total_assists, Is.EqualTo(11381));
+        Assert.That(migrated.total_double_doubles, Is.EqualTo(632));
+        Assert.That(migrated.total_triple_doubles, Is.EqualTo(125));
+
+        var hof = db.Db.Table<HallOfFameData>()
+            .FirstOrDefault(h => h.player_id == lebron.id);
+        Assert.That(hof, Is.Not.Null);
+        Assert.That(hof.career_games, Is.EqualTo(1570));
+        Assert.That(hof.career_points, Is.EqualTo(41988));
+        Assert.That(hof.career_rebounds, Is.EqualTo(11664));
+        Assert.That(hof.career_assists, Is.EqualTo(11381));
+        Assert.That(db.GetHistoricalPlayerStats("LeBron", "James"), Is.Null,
+            "La migración debe eliminar la fila duplicada del seeder.");
+    }
+
+    [Test]
     public void InitSaveSlot_SeedLeagueSettings_UsaLaTablaCba()
     {
         var db = DatabaseManager.Instance;

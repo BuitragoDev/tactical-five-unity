@@ -1632,6 +1632,24 @@ public partial class DatabaseManager : MonoBehaviour
             }
         }
 
+        // Unificar la carrera de los jugadores sembrados con la fila real del histórico.
+        // Las partidas antiguas tienen una carrera sintética + una fila del seeder con el
+        // mismo nombre; el Salón de la Fama leía la sintética. Esta migración conserva las
+        // temporadas jugadas y deja una sola carrera canónica por jugador. Se ejecuta
+        // después de crear/actualizar `player_season_stats` para poder leer sus columnas.
+        if (!IsMigrationApplied("seeded_player_careers"))
+        {
+            try
+            {
+                CanonicalizeSeededPlayerCareers(allowSeedAdoption: false);
+                MarkMigrationApplied("seeded_player_careers");
+            }
+            catch (System.Exception ex)
+            {
+                throw new DatabaseMigrationException("seeded_player_careers", ex);
+            }
+        }
+
         // Create monthly_awards table if missing (for monthly awards)
         try
         {
@@ -1958,10 +1976,12 @@ public partial class DatabaseManager : MonoBehaviour
         if (_db.Table<LeagueSettingsData>().Count() == 0)
             SeedLeagueSettings();
 
+        bool seededPlayers = false;
         if (_db.Table<PlayerData>().Count() == 0)
         {
             SeedPlayers();
             SeedFreeAgents();
+            seededPlayers = true;
         }
 
         if (_db.Table<SponsorData>().Count() == 0)
@@ -1999,6 +2019,14 @@ public partial class DatabaseManager : MonoBehaviour
             }
         }
 
+        // Las carreras de los jugadores sembrados deben existir (y estar corregidas)
+        // antes de los dorsales de veteranos, que consultan su fila histórica por player_id.
+        // Solo se adopta por nombre si los jugadores se acaban de sembrar o si la partida
+        // todavía no ha generado jugadores por draft; si no, un rookie generado podría
+        // compartir nombre con una leyenda.
+        bool allowSeedAdoption = seededPlayers || !HasAllocatedPlayerIds();
+        CanonicalizeSeededPlayerCareers(allowSeedAdoption);
+
         if (_db.Table<FinalsRecord>().Count() == 0)
             SeedPalmaresData();
 
@@ -2022,8 +2050,16 @@ public partial class DatabaseManager : MonoBehaviour
         // Los settings económicos también son datos estáticos: cada equipo debe tener
         // precios de entrada/abono desde el inicio de la partida.
         EnsureTeamSettingsForAllTeams();
+    }
 
-        SeedActivePlayerCareers();
+    bool HasAllocatedPlayerIds()
+    {
+        int tableExists = _db.ExecuteScalar<int>(
+            "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = 'id_counters'");
+        if (tableExists == 0) return false;
+
+        return _db.ExecuteScalar<int>(
+            "SELECT COUNT(*) FROM id_counters WHERE name = 'player' AND value > 0") > 0;
     }
 
     public void SeedHallOfFame()

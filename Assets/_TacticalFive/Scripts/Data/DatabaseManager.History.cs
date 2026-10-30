@@ -227,6 +227,233 @@ public partial class DatabaseManager
     }
 
     /// <summary>
+    /// Totales de liga regular de cada jugador en esta partida. Las temporadas cerradas
+    /// viven en `player_season_stats`; la temporada en curso sigue en `player_game_stats`.
+    /// La migración puede pedir ambas por separado porque no sabe si la temporada actual
+    /// ya fue archivada en `historical_player_stats`.
+    /// </summary>
+    Dictionary<int, HistoricalPlayerStatsData> BuildCareerGameTotals(bool includeCurrentSeason)
+    {
+        var totals = new Dictionary<int, HistoricalPlayerStatsData>();
+
+        void Add(HistoricalStatsAggregateRow r)
+        {
+            if (r == null || r.player_id <= 0) return;
+            if (!totals.TryGetValue(r.player_id, out var t))
+            {
+                t = new HistoricalPlayerStatsData { player_id = r.player_id };
+                totals[r.player_id] = t;
+            }
+
+            t.games += r.games;
+            t.total_points += r.total_points;
+            t.total_rebounds += r.total_rebounds;
+            t.total_assists += r.total_assists;
+            t.total_steals += r.total_steals;
+            t.total_blocks += r.total_blocks;
+            t.total_turnovers += r.total_turnovers;
+            t.total_fgm += r.total_fgm;
+            t.total_fga += r.total_fga;
+            t.total_fg3m += r.total_fg3m;
+            t.total_fg3a += r.total_fg3a;
+            t.total_ftm += r.total_ftm;
+            t.total_fta += r.total_fta;
+            t.total_oreb += r.total_oreb;
+            t.total_dreb += r.total_dreb;
+            t.total_double_doubles += r.total_double_doubles;
+            t.total_triple_doubles += r.total_triple_doubles;
+            t.total_minutes += r.total_minutes;
+            t.total_rating += r.total_rating;
+        }
+
+        var archived = _db.Query<HistoricalStatsAggregateRow>(@"
+            SELECT player_id,
+                   SUM(games) AS games,
+                   SUM(total_points) AS total_points,
+                   SUM(total_rebounds) AS total_rebounds,
+                   SUM(total_assists) AS total_assists,
+                   SUM(total_steals) AS total_steals,
+                   SUM(total_blocks) AS total_blocks,
+                   SUM(total_turnovers) AS total_turnovers,
+                   SUM(total_fgm) AS total_fgm,
+                   SUM(total_fga) AS total_fga,
+                   SUM(total_fg3m) AS total_fg3m,
+                   SUM(total_fg3a) AS total_fg3a,
+                   SUM(total_ftm) AS total_ftm,
+                   SUM(total_fta) AS total_fta,
+                   SUM(total_oreb) AS total_oreb,
+                   SUM(total_dreb) AS total_dreb,
+                   0 AS total_double_doubles,
+                   0 AS total_triple_doubles,
+                   CAST(SUM(total_minutes) AS INTEGER) AS total_minutes,
+                   SUM(total_rating) AS total_rating
+            FROM player_season_stats
+            GROUP BY player_id");
+        foreach (var row in archived) Add(row);
+
+        if (includeCurrentSeason)
+        {
+            var current = _db.Query<HistoricalStatsAggregateRow>(@"
+                SELECT ps.player_id,
+                       COUNT(*) AS games,
+                       SUM(ps.points) AS total_points,
+                       SUM(ps.rebounds) AS total_rebounds,
+                       SUM(ps.assists) AS total_assists,
+                       SUM(ps.steals) AS total_steals,
+                       SUM(ps.blocks) AS total_blocks,
+                       SUM(ps.turnovers) AS total_turnovers,
+                       SUM(ps.fgm) AS total_fgm,
+                       SUM(ps.fga) AS total_fga,
+                       SUM(ps.fg3m) AS total_fg3m,
+                       SUM(ps.fg3a) AS total_fg3a,
+                       SUM(ps.ftm) AS total_ftm,
+                       SUM(ps.fta) AS total_fta,
+                       SUM(ps.oreb) AS total_oreb,
+                       SUM(ps.dreb) AS total_dreb,
+                       SUM(ps.double_double) AS total_double_doubles,
+                       SUM(ps.triple_double) AS total_triple_doubles,
+                       CAST(SUM(ps.minutes) AS INTEGER) AS total_minutes,
+                       SUM(ps.rating) AS total_rating
+                FROM player_game_stats ps
+                JOIN games g ON g.id = ps.game_id
+                WHERE g.is_played = 1 AND g.game_type = 'regular'
+                GROUP BY ps.player_id");
+            foreach (var row in current) Add(row);
+        }
+
+        return totals;
+    }
+
+    /// <summary>
+    /// Migración one-time: sustituye la base sintética de las carreras sembradas por la
+    /// carrera real del seeder, conservando las temporadas jugadas y actualizando las
+    /// filas del Salón de la Fama ya creadas.
+    /// </summary>
+    void CanonicalizeSeededPlayerCareers(bool allowSeedAdoption)
+    {
+        if (_db.Table<HistoricalPlayerStatsData>().Count() == 0) return;
+
+        // En el seed/template todos los jugadores son del seed y se puede adoptar su
+        // carrera real. En una partida antigua no: un rookie generado puede compartir
+        // nombre con una leyenda y no debe heredar su carrera.
+        if (allowSeedAdoption)
+            SeedActivePlayerCareers();
+
+        var all = _db.Table<HistoricalPlayerStatsData>().ToList();
+
+        var archivedTotals = BuildCareerGameTotals(includeCurrentSeason: false);
+        var allTotals = BuildCareerGameTotals(includeCurrentSeason: true);
+        var seedRows = all.Where(r => r.player_id <= 0).ToList();
+        var ownedRows = all.Where(r => r.player_id > 0).ToList();
+
+        int merged = 0;
+        foreach (var owned in ownedRows)
+        {
+            archivedTotals.TryGetValue(owned.player_id, out var archived);
+            allTotals.TryGetValue(owned.player_id, out var allGames);
+
+            HistoricalPlayerStatsData played = null;
+            if (SeededCareerRules.LooksSyntheticBaseline(owned, archived))
+                played = archived;
+            else if (SeededCareerRules.LooksSyntheticBaseline(owned, allGames))
+                played = allGames;
+
+            if (played == null) continue;
+
+            var seedRow = SeededCareerRules.FindUniqueSeedRow(
+                seedRows, owned.first_name, owned.last_name);
+            if (seedRow == null) continue;
+
+            var combined = SeededCareerRules.Merge(seedRow, played);
+            combined.id = owned.id;
+            combined.player_id = owned.player_id;
+            combined.first_name = owned.first_name;
+            combined.last_name = owned.last_name;
+            combined.position = string.IsNullOrEmpty(owned.position) ? seedRow.position : owned.position;
+            combined.overall = owned.overall;
+            combined.team_name = owned.team_name;
+            combined.team_abbreviation = owned.team_abbreviation;
+            combined.team_logo = owned.team_logo;
+            // La base sintética no aporta dobles-dobles ni triples-dobles: los de la
+            // fila propia son exactamente los de los partidos jugados.
+            combined.total_double_doubles = seedRow.total_double_doubles + owned.total_double_doubles;
+            combined.total_triple_doubles = seedRow.total_triple_doubles + owned.total_triple_doubles;
+
+            _db.Update(combined);
+            _db.Delete(seedRow);
+            seedRows.Remove(seedRow);
+            UpdateHallOfFameCareerTotals(owned.player_id, combined);
+            merged++;
+        }
+
+        // Filas del seeder con 0 partidos (rookies sin carrera NBA) que ya tienen dueño
+        // en la partida: no aportan nada y duplicarían la fila en Estadísticas históricas.
+        var playerNames = new HashSet<string>(
+            _db.Table<PlayerData>().Select(p => SeededCareerRules.NameKey(p.first_name, p.last_name)));
+        int removedEmpty = 0;
+        foreach (var seedRow in seedRows.ToList())
+        {
+            if (seedRow.games != 0) continue;
+            string key = SeededCareerRules.NameKey(seedRow.first_name, seedRow.last_name);
+            bool hasOwnedRow = ownedRows.Any(r =>
+                SeededCareerRules.NameKey(r.first_name, r.last_name) == key);
+            if (!hasOwnedRow && !playerNames.Contains(key)) continue;
+
+            _db.Delete(seedRow);
+            seedRows.Remove(seedRow);
+            removedEmpty++;
+        }
+
+        // Red de seguridad: un HOF sin fila de carrera propia se reconstruye desde el
+        // seeder. No debería ocurrir en partidas normales, pero evita dejar una fila
+        // histórica huérfana si una versión anterior borró la carrera.
+        foreach (var hof in _db.Table<HallOfFameData>().Where(h => h.player_id > 0).ToList())
+        {
+            if (ownedRows.Any(r => r.player_id == hof.player_id)) continue;
+
+            var seedRow = SeededCareerRules.FindUniqueSeedRow(
+                seedRows, hof.first_name, hof.last_name);
+            if (seedRow == null) continue;
+
+            allTotals.TryGetValue(hof.player_id, out var played);
+            var combined = SeededCareerRules.Merge(seedRow, played);
+            combined.id = 0;
+            combined.player_id = hof.player_id;
+            combined.first_name = hof.first_name;
+            combined.last_name = hof.last_name;
+            combined.position = hof.position;
+            combined.team_abbreviation = hof.team_abbreviation;
+
+            _db.Insert(combined);
+            _db.Delete(seedRow);
+            seedRows.Remove(seedRow);
+            UpdateHallOfFameCareerTotals(hof.player_id, combined);
+            merged++;
+        }
+
+        if (merged > 0 || removedEmpty > 0)
+            Debug.Log($"[DB] Carreras sembradas: {merged} unificadas con el histórico real, " +
+                      $"{removedEmpty} filas vacías del seeder eliminadas.");
+    }
+
+    void UpdateHallOfFameCareerTotals(int playerId, HistoricalPlayerStatsData stats)
+    {
+        if (playerId <= 0 || stats == null) return;
+
+        var hof = _db.Table<HallOfFameData>()
+                     .FirstOrDefault(h => h.player_id == playerId);
+        if (hof == null) return;
+
+        hof.career_points = stats.total_points;
+        hof.career_rebounds = stats.total_rebounds;
+        hof.career_assists = stats.total_assists;
+        hof.career_games = stats.games;
+        if (!string.IsNullOrEmpty(stats.team_abbreviation))
+            hof.team_abbreviation = stats.team_abbreviation;
+        _db.Update(hof);
+    }
+
+    /// <summary>
     /// F6-01: rellena splits de tiro, pérdidas y OREB/DREB en filas archivadas
     /// usando los partidos que aún existan en `player_game_stats`. Las temporadas
     /// ya purgadas no se pueden reconstruir y se dejan como estén.
