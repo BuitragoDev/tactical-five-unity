@@ -1172,7 +1172,7 @@ public partial class MatchDayController
         float previousTime = path[path.Count - 1].Time;
         path.Add(new Sim2DPlayerWaypoint
         {
-            Position = new Vector2(Mathf.Clamp(point.x, 0.025f, 0.975f),
+            Position = new Vector2(Mathf.Clamp(point.x, -0.02f, 1.02f),
                 Mathf.Clamp(point.y, 0.04f, 0.96f)),
             Time = Mathf.Clamp(Mathf.Max(time, previousTime + 0.001f), 0f, 1f)
         });
@@ -1217,17 +1217,18 @@ public partial class MatchDayController
 
         int inbounderId = offenseIds
             .Where(id => id != pointGuardId)
-            .OrderBy(id => _sim2DPlayers[id].Player.position == "SG" ? 0
-                : _sim2DPlayers[id].Player.position == "SF" ? 1
-                : _sim2DPlayers[id].Player.position == "PG" ? 2 : 3)
-            .ThenByDescending(id => _sim2DPlayers[id].Player.passing)
+            .OrderBy(id => _sim2DPlayers[id].Player.position == "C" ? 0
+                : _sim2DPlayers[id].Player.position == "PF" ? 1
+                : _sim2DPlayers[id].Player.position == "SF" ? 2
+                : _sim2DPlayers[id].Player.position == "SG" ? 3 : 4)
+            .ThenByDescending(id => _sim2DPlayers[id].Player.rebounding)
             .FirstOrDefault();
         // Plantillas cortas: si solo queda un jugador, que saque y conduzca él.
         if (inbounderId <= 0) inbounderId = pointGuardId;
         if (!_sim2DPlayers.TryGetValue(inbounderId, out var inbounder)
             || !_sim2DPlayers.TryGetValue(pointGuardId, out var pointGuard)) return;
 
-        float baselineX = attackRight ? 0.055f : 0.945f;
+        float baselineX = attackRight ? 0.03f : 0.97f;
         float inboundX = _sim2DInboundType == Sim2DInboundType.Baseline
             ? baselineX
             : Mathf.Clamp(_sim2DBallX, 0.08f, 0.92f);
@@ -1236,13 +1237,29 @@ public partial class MatchDayController
             : _sim2DInboundY;
         Vector2 inbounderOffenseSpot = new Vector2(inbounder.TargetX, inbounder.TargetY);
         SetSim2DTarget(inbounder, new Vector2(inboundX, inboundY));
+        if (_sim2DInboundType == Sim2DInboundType.Baseline)
+            inbounder.TargetX = baselineX;
         inbounder.Node?.AddToClassList("sim2d-player--inbound");
+        if (_sim2DInboundType == Sim2DInboundType.Baseline)
+            AddSim2DBallWaypoint(new Vector2(_sim2DBallX, _sim2DBallY), 0.16f);
         AddSim2DPlayerWaypoint(inbounderId,
-            new Vector2(inbounder.TargetX, inbounder.TargetY), 0.10f);
+            new Vector2(inbounder.TargetX, inbounder.TargetY), 0.25f);
         if (inbounderId != pointGuardId)
-            AddSim2DPlayerWaypoint(inbounderId, inbounderOffenseSpot, 0.32f);
-        inbounder.TargetX = inbounderOffenseSpot.x;
-        inbounder.TargetY = inbounderOffenseSpot.y;
+        {
+            float direction = attackRight ? 1f : -1f;
+            Vector2 stepInPoint = new Vector2(baselineX + direction * 0.13f, 0.5f);
+            Vector2 trailPoint = new Vector2(attackRight ? 0.63f : 0.37f,
+                inbounderOffenseSpot.y);
+            AddSim2DPlayerWaypoint(inbounderId, stepInPoint, 0.40f);
+            AddSim2DPlayerWaypoint(inbounderId, trailPoint, 0.67f);
+            inbounder.TargetX = trailPoint.x;
+            inbounder.TargetY = trailPoint.y;
+        }
+        else
+        {
+            inbounder.TargetX = inbounderOffenseSpot.x;
+            inbounder.TargetY = inbounderOffenseSpot.y;
+        }
 
         float backcourtX = attackRight ? 0.40f : 0.60f;
         float receiveY = Mathf.Clamp(inboundY + (inboundY < 0.5f ? 0.12f : -0.12f), 0.18f, 0.82f);
@@ -1255,14 +1272,14 @@ public partial class MatchDayController
         }
         else
             SetSim2DTarget(pointGuard, pointGuardSet);
-        AddSim2DPlayerWaypoint(pointGuardId, receivePoint, 0.30f);
-        AddSim2DPlayerWaypoint(pointGuardId, pointGuardSet, 0.49f);
+        AddSim2DPlayerWaypoint(pointGuardId, receivePoint, 0.48f);
+        AddSim2DPlayerWaypoint(pointGuardId, pointGuardSet, 0.65f);
 
         // La pelota parte del jugador situado junto a la línea, viaja a un base
         // claramente separado y este avanza desde campo propio hacia la pista rival.
-        AddSim2DBallWaypoint(new Vector2(inbounder.TargetX, inbounder.TargetY), 0.10f);
-        AddSim2DBallWaypoint(receivePoint, 0.30f);
-        AddSim2DBallWaypoint(new Vector2(pointGuardSet.x, pointGuardSet.y), 0.49f);
+        AddSim2DBallWaypoint(new Vector2(inbounder.TargetX, inbounder.TargetY), 0.28f);
+        AddSim2DBallWaypoint(receivePoint, 0.48f);
+        AddSim2DBallWaypoint(new Vector2(pointGuardSet.x, pointGuardSet.y), 0.65f);
         _sim2DBallHandlerId = pointGuardId;
         _sim2DBallFollowsHandler = true;
     }

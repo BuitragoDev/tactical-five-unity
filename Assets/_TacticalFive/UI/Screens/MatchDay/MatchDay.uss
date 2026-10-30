@@ -1136,7 +1136,7 @@
     background-repeat: no-repeat;
     background-position: center;
     border-radius: 8px;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .sim2d-effects-layer {
@@ -1246,13 +1246,8 @@
     border-color: rgb(220, 60, 60);
 }
 
-.sim2d-player--inbound .sim2d-player-photo {
-    border-width: 5px;
-    border-color: rgb(255, 214, 90);
-}
-
 .sim2d-player--inbound .sim2d-player-plate {
-    background-color: rgb(52, 42, 22);
+    display: none;
 }
 
 .sim2d-player-plate {
