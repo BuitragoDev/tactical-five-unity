@@ -10,18 +10,15 @@ using System.Linq;
 public partial class MatchDayController
 {
     private const string SIM2D_SPEED_PREF = "TF_Sim2DSpeed";
-    // En NORMAL cada jugada dispone de tiempo suficiente para ver el movimiento;
-    // las velocidades superiores comprimen el evento, no lo convierten en un salto.
-    private const float SIM2D_EVENT_SECONDS = 1.7f;
-    private const float SIM2D_MOVE_SECONDS = 1.05f;
 
     private VisualElement _sim2DOverlay, _sim2DHomeLayer, _sim2DAwayLayer, _sim2DBall;
     private VisualElement _sim2DHomeLogo, _sim2DAwayLogo, _sim2DTeamList;
     private Label _sim2DHomeAbbr, _sim2DAwayAbbr, _sim2DHomeName, _sim2DAwayName;
     private Label _sim2DScore, _sim2DQuarter, _sim2DClock, _sim2DTickerText;
     private Label _sim2DPossession, _sim2DVenue;
+    private Label _sim2DHeaderPlayer, _sim2DHeaderPts, _sim2DHeaderReb, _sim2DHeaderAsi;
     private Button _sim2DHomeTab, _sim2DAwayTab, _sim2DPause, _sim2DSkip;
-    private Button _sim2DSpeed1, _sim2DSpeed3, _sim2DSpeed5, _sim2DSpeed10;
+    private Button _sim2DSpeed1, _sim2DSpeed5, _sim2DSpeed10, _sim2DSpeed20;
 
     private Coroutine _sim2DRoutine;
     private List<GameSimulator.PlayByPlayEvent> _sim2DLog;
@@ -73,18 +70,63 @@ public partial class MatchDayController
         _sim2DTickerText = _root.Q<Label>("Sim2DTickerText");
         _sim2DPossession = _root.Q<Label>("Sim2DPossession");
         _sim2DVenue = _root.Q<Label>("Sim2DVenue");
+        _sim2DHeaderPlayer = _root.Q<Label>("Sim2DHeaderPlayer");
+        _sim2DHeaderPts = _root.Q<Label>("Sim2DHeaderPts");
+        _sim2DHeaderReb = _root.Q<Label>("Sim2DHeaderReb");
+        _sim2DHeaderAsi = _root.Q<Label>("Sim2DHeaderAsi");
 
         _sim2DHomeTab = _root.Q<Button>("Sim2DHomeTab");
         _sim2DAwayTab = _root.Q<Button>("Sim2DAwayTab");
         _sim2DPause = _root.Q<Button>("Sim2DPause");
         _sim2DSkip = _root.Q<Button>("Sim2DSkip");
         _sim2DSpeed1 = _root.Q<Button>("Sim2DSpeed1");
-        _sim2DSpeed3 = _root.Q<Button>("Sim2DSpeed3");
         _sim2DSpeed5 = _root.Q<Button>("Sim2DSpeed5");
         _sim2DSpeed10 = _root.Q<Button>("Sim2DSpeed10");
+        _sim2DSpeed20 = _root.Q<Button>("Sim2DSpeed20");
 
-        _sim2DSpeed = PlayerPrefs.GetInt(SIM2D_SPEED_PREF, 1);
+        _sim2DSpeed = NormalizeSim2DSpeed(PlayerPrefs.GetInt(SIM2D_SPEED_PREF, 1));
         UpdateSim2DSpeedButtons();
+    }
+
+    void ConfigureSim2DHeader()
+    {
+        if (_sim2DHeaderPlayer == null) return;
+
+        _sim2DHeaderPlayer.text = LocalizationService.T("ui.match_day.jugador");
+        _sim2DHeaderPts.text = LocalizationService.T("ui.match_day.pts");
+        _sim2DHeaderReb.text = LocalizationService.T("ui.match_day.reb");
+        _sim2DHeaderAsi.text = LocalizationService.T("ui.match_day.asi");
+
+        ApplySim2DHeaderStyle(_sim2DHeaderPlayer, TextAnchor.MiddleLeft, 0, true);
+        ApplySim2DHeaderStyle(_sim2DHeaderPts, TextAnchor.MiddleCenter, 52, false);
+        ApplySim2DHeaderStyle(_sim2DHeaderReb, TextAnchor.MiddleCenter, 52, false);
+        ApplySim2DHeaderStyle(_sim2DHeaderAsi, TextAnchor.MiddleCenter, 52, false);
+    }
+
+    static void ApplySim2DHeaderStyle(Label label, TextAnchor alignment, float width, bool grow)
+    {
+        if (label == null) return;
+        label.style.display = DisplayStyle.Flex;
+        label.style.visibility = Visibility.Visible;
+        label.style.height = 28;
+        label.style.fontSize = 18;
+        label.style.unityFontStyleAndWeight = FontStyle.Bold;
+        label.style.unityTextAlign = alignment;
+        label.style.flexShrink = grow ? 1 : 0;
+        if (grow)
+        {
+            label.style.width = new Length(50f, LengthUnit.Percent);
+            label.style.flexGrow = 0;
+            label.style.flexShrink = 0;
+            label.style.minWidth = 0;
+        }
+        else
+        {
+            label.style.width = width;
+        }
+        label.style.color = new StyleColor(grow
+            ? new Color32(190, 200, 218, 255)
+            : new Color32(212, 160, 23, 255));
     }
 
     void RegisterSimVisualCallbacks()
@@ -108,15 +150,15 @@ public partial class MatchDayController
         _sim2DPause?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ToggleSim2DPause(); });
         _sim2DSkip?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnSim2DSkip(); });
         _sim2DSpeed1?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SelectSim2DSpeed(1); });
-        _sim2DSpeed3?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SelectSim2DSpeed(3); });
         _sim2DSpeed5?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SelectSim2DSpeed(5); });
         _sim2DSpeed10?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SelectSim2DSpeed(10); });
+        _sim2DSpeed20?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SelectSim2DSpeed(20); });
 
         if (CursorManager.Instance == null) return;
         foreach (var name in new[]
         {
             "Sim2DHomeTab", "Sim2DAwayTab", "Sim2DPause", "Sim2DSkip",
-            "Sim2DSpeed1", "Sim2DSpeed3", "Sim2DSpeed5", "Sim2DSpeed10"
+            "Sim2DSpeed1", "Sim2DSpeed5", "Sim2DSpeed10", "Sim2DSpeed20"
         })
         {
             var el = _root.Q<VisualElement>(name);
@@ -141,15 +183,18 @@ public partial class MatchDayController
                    ?? DatabaseManager.Instance.GetTeamById(_sim2DHomeTeamId);
         var away = _allTeams?.Find(t => t.id == _sim2DAwayTeamId)
                    ?? DatabaseManager.Instance.GetTeamById(_sim2DAwayTeamId);
-        _sim2DHomeAbbr.text = home?.abbreviation ?? "--";
-        _sim2DAwayAbbr.text = away?.abbreviation ?? "--";
         _sim2DHomeTab.text = home?.abbreviation ?? "LOC";
         _sim2DAwayTab.text = away?.abbreviation ?? "VIS";
-        _sim2DHomeName.text = home?.name?.ToUpperInvariant() ?? "";
-        _sim2DAwayName.text = away?.name?.ToUpperInvariant() ?? "";
-        SetLogo(_sim2DHomeLogo, home?.logo, "80x80");
-        SetLogo(_sim2DAwayLogo, away?.logo, "80x80");
+        _sim2DHomeAbbr.text = home?.name ?? "--";
+        _sim2DAwayAbbr.text = away?.name ?? "--";
+        _sim2DHomeName.style.display = DisplayStyle.None;
+        _sim2DAwayName.style.display = DisplayStyle.None;
+        _sim2DHomeName.text = "";
+        _sim2DAwayName.text = "";
+        SetLogo(_sim2DHomeLogo, home?.logo, "64x64");
+        SetLogo(_sim2DAwayLogo, away?.logo, "64x64");
         _sim2DVenue.text = home?.arena ?? "";
+        ConfigureSim2DHeader();
 
         _sim2DSelectedTeamId = _myTeam != null &&
             (_myTeam.id == _sim2DHomeTeamId || _myTeam.id == _sim2DAwayTeamId)
@@ -239,6 +284,18 @@ public partial class MatchDayController
         name.AddToClassList("sim2d-player-name");
         plate.Add(number);
         plate.Add(name);
+        plate.style.position = Position.Absolute;
+        plate.style.left = 0;
+        plate.style.right = 0;
+        plate.style.top = 46;
+        plate.style.marginTop = 0;
+        plate.style.display = DisplayStyle.Flex;
+        plate.style.visibility = Visibility.Visible;
+        number.style.color = new StyleColor(new Color32(212, 160, 23, 255));
+        name.style.color = new StyleColor(new Color32(235, 239, 247, 255));
+        name.style.display = DisplayStyle.Flex;
+        name.style.visibility = Visibility.Visible;
+
         node.Add(photo);
         node.Add(plate);
 
@@ -259,11 +316,19 @@ public partial class MatchDayController
             ev.text, ev.homeScore, ev.awayScore, ev.quarter, _pbpNarrator.NextDouble());
     }
 
+    static string FullName(PlayerData p)
+    {
+        if (p == null) return "";
+        string full = $"{p.first_name} {p.last_name}".Trim();
+        return string.IsNullOrWhiteSpace(full) ? $"#{p.id}" : full;
+    }
+
     static string ShortName(PlayerData p)
     {
         if (p == null) return "";
         string last = string.IsNullOrWhiteSpace(p.last_name) ? p.first_name : p.last_name;
-        return (last ?? "").ToUpperInvariant();
+        if (string.IsNullOrWhiteSpace(last)) last = $"#{p.id}";
+        return last.ToUpperInvariant();
     }
 
     static int Sim2DPositionOrder(string position) => position switch
@@ -353,10 +418,27 @@ public partial class MatchDayController
 
             var pos = new Label { text = PositionCodes.GetShort(state.Player.position) };
             pos.AddToClassList("sim2d-roster-pos");
+            pos.style.color = new StyleColor(new Color32(212, 160, 23, 255));
+            pos.style.display = DisplayStyle.Flex;
+            pos.style.visibility = Visibility.Visible;
             row.Add(pos);
 
-            var name = new Label { text = ShortName(state.Player) };
+            var name = new Label
+            {
+                text = FullName(state.Player),
+                tooltip = FullName(state.Player)
+            };
             name.AddToClassList("sim2d-roster-name");
+            name.style.width = new Length(47f, LengthUnit.Percent);
+            name.style.flexGrow = 0;
+            name.style.flexShrink = 0;
+            name.style.minWidth = 0;
+            name.style.height = 50;
+            name.style.fontSize = 18;
+            name.style.color = new StyleColor(new Color32(235, 239, 247, 255));
+            name.style.unityTextAlign = TextAnchor.MiddleLeft;
+            name.style.display = DisplayStyle.Flex;
+            name.style.visibility = Visibility.Visible;
             row.Add(name);
 
             var pts = new Label { text = state.Points.ToString() };
@@ -414,6 +496,7 @@ public partial class MatchDayController
 
     IEnumerator Sim2DCoroutine(List<GameSimulator.PlayByPlayEvent> log)
     {
+        float previousAbsolute = 0f;
         for (int i = 0; i < log.Count; i++)
         {
             while (_sim2DPaused) yield return null;
@@ -431,26 +514,28 @@ public partial class MatchDayController
             UpdateSim2DPossession();
             UpdateSim2DRoster();
             LayoutSim2DTargets(ev, i, animate: true);
-            float eventPace = SIM2D_EVENT_SECONDS / Mathf.Max(1, _sim2DSpeed);
-            float moveDuration = Mathf.Min(SIM2D_MOVE_SECONDS / Mathf.Max(1, _sim2DSpeed), eventPace);
+
+            // x1 = tiempo real: cada minuto de juego dura un minuto. Los eventos con
+            // el mismo instante reciben un mínimo para que la acción sea visible.
+            float currentAbsolute = GetSim2DAbsoluteMinutes(ev);
+            float eventDuration = Mathf.Max(0.22f,
+                (currentAbsolute - previousAbsolute) * 60f / Mathf.Max(1, _sim2DSpeed));
+            previousAbsolute = currentAbsolute;
+
             var next = i + 1 < log.Count ? log[i + 1] : null;
             float clockTarget = GetSim2DClockTarget(ev, next);
             yield return AnimateSim2DPositions(ev.quarter, ev.timeElapsed, clockTarget,
-                eventPace, moveDuration);
-
-            float elapsed = moveDuration;
-            while (elapsed < eventPace)
-            {
-                if (!_sim2DPaused)
-                {
-                    elapsed += Time.unscaledDeltaTime;
-                    UpdateSim2DClock(ev.quarter, Mathf.Lerp(ev.timeElapsed, clockTarget,
-                        Mathf.Clamp01(elapsed / eventPace)));
-                }
-                yield return null;
-            }
+                eventDuration);
         }
         OnSim2DComplete();
+    }
+
+    static float GetSim2DAbsoluteMinutes(GameSimulator.PlayByPlayEvent ev)
+    {
+        if (ev == null) return 0f;
+        return ev.quarter <= 4
+            ? (ev.quarter - 1) * 12f + ev.timeElapsed
+            : 48f + (ev.quarter - 5) * 5f + ev.timeElapsed;
     }
 
     void LayoutSim2DTargets(GameSimulator.PlayByPlayEvent ev, int eventIndex, bool animate)
@@ -748,9 +833,10 @@ public partial class MatchDayController
     }
 
     IEnumerator AnimateSim2DPositions(int quarter, float clockStart, float clockTarget,
-                                      float clockDuration, float movementDuration)
+                                      float duration)
     {
-        float duration = Mathf.Max(0.08f, movementDuration);
+        duration = Mathf.Max(0.05f, duration);
+        float clockDuration = duration;
 
         var start = new Dictionary<int, Vector2>();
         foreach (var state in _sim2DPlayers.Values)
@@ -928,10 +1014,18 @@ public partial class MatchDayController
         StopSimVisual();
     }
 
+    static int NormalizeSim2DSpeed(int speed) => speed switch
+    {
+        5 => 5,
+        10 => 10,
+        20 => 20,
+        _ => 1
+    };
+
     void SelectSim2DSpeed(int speed)
     {
-        _sim2DSpeed = speed;
-        PlayerPrefs.SetInt(SIM2D_SPEED_PREF, speed);
+        _sim2DSpeed = NormalizeSim2DSpeed(speed);
+        PlayerPrefs.SetInt(SIM2D_SPEED_PREF, _sim2DSpeed);
         PlayerPrefs.Save();
         UpdateSim2DSpeedButtons();
     }
@@ -939,8 +1033,8 @@ public partial class MatchDayController
     void UpdateSim2DSpeedButtons()
     {
         _sim2DSpeed1?.EnableInClassList("sim2d-speed-btn--active", _sim2DSpeed == 1);
-        _sim2DSpeed3?.EnableInClassList("sim2d-speed-btn--active", _sim2DSpeed == 3);
         _sim2DSpeed5?.EnableInClassList("sim2d-speed-btn--active", _sim2DSpeed == 5);
         _sim2DSpeed10?.EnableInClassList("sim2d-speed-btn--active", _sim2DSpeed == 10);
+        _sim2DSpeed20?.EnableInClassList("sim2d-speed-btn--active", _sim2DSpeed == 20);
     }
 }

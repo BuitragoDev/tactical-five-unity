@@ -5146,6 +5146,10 @@
       "value": "3P"
     },
     {
+      "key": "ui.match_day.asi",
+      "value": "ASI"
+    },
+    {
       "key": "ui.match_day.ast",
       "value": "AST"
     },
@@ -5186,6 +5190,10 @@
       "value": "x10"
     },
     {
+      "key": "ui.match_day.pbp_btn_speed20",
+      "value": "x20"
+    },
+    {
       "key": "ui.match_day.pbp_btn_speed3",
       "value": "x3"
     },
@@ -5196,10 +5204,6 @@
     {
       "key": "ui.match_day.pbp_skip",
       "value": "SALTAR ►"
-    },
-    {
-      "key": "ui.match_day.sim2d_speed_normal",
-      "value": "NORMAL"
     },
     {
       "key": "ui.match_day.pts",

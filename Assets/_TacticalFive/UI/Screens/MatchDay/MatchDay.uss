@@ -840,11 +840,11 @@
 }
 
 .sim2d-team-logo {
-    width: 70px;
-    height: 70px;
+    width: 64px;
+    height: 64px;
     flex-shrink: 0;
-    margin-left: 6px;
-    margin-right: 6px;
+    margin-left: 8px;
+    margin-right: 8px;
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
@@ -864,9 +864,13 @@
 }
 
 .sim2d-team-abbr {
-    font-size: 30px;
+    font-size: 25px;
     color: rgb(255, 255, 255);
-    letter-spacing: 2px;
+    letter-spacing: 1px;
+    max-width: 360px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
 }
 
@@ -931,8 +935,8 @@
 }
 
 .sim2d-side {
-    width: 360px;
-    min-width: 340px;
+    width: 40%;
+    min-width: 0;
     flex-shrink: 0;
     flex-direction: column;
     background-color: rgb(19, 24, 35);
@@ -982,6 +986,7 @@
     flex-direction: row;
     align-items: center;
     flex-shrink: 0;
+    min-height: 42px;
     padding: 8px 12px;
     background-color: rgb(24, 30, 44);
     border-bottom-width: 1px;
@@ -989,20 +994,25 @@
 }
 
 .sim2d-col-player {
-    flex: 1;
+    flex-grow: 1;
+    flex-shrink: 1;
     min-width: 0;
-    font-size: 13px;
-    color: rgb(122, 138, 170);
+    font-size: 16px;
+    color: rgb(180, 191, 210);
     letter-spacing: 1px;
+    text-transform: uppercase;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
 }
 
 .sim2d-col-stat {
-    width: 38px;
+    width: 52px;
     flex-shrink: 0;
-    font-size: 13px;
-    color: rgb(122, 138, 170);
-    text-align: center;
+    font-size: 18px;
+    font-weight: 700;
+    color: rgb(212, 160, 23);
+    -unity-text-align: middle-center;
     letter-spacing: 1px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
 }
 
 .sim2d-team-list {
@@ -1015,10 +1025,11 @@
 .sim2d-roster-row {
     flex-direction: row;
     align-items: center;
-    min-height: 48px;
-    padding: 5px 6px;
+    width: 100%;
+    min-height: 66px;
+    padding: 7px 8px;
     border-radius: 6px;
-    margin-bottom: 3px;
+    margin-bottom: 4px;
 }
 
 .sim2d-roster-row--active {
@@ -1026,40 +1037,48 @@
 }
 
 .sim2d-roster-photo {
-    width: 34px;
-    height: 34px;
-    border-radius: 17px;
+    width: 50px;
+    height: 50px;
+    border-radius: 25px;
     background-color: rgb(38, 47, 65);
     background-size: cover;
     background-position: center;
     flex-shrink: 0;
-    margin-right: 8px;
-    border-width: 1px;
-    border-color: rgb(75, 90, 120);
+    margin-right: 10px;
+    border-width: 2px;
+    border-color: rgb(100, 150, 245);
 }
 
 .sim2d-roster-name {
-    flex: 1;
+    flex-grow: 1;
+    flex-shrink: 1;
     min-width: 0;
-    font-size: 15px;
-    color: rgb(220, 226, 238);
+    font-size: 18px;
+    color: rgb(235, 239, 247);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    -unity-text-align: middle-left;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
 }
 
 .sim2d-roster-pos {
-    font-size: 11px;
+    width: 24px;
+    flex-shrink: 0;
+    font-size: 14px;
+    font-weight: 700;
     color: rgb(212, 160, 23);
-    margin-right: 4px;
+    -unity-text-align: middle-center;
+    margin-right: 8px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
 }
 
 .sim2d-roster-stat {
-    width: 34px;
+    width: 52px;
     flex-shrink: 0;
-    font-size: 15px;
-    color: rgb(220, 226, 238);
-    text-align: center;
+    font-size: 24px;
+    color: rgb(235, 239, 247);
+    -unity-text-align: middle-center;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
 }
 
@@ -1067,6 +1086,7 @@
     flex: 1;
     flex-direction: column;
     min-width: 0;
+    width: 60%;
 }
 
 .sim2d-court-top {
@@ -1083,12 +1103,14 @@
     color: rgb(100, 200, 140);
     letter-spacing: 1px;
     text-transform: uppercase;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
 }
 
 .sim2d-venue {
     font-size: 13px;
     color: rgb(122, 138, 170);
     letter-spacing: 1px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
 }
 
 .sim2d-court {
@@ -1250,6 +1272,7 @@
     font-size: 11px;
     color: rgb(212, 160, 23);
     margin-right: 3px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
 }
 
 .sim2d-player-name {
@@ -1258,6 +1281,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
 }
 
 .sim2d-ball {
