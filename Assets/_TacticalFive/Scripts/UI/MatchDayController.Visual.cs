@@ -14,6 +14,8 @@ public partial class MatchDayController
 
     private VisualElement _sim2DOverlay, _sim2DCourt, _sim2DHomeLayer, _sim2DAwayLayer, _sim2DBall;
     private VisualElement _sim2DHomeLogo, _sim2DAwayLogo, _sim2DTeamList;
+    private VisualElement _sim2DLeftHoopLogo, _sim2DRightHoopLogo;
+    private VisualElement _sim2DLeftAttackArrow, _sim2DRightAttackArrow;
     private Label _sim2DHomeAbbr, _sim2DAwayAbbr, _sim2DHomeName, _sim2DAwayName;
     private Label _sim2DScore, _sim2DQuarter, _sim2DClock, _sim2DTickerText;
     private Label _sim2DPossession, _sim2DVenue;
@@ -85,6 +87,12 @@ public partial class MatchDayController
         _sim2DHomeLogo = _root.Q<VisualElement>("Sim2DHomeLogo");
         _sim2DAwayLogo = _root.Q<VisualElement>("Sim2DAwayLogo");
         _sim2DTeamList = _root.Q<VisualElement>("Sim2DTeamList");
+        _sim2DLeftHoopLogo = _root.Q<VisualElement>("Sim2DLeftHoopLogo");
+        _sim2DRightHoopLogo = _root.Q<VisualElement>("Sim2DRightHoopLogo");
+        _sim2DLeftAttackArrow = _root.Q<VisualElement>("Sim2DLeftAttackArrow");
+        _sim2DRightAttackArrow = _root.Q<VisualElement>("Sim2DRightAttackArrow");
+        SetSim2DIcon(_sim2DLeftAttackArrow, "Icons/right_arrow");
+        SetSim2DIcon(_sim2DRightAttackArrow, "Icons/left_arrow");
 
         _sim2DHomeAbbr = _root.Q<Label>("Sim2DHomeAbbr");
         _sim2DAwayAbbr = _root.Q<Label>("Sim2DAwayAbbr");
@@ -172,6 +180,20 @@ public partial class MatchDayController
             : new Color32(212, 160, 23, 255));
     }
 
+    static void SetSim2DIcon(VisualElement elem, string resource)
+    {
+        if (elem == null) return;
+        var sprite = Resources.Load<Sprite>(resource);
+        if (sprite != null)
+        {
+            elem.style.backgroundImage = new StyleBackground(sprite);
+            return;
+        }
+        var texture = Resources.Load<Texture2D>(resource);
+        if (texture != null)
+            elem.style.backgroundImage = new StyleBackground(texture);
+    }
+
     void RegisterSimVisualCallbacks()
     {
         if (_sim2DOverlay == null) return;
@@ -236,6 +258,10 @@ public partial class MatchDayController
         _sim2DAwayName.text = "";
         SetLogo(_sim2DHomeLogo, home?.logo, "64x64");
         SetLogo(_sim2DAwayLogo, away?.logo, "64x64");
+        // Sin cambio de lado: el local defiende el aro izquierdo (ataca a la derecha)
+        // y el visitante defiende el derecho (ataca a la izquierda).
+        SetLogo(_sim2DLeftHoopLogo, home?.logo, "64x64");
+        SetLogo(_sim2DRightHoopLogo, away?.logo, "64x64");
         _sim2DVenue.text = home?.arena ?? "";
         ConfigureSim2DHeader();
 

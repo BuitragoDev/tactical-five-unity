@@ -1126,6 +1126,46 @@
     overflow: hidden;
 }
 
+.sim2d-hoop-owners {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    min-height: 64px;
+    margin-top: 8px;
+    flex-shrink: 0;
+}
+
+.sim2d-hoop-owner {
+    flex-direction: row;
+    align-items: center;
+}
+
+.sim2d-hoop-logo {
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.sim2d-hoop-arrow {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    margin-left: 10px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.9;
+}
+
+.sim2d-hoop-owner--right .sim2d-hoop-arrow {
+    margin-left: 0;
+    margin-right: 10px;
+}
+
 .sim2d-player-layer {
     position: absolute;
     left: 0;

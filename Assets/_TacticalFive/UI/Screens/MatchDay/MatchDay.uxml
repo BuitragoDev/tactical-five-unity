@@ -172,6 +172,16 @@
                         <ui:VisualElement name="Sim2DAwayLayer" class="sim2d-player-layer" />
                         <ui:VisualElement name="Sim2DBall" class="sim2d-ball" />
                     </ui:VisualElement>
+                    <ui:VisualElement class="sim2d-hoop-owners">
+                        <ui:VisualElement class="sim2d-hoop-owner sim2d-hoop-owner--left">
+                            <ui:VisualElement name="Sim2DLeftHoopLogo" class="sim2d-hoop-logo" />
+                            <ui:VisualElement name="Sim2DLeftAttackArrow" class="sim2d-hoop-arrow" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="sim2d-hoop-owner sim2d-hoop-owner--right">
+                            <ui:VisualElement name="Sim2DRightAttackArrow" class="sim2d-hoop-arrow" />
+                            <ui:VisualElement name="Sim2DRightHoopLogo" class="sim2d-hoop-logo" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
 
