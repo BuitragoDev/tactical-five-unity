@@ -1323,8 +1323,8 @@
 }
 
 .sim2d-ticker-icon {
-    width: 26px;
-    height: 26px;
+    width: 64px;
+    height: 64px;
     flex-shrink: 0;
     margin-right: 10px;
     background-size: contain;
