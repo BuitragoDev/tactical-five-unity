@@ -11,6 +11,12 @@ public partial class MatchDayController
 {
     private const string SIM2D_SPEED_PREF = "TF_Sim2DSpeed";
     private const float SIM2D_COURT_ASPECT = 28f / 15f;
+    // Ritmo visual: una transición de cancha completa no debe verse como cámara
+    // rápida. El reloj sigue avanzando con el partido, pero cada jugada tiene una
+    // duración mínima proporcional a lo que se mueven jugadores y balón.
+    private const float SIM2D_MIN_EVENT_SECONDS = 3.0f;
+    private const float SIM2D_TRAVEL_SECONDS_PER_COURT = 6.0f;
+    private const float SIM2D_BALL_TRAVEL_SECONDS_PER_COURT = 2.5f;
     // Centros de los aros en la imagen de la cancha (1400x750, margen 20 px).
     private const float SIM2D_LEFT_HOOP_X = 0.069f;
     private const float SIM2D_RIGHT_HOOP_X = 0.931f;
@@ -67,6 +73,7 @@ public partial class MatchDayController
         public Texture2D Photo;
         public VisualElement Node;
         public float X = 0.5f, Y = 0.5f;
+        public float StartX = 0.5f, StartY = 0.5f;
         public float TargetX = 0.5f, TargetY = 0.5f;
         public bool OnCourt;
     }
@@ -287,12 +294,14 @@ public partial class MatchDayController
         _sim2DActive = true;
         _sim2DFinished = false;
         _sim2DPaused = false;
-        _sim2DHomeOnOffense = true;
+        _sim2DHomeOnOffense = log.Count > 0 ? log[0].homeOnOffense : true;
         _sim2DHomeOnCourt = new List<int>();
         _sim2DAwayOnCourt = new List<int>();
         _sim2DBallHandlerId = 0;
         _sim2DBallPath.Clear();
         _sim2DBallFollowsHandler = false;
+        _sim2DBallX = 0.5f;
+        _sim2DBallY = 0.5f;
         _sim2DInboundType = Sim2DInboundType.None;
         _sim2DShotClock = 24f;
         UpdateSim2DShotClock(_sim2DShotClock);
@@ -341,6 +350,15 @@ public partial class MatchDayController
             : "";
         UpdateSim2DPossession();
         UpdateSim2DRoster();
+        if (log.Count > 0)
+        {
+            if (log[0].homeOnCourt != null && log[0].homeOnCourt.Count > 0)
+            {
+                _sim2DHomeOnCourt = new List<int>(log[0].homeOnCourt);
+                _sim2DAwayOnCourt = new List<int>(log[0].awayOnCourt ?? new List<int>());
+            }
+            PrepareSim2DPossession(null, log[0]);
+        }
         LayoutSim2DTargets(log.Count > 0 ? log[0] : null, 0, animate: false);
 
         _sim2DOverlay.style.display = DisplayStyle.Flex;
@@ -639,8 +657,9 @@ public partial class MatchDayController
             float clockTarget = GetSim2DClockTarget(ev, next);
             float nextAbsolute = next != null ? GetSim2DAbsoluteMinutes(next) : currentAbsolute;
             float gameSeconds = Mathf.Max(0f, (nextAbsolute - currentAbsolute) * 60f);
-            float eventDuration = Mathf.Max(2.5f / Mathf.Max(1, _sim2DSpeed),
-                gameSeconds / Mathf.Max(1, _sim2DSpeed));
+            float eventDuration = Mathf.Max(
+                Mathf.Max(SIM2D_MIN_EVENT_SECONDS, gameSeconds),
+                GetSim2DEventTravelSeconds()) / Mathf.Max(1, _sim2DSpeed);
             float shotClockStart = _sim2DShotClock;
             float shotClockEnd = Mathf.Max(0.1f, shotClockStart - gameSeconds);
             yield return AnimateSim2DPositions(ev.quarter, ev.timeElapsed, clockTarget,
@@ -792,6 +811,8 @@ public partial class MatchDayController
         foreach (var state in _sim2DPlayers.Values)
         {
             state.OnCourt = false;
+            state.StartX = state.X;
+            state.StartY = state.Y;
             state.TargetX = state.X;
             state.TargetY = state.Y;
             state.Node?.RemoveFromClassList("sim2d-player--action");
@@ -820,14 +841,41 @@ public partial class MatchDayController
             foreach (var state in _sim2DPlayers.Values)
             {
                 if (!state.OnCourt) continue;
-                state.X = state.TargetX;
-                state.Y = state.TargetY;
+                Vector2 initial = GetSim2DInitialPathPosition(state);
+                state.X = initial.x;
+                state.Y = initial.y;
                 ApplySim2DNodePosition(state);
             }
-            _sim2DBallX = _sim2DBallTargetX;
-            _sim2DBallY = _sim2DBallTargetY;
+            Vector2 ballStart = GetSim2DInitialBallPosition();
+            _sim2DBallX = ballStart.x;
+            _sim2DBallY = ballStart.y;
             ApplySim2DBallPosition();
         }
+    }
+
+    // Posición de arranque de una jugada sin animación: el primer punto real del
+    // recorrido (salto inicial, saque...) en lugar del destino final.
+    Vector2 GetSim2DInitialPathPosition(Sim2DPlayerState state)
+    {
+        if (state != null && _sim2DPlayerPaths.TryGetValue(state.Player.id, out var path))
+        {
+            foreach (var waypoint in path)
+            {
+                if (waypoint.Time > 0.0001f)
+                    return waypoint.Position;
+            }
+        }
+        return new Vector2(state?.TargetX ?? 0.5f, state?.TargetY ?? 0.5f);
+    }
+
+    Vector2 GetSim2DInitialBallPosition()
+    {
+        foreach (var waypoint in _sim2DBallPath)
+        {
+            if (waypoint.Time > 0.0001f)
+                return waypoint.Position;
+        }
+        return new Vector2(_sim2DBallTargetX, _sim2DBallTargetY);
     }
 
     void LayoutSim2DTeam(List<int> ids, bool homeTeam, int eventIndex)
@@ -933,14 +981,14 @@ public partial class MatchDayController
 
             if (_sim2DPlayers.TryGetValue(ftShooterId, out var ftShooter))
             {
-                AddSim2DBallWaypoint(new Vector2(ftShooter.TargetX, ftShooter.TargetY), 0.52f);
+                AddSim2DBallWaypoint(GetSim2DPlayerPathPositionAt(ftShooter, 0.52f), 0.52f);
                 int ftRebounderId = FindSim2DPlayerForStat(ev, "oreb", "dreb");
                 if (ftRebounderId > 0 && _sim2DPlayers.TryGetValue(ftRebounderId, out var ftRebounder))
                 {
                     float hoopX = attackRight ? SIM2D_RIGHT_HOOP_X : SIM2D_LEFT_HOOP_X;
                     AddSim2DBallWaypoint(new Vector2(hoopX, SIM2D_HOOP_Y), 0.82f, isShot: true);
                     SetSim2DTarget(ftRebounder, GetSim2DReboundPosition(ftRebounder, attackRight));
-                    AddSim2DBallWaypoint(new Vector2(ftRebounder.TargetX, ftRebounder.TargetY), 0.98f);
+                    AddSim2DBallWaypoint(GetSim2DPlayerPathPositionAt(ftRebounder, 0.98f), 0.98f);
                     _sim2DBallHandlerId = ftRebounderId;
                     _sim2DBallFollowsHandler = true;
                 }
@@ -975,26 +1023,21 @@ public partial class MatchDayController
                 defender.Node?.EnableInClassList("sim2d-player--action", blockId > 0);
             }
 
-            if (afterInbound && _sim2DInboundType != Sim2DInboundType.TipOff)
-            {
-                // El punto representa al propio base al terminar de subir el balón,
-                // no una coordenada intermedia inventada en la pista.
-                if (ballHandler != null)
-                    AddSim2DBallWaypoint(new Vector2(ballHandler.TargetX, ballHandler.TargetY), 0.78f);
-            }
-            else if (ballHandler != null && _sim2DBallHandlerId != shooterId)
-                AddSim2DBallWaypoint(new Vector2(ballHandler.TargetX, ballHandler.TargetY), 0.24f);
+            // El balón nunca viaja a la coordenada final del manejador: lo acompaña
+            // mientras sube el balón y solo se desprende cuando hay un pase real.
+            if (ballHandler != null)
+                AddSim2DBallHandlerAdvance(ballHandler, passTime - 0.04f);
 
             int assistId = FindSim2DPlayerForStat(ev, "ast");
             if (assistId > 0 && assistId != shooterId
                 && _sim2DPlayers.TryGetValue(assistId, out var passer) && passer.OnCourt)
             {
                 if (assistId != _sim2DBallHandlerId)
-                    AddSim2DBallWaypoint(new Vector2(passer.TargetX, passer.TargetY), passTime);
-                AddSim2DBallWaypoint(new Vector2(shooter.TargetX, shooter.TargetY), shooterTime);
+                    AddSim2DBallWaypoint(GetSim2DPlayerPathPositionAt(passer, passTime), passTime);
+                AddSim2DBallWaypoint(GetSim2DPlayerPathPositionAt(shooter, shooterTime), shooterTime);
             }
             else
-                AddSim2DBallWaypoint(new Vector2(shooter.TargetX, shooter.TargetY), shooterTime);
+                AddSim2DBallWaypoint(GetSim2DPlayerPathPositionAt(shooter, shooterTime), shooterTime);
 
             float hoopTargetX = attackRight ? SIM2D_RIGHT_HOOP_X : SIM2D_LEFT_HOOP_X;
             var hoop = new Vector2(hoopTargetX, SIM2D_HOOP_Y);
@@ -1009,8 +1052,8 @@ public partial class MatchDayController
             }
             else if (blockId > 0 && _sim2DPlayers.TryGetValue(blockId, out var blocker))
             {
-                AddSim2DBallWaypoint(new Vector2(blocker.TargetX, blocker.TargetY),
-                    afterInbound ? 0.985f : 0.94f);
+                float blockTime = afterInbound ? 0.985f : 0.94f;
+                AddSim2DBallWaypoint(GetSim2DPlayerPathPositionAt(blocker, blockTime), blockTime);
                 blocker.Node?.EnableInClassList("sim2d-player--action", true);
                 _sim2DBallHandlerId = blockId;
                 _sim2DBallFollowsHandler = true;
@@ -1040,14 +1083,14 @@ public partial class MatchDayController
                 thief.TargetY = Mathf.Lerp(thief.TargetY, victimPoint.y, 0.72f);
                 victim.Node?.EnableInClassList("sim2d-player--action", true);
             }
-            AddSim2DBallWaypoint(new Vector2(thief.TargetX, thief.TargetY), 0.48f);
+            AddSim2DBallWaypoint(GetSim2DPlayerPathPositionAt(thief, 0.48f), 0.48f);
             _sim2DBallHandlerId = stealId;
             _sim2DBallFollowsHandler = true;
             thief.Node?.EnableInClassList("sim2d-player--action", true);
         }
         else if (blockId > 0 && _sim2DPlayers.TryGetValue(blockId, out var blocker))
         {
-            AddSim2DBallWaypoint(new Vector2(blocker.TargetX, blocker.TargetY), 0.50f);
+            AddSim2DBallWaypoint(GetSim2DPlayerPathPositionAt(blocker, 0.50f), 0.50f);
             _sim2DBallHandlerId = blockId;
             _sim2DBallFollowsHandler = true;
             blocker.Node?.EnableInClassList("sim2d-player--action", true);
@@ -1055,7 +1098,7 @@ public partial class MatchDayController
         else if (reboundId > 0 && _sim2DPlayers.TryGetValue(reboundId, out var rebounder))
         {
             SetSim2DFormationTarget(rebounder, GetSim2DReboundPosition(rebounder, attackRight), 0.48f);
-            AddSim2DBallWaypoint(new Vector2(rebounder.TargetX, rebounder.TargetY), 0.52f);
+            AddSim2DBallWaypoint(GetSim2DPlayerPathPositionAt(rebounder, 0.52f), 0.52f);
             _sim2DBallHandlerId = reboundId;
             _sim2DBallFollowsHandler = true;
             rebounder.Node?.EnableInClassList("sim2d-player--action", true);
@@ -1063,12 +1106,13 @@ public partial class MatchDayController
         else if (turnoverId > 0 && _sim2DPlayers.TryGetValue(turnoverId, out var offender))
         {
             bool sideline = ev.turnoverType == "sideline";
+            Vector2 offenderPoint = GetSim2DPlayerPathPositionAt(offender, 0.58f);
             _sim2DInboundY = sideline
-                ? (offender.TargetY < 0.5f ? 0.09f : 0.91f)
-                : Mathf.Clamp(offender.TargetY, 0.12f, 0.88f);
+                ? (offenderPoint.y < 0.5f ? 0.09f : 0.91f)
+                : Mathf.Clamp(offenderPoint.y, 0.12f, 0.88f);
             Vector2 deadBall = sideline
-                ? new Vector2(offender.TargetX, _sim2DInboundY)
-                : new Vector2(offender.TargetX, offender.TargetY);
+                ? new Vector2(offenderPoint.x, _sim2DInboundY)
+                : offenderPoint;
             AddSim2DBallWaypoint(deadBall, 0.58f);
             offender.Node?.EnableInClassList("sim2d-player--action", true);
             _sim2DBallHandlerId = 0;
@@ -1081,7 +1125,7 @@ public partial class MatchDayController
                 {
                     float direction = attackRight ? 1f : -1f;
                     ballHandler.TargetX = Mathf.Clamp(ballHandler.TargetX + direction * 0.035f, 0.05f, 0.95f);
-                    AddSim2DBallWaypoint(new Vector2(ballHandler.TargetX, ballHandler.TargetY), 0.30f);
+                    AddSim2DBallHandlerAdvance(ballHandler, 0.96f);
                 }
                 _sim2DBallHandlerId = ballHandler.Player.id;
                 _sim2DBallFollowsHandler = true;
@@ -1579,6 +1623,86 @@ public partial class MatchDayController
             fromTime = waypoint.Time;
         }
         return path[path.Count - 1].Position;
+    }
+
+    // Posición real de un jugador en un instante normalizado de la jugada. La usan
+    // los pases para terminar donde el receptor estará, no donde acabará la jugada.
+    Vector2 GetSim2DPlayerPathPositionAt(Sim2DPlayerState state, float rawT)
+    {
+        if (state == null) return new Vector2(0.5f, 0.5f);
+        var start = new Vector2(state.StartX, state.StartY);
+        float clamped = Mathf.Clamp01(rawT);
+        return GetSim2DPlayerPositionAt(state, start, clamped,
+            Mathf.SmoothStep(0f, 1f, clamped));
+    }
+
+    // Mantiene el balón pegado al manejador mientras avanza: muestrea su recorrido
+    // real para que nunca vuele a una coordenada que todavía no ha alcanzado.
+    void AddSim2DBallFollowWaypoints(Sim2DPlayerState handler, float fromTime, float toTime,
+                                     int samples)
+    {
+        if (handler == null || samples < 1 || toTime <= fromTime) return;
+        for (int i = 1; i <= samples; i++)
+        {
+            float time = Mathf.Lerp(fromTime, toTime, i / (float)samples);
+            AddSim2DBallWaypoint(GetSim2DPlayerPathPositionAt(handler, time), time);
+        }
+    }
+
+    // Acompaña al manejador desde el último punto del balón hasta el instante del
+    // pase. Evita el "pase a un punto vacío" cuando el jugador aún está llegando.
+    void AddSim2DBallHandlerAdvance(Sim2DPlayerState handler, float untilTime)
+    {
+        if (handler == null) return;
+        float fromTime = Mathf.Max(GetSim2DLastBallWaypointTime() + 0.02f, 0.10f);
+        float toTime = Mathf.Min(untilTime, 0.94f);
+        if (toTime <= fromTime) return;
+        AddSim2DBallFollowWaypoints(handler, fromTime, toTime, 3);
+    }
+
+    float GetSim2DLastBallWaypointTime()
+    {
+        return _sim2DBallPath.Count > 0
+            ? _sim2DBallPath[_sim2DBallPath.Count - 1].Time
+            : 0f;
+    }
+
+    // Segundos que necesita la jugada para recorrerse a un ritmo legible. Se toma
+    // el recorrido de los jugadores (ritmo de carrera) y el del balón (los pases
+    // viajan más rápido) por separado, y manda el que más tiempo necesite.
+    float GetSim2DEventTravelSeconds()
+    {
+        float playerDistance = 0f;
+        foreach (var state in _sim2DPlayers.Values)
+        {
+            if (!state.OnCourt) continue;
+            Vector2 previous = new Vector2(state.StartX, state.StartY);
+            float distance = 0f;
+            if (_sim2DPlayerPaths.TryGetValue(state.Player.id, out var path))
+            {
+                foreach (var waypoint in path)
+                {
+                    distance += Vector2.Distance(previous, waypoint.Position);
+                    previous = waypoint.Position;
+                }
+            }
+            else
+            {
+                distance = Vector2.Distance(previous, new Vector2(state.TargetX, state.TargetY));
+            }
+            playerDistance = Mathf.Max(playerDistance, distance);
+        }
+
+        float ballDistance = 0f;
+        if (_sim2DBallPath.Count > 1)
+        {
+            for (int i = 1; i < _sim2DBallPath.Count; i++)
+                ballDistance += Vector2.Distance(_sim2DBallPath[i - 1].Position,
+                    _sim2DBallPath[i].Position);
+        }
+
+        return Mathf.Max(playerDistance * SIM2D_TRAVEL_SECONDS_PER_COURT,
+            ballDistance * SIM2D_BALL_TRAVEL_SECONDS_PER_COURT);
     }
 
     void UpdateSim2DBallAlongPath(float t, float elapsed, float startX, float startY)
