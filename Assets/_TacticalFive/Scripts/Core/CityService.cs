@@ -180,9 +180,15 @@ public static class CityService
         };
         db.InsertCityEvent(cityEvent);
 
+        var team = db.GetTeamById(manager.team_id);
+        string teamName = team?.name ?? "La franquicia";
         AddMessage(manager, season, gameDay,
             "Nuevo evento en la ciudad",
-            $"{definition.title}. Abre THE CITY para tomar una decisión.",
+            $"{teamName} afronta un nuevo episodio en la ciudad: {definition.title.ToLowerInvariant()}. " +
+            $"{definition.description}\n\n" +
+            $"La directiva deberá elegir cómo responder en las próximas horas. Abre THE CITY para " +
+            $"revisar las opciones disponibles; la decisión tendrá efecto inmediato en la franquicia y " +
+            $"puede afectar a la afición, la moral o el físico de la plantilla.",
             NewsType.EVENTO_CIUDAD);
 
         return cityEvent;
@@ -253,7 +259,12 @@ public static class CityService
 
         AddMessage(manager, season, day,
             $"Ciudad: {definition.title}",
-            $"Decisión: {choice.label}. {CityCatalog.EventEffectSummary(choice)}",
+            $"La franquicia ha tomado una decisión sobre {definition.title.ToLowerInvariant()}: " +
+            $"\"{choice.label}\". La medida responde a una situación que afecta directamente al " +
+            $"día a día del club y a su entorno.\n\n" +
+            $"{definition.description} La operación queda reflejada así: " +
+            $"{CityCatalog.EventEffectSummary(choice)}. El club seguirá de cerca la respuesta de la " +
+            $"ciudad y de la afición en los próximos días.",
             NewsType.EVENTO_CIUDAD);
 
         return true;
