@@ -56,6 +56,22 @@ public partial class MatchDayController
         _sim2DHomeLayer = _root.Q<VisualElement>("Sim2DHomeLayer");
         _sim2DAwayLayer = _root.Q<VisualElement>("Sim2DAwayLayer");
         _sim2DBall = _root.Q<VisualElement>("Sim2DBall");
+        if (_sim2DBall != null)
+        {
+            var ballSprite = Resources.Load<Sprite>("Icons/pelota");
+            if (ballSprite != null)
+            {
+                _sim2DBall.style.backgroundImage = new StyleBackground(ballSprite);
+            }
+            else
+            {
+                var ballTexture = Resources.Load<Texture2D>("Icons/pelota");
+                if (ballTexture != null)
+                    _sim2DBall.style.backgroundImage = new StyleBackground(ballTexture);
+                else
+                    _sim2DBall.style.backgroundColor = new StyleColor(new Color32(232, 128, 42, 255));
+            }
+        }
         _sim2DHomeLogo = _root.Q<VisualElement>("Sim2DHomeLogo");
         _sim2DAwayLogo = _root.Q<VisualElement>("Sim2DAwayLogo");
         _sim2DTeamList = _root.Q<VisualElement>("Sim2DTeamList");

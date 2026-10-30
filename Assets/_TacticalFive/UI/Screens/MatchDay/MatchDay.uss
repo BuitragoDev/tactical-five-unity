@@ -1053,7 +1053,7 @@
     flex-grow: 1;
     flex-shrink: 1;
     min-width: 0;
-    font-size: 18px;
+    font-size: 22px;
     color: rgb(235, 239, 247);
     white-space: nowrap;
     overflow: hidden;
@@ -1063,9 +1063,9 @@
 }
 
 .sim2d-roster-pos {
-    width: 24px;
+    width: 30px;
     flex-shrink: 0;
-    font-size: 14px;
+    font-size: 22px;
     font-weight: 700;
     color: rgb(212, 160, 23);
     -unity-text-align: middle-center;
@@ -1099,7 +1099,7 @@
 }
 
 .sim2d-possession {
-    font-size: 14px;
+    font-size: 18px;
     color: rgb(100, 200, 140);
     letter-spacing: 1px;
     text-transform: uppercase;
@@ -1107,7 +1107,7 @@
 }
 
 .sim2d-venue {
-    font-size: 13px;
+    font-size: 18px;
     color: rgb(122, 138, 170);
     letter-spacing: 1px;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
@@ -1289,14 +1289,16 @@
 
 .sim2d-ball {
     position: absolute;
-    width: 18px;
-    height: 18px;
-    border-radius: 9px;
-    background-color: rgb(232, 128, 42);
-    border-width: 2px;
-    border-color: rgb(90, 40, 20);
-    margin-left: -9px;
-    margin-top: -9px;
+    width: 32px;
+    height: 32px;
+    border-radius: 0;
+    background-color: transparent;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    border-width: 0;
+    margin-left: -16px;
+    margin-top: -16px;
 }
 
 .sim2d-footer {
