@@ -18,6 +18,8 @@ public class MatchDayVisualUiTests
 
         Assert.That(root.Q<VisualElement>("SimVisualOverlay"), Is.Not.Null);
         Assert.That(root.Q<VisualElement>("Sim2DCourt"), Is.Not.Null);
+        Assert.That(root.Q<VisualElement>("Sim2DCourtTop"), Is.Not.Null);
+        Assert.That(root.Q<VisualElement>("Sim2DHoopOwners"), Is.Not.Null);
         Assert.That(root.Q<VisualElement>("Sim2DHomeLayer"), Is.Not.Null);
         Assert.That(root.Q<VisualElement>("Sim2DAwayLayer"), Is.Not.Null);
         Assert.That(root.Q<VisualElement>("Sim2DBall"), Is.Not.Null);
@@ -27,6 +29,7 @@ public class MatchDayVisualUiTests
         Assert.That(root.Q<VisualElement>("Sim2DLeftAttackArrow"), Is.Not.Null);
         Assert.That(root.Q<VisualElement>("Sim2DRightAttackArrow"), Is.Not.Null);
         Assert.That(root.Q<VisualElement>("Sim2DEffectsLayer"), Is.Not.Null);
+        Assert.That(root.Q<Label>("Sim2DShotClock"), Is.Not.Null);
         Assert.That(root.Q<Label>("Sim2DScore"), Is.Not.Null);
         Assert.That(root.Q<Label>("Sim2DTickerText"), Is.Not.Null);
         Assert.That(root.Q<VisualElement>("Sim2DTickerIcon"), Is.Not.Null);

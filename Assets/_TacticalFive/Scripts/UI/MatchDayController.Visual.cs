@@ -15,6 +15,8 @@ public partial class MatchDayController
     private const float SIM2D_LEFT_HOOP_X = 0.069f;
     private const float SIM2D_RIGHT_HOOP_X = 0.931f;
     private const float SIM2D_HOOP_Y = 0.5f;
+    private const float SIM2D_LEFT_FT_X = 0.215f;
+    private const float SIM2D_RIGHT_FT_X = 0.785f;
     private static readonly Color32[] Sim2DScoreParticleColors =
     {
         new Color32(255, 214, 90, 255),
@@ -24,12 +26,13 @@ public partial class MatchDayController
 
     private VisualElement _sim2DOverlay, _sim2DCourt, _sim2DHomeLayer, _sim2DAwayLayer, _sim2DBall;
     private VisualElement _sim2DEffectsLayer;
+    private VisualElement _sim2DCourtTop, _sim2DHoopOwners;
     private VisualElement _sim2DHomeLogo, _sim2DAwayLogo, _sim2DTeamList;
     private VisualElement _sim2DLeftHoopLogo, _sim2DRightHoopLogo;
     private VisualElement _sim2DLeftAttackArrow, _sim2DRightAttackArrow;
     private Label _sim2DHomeAbbr, _sim2DAwayAbbr, _sim2DHomeName, _sim2DAwayName;
     private Label _sim2DScore, _sim2DQuarter, _sim2DClock, _sim2DTickerText;
-    private Label _sim2DPossession, _sim2DVenue;
+    private Label _sim2DPossession, _sim2DVenue, _sim2DShotClockLabel;
     private VisualElement _sim2DTickerIcon;
     private Label _sim2DHeaderPlayer, _sim2DHeaderPts, _sim2DHeaderReb, _sim2DHeaderAsi;
     private Button _sim2DHomeTab, _sim2DAwayTab, _sim2DPause, _sim2DSkip;
@@ -46,9 +49,13 @@ public partial class MatchDayController
     private List<int> _sim2DAwayOnCourt = new();
     private float _sim2DBallX = 0.5f, _sim2DBallY = 0.5f;
     private float _sim2DBallTargetX = 0.5f, _sim2DBallTargetY = 0.5f;
-    private float _sim2DBallViaX, _sim2DBallViaY;
-    private float _sim2DBallReceiverX, _sim2DBallReceiverY;
-    private bool _sim2DBallHasVia, _sim2DBallHasReceiver;
+    private int _sim2DBallHandlerId;
+    private bool _sim2DBallFollowsHandler;
+    private readonly List<Sim2DBallWaypoint> _sim2DBallPath = new();
+    private readonly Dictionary<int, List<Sim2DPlayerWaypoint>> _sim2DPlayerPaths = new();
+    private float _sim2DShotClock = 24f;
+    private Sim2DInboundType _sim2DInboundType;
+    private float _sim2DInboundY = 0.5f;
 
     private readonly Dictionary<int, Sim2DPlayerState> _sim2DPlayers = new();
 
@@ -70,12 +77,29 @@ public partial class MatchDayController
         public float X, Y, Vx, Vy;
     }
 
+    private enum Sim2DInboundType { None, Baseline, Sideline, DeadBall, Outlet }
+
+    private class Sim2DBallWaypoint
+    {
+        public Vector2 Position;
+        public float Time;
+        public bool IsShot;
+    }
+
+    private class Sim2DPlayerWaypoint
+    {
+        public Vector2 Position;
+        public float Time;
+    }
+
     void CacheSimVisualReferences()
     {
         _sim2DOverlay = _root.Q<VisualElement>("SimVisualOverlay");
         if (_sim2DOverlay == null) return;
 
         _sim2DCourt = _root.Q<VisualElement>("Sim2DCourt");
+        _sim2DCourtTop = _root.Q<VisualElement>("Sim2DCourtTop");
+        _sim2DHoopOwners = _root.Q<VisualElement>("Sim2DHoopOwners");
         _sim2DHomeLayer = _root.Q<VisualElement>("Sim2DHomeLayer");
         _sim2DAwayLayer = _root.Q<VisualElement>("Sim2DAwayLayer");
         _sim2DBall = _root.Q<VisualElement>("Sim2DBall");
@@ -140,6 +164,7 @@ public partial class MatchDayController
         }
         _sim2DPossession = _root.Q<Label>("Sim2DPossession");
         _sim2DVenue = _root.Q<Label>("Sim2DVenue");
+        _sim2DShotClockLabel = _root.Q<Label>("Sim2DShotClock");
         _sim2DHeaderPlayer = _root.Q<Label>("Sim2DHeaderPlayer");
         _sim2DHeaderPts = _root.Q<Label>("Sim2DHeaderPts");
         _sim2DHeaderReb = _root.Q<Label>("Sim2DHeaderReb");
@@ -265,6 +290,12 @@ public partial class MatchDayController
         _sim2DHomeOnOffense = true;
         _sim2DHomeOnCourt = new List<int>();
         _sim2DAwayOnCourt = new List<int>();
+        _sim2DBallHandlerId = 0;
+        _sim2DBallPath.Clear();
+        _sim2DBallFollowsHandler = false;
+        _sim2DInboundType = Sim2DInboundType.None;
+        _sim2DShotClock = 24f;
+        UpdateSim2DShotClock(_sim2DShotClock);
 
         var home = _allTeams?.Find(t => t.id == _sim2DHomeTeamId)
                    ?? DatabaseManager.Instance.GetTeamById(_sim2DHomeTeamId);
@@ -582,17 +613,19 @@ public partial class MatchDayController
 
     IEnumerator Sim2DCoroutine(List<GameSimulator.PlayByPlayEvent> log)
     {
-        float previousAbsolute = 0f;
+        GameSimulator.PlayByPlayEvent previousAction = null;
         for (int i = 0; i < log.Count; i++)
         {
             while (_sim2DPaused) yield return null;
             var ev = log[i];
             ApplySim2DDeltas(ev.deltas);
-            if (ev.homeOnCourt != null && ev.homeOnCourt.Count > 0)
+            bool hasLineups = ev.homeOnCourt != null && ev.homeOnCourt.Count > 0;
+            if (hasLineups)
             {
                 _sim2DHomeOnCourt = new List<int>(ev.homeOnCourt);
                 _sim2DAwayOnCourt = new List<int>(ev.awayOnCourt ?? new List<int>());
                 _sim2DHomeOnOffense = ev.homeOnOffense;
+                PrepareSim2DPossession(previousAction, ev);
             }
 
             UpdateSim2DScoreboard(ev.homeScore, ev.awayScore, ev.quarter, ev.timeElapsed);
@@ -601,24 +634,114 @@ public partial class MatchDayController
             UpdateSim2DRoster();
             LayoutSim2DTargets(ev, i, animate: true);
 
-            // x1 = tiempo real: cada minuto de juego dura un minuto. Los eventos con
-            // el mismo instante reciben un mínimo para que la acción sea visible.
             float currentAbsolute = GetSim2DAbsoluteMinutes(ev);
-            float eventDuration = Mathf.Max(0.22f,
-                (currentAbsolute - previousAbsolute) * 60f / Mathf.Max(1, _sim2DSpeed));
-            previousAbsolute = currentAbsolute;
-
             var next = i + 1 < log.Count ? log[i + 1] : null;
             float clockTarget = GetSim2DClockTarget(ev, next);
+            float nextAbsolute = next != null ? GetSim2DAbsoluteMinutes(next) : currentAbsolute;
+            float gameSeconds = Mathf.Max(0f, (nextAbsolute - currentAbsolute) * 60f);
+            float eventDuration = Mathf.Max(2.5f / Mathf.Max(1, _sim2DSpeed),
+                gameSeconds / Mathf.Max(1, _sim2DSpeed));
+            float shotClockStart = _sim2DShotClock;
+            float shotClockEnd = Mathf.Max(0.1f, shotClockStart - gameSeconds);
             yield return AnimateSim2DPositions(ev.quarter, ev.timeElapsed, clockTarget,
-                eventDuration);
+                eventDuration, shotClockStart, shotClockEnd);
 
             // El aro se enciende cuando el balón ya ha llegado a la canasta.
             if (Sim2DIsFieldGoalMade(ev))
                 PlaySim2DScoreEffect(ev.homeOnOffense, Sim2DIsThreePointer(ev));
+            else if (Sim2DIsMadeFreeThrow(ev))
+                PlaySim2DScoreEffect(ev.homeOnOffense, false, true);
+
+            if (Sim2DIsOffensiveRebound(ev))
+            {
+                _sim2DShotClock = 14f;
+                UpdateSim2DShotClock(_sim2DShotClock);
+            }
+
+            if (hasLineups)
+                previousAction = ev;
         }
         OnSim2DComplete();
     }
+
+    void PrepareSim2DPossession(GameSimulator.PlayByPlayEvent previous,
+                                GameSimulator.PlayByPlayEvent current)
+    {
+        _sim2DInboundType = Sim2DInboundType.None;
+        bool newPeriod = previous != null && previous.quarter != current.quarter;
+        bool newPossession = previous == null || newPeriod
+            || previous.homeOnOffense != current.homeOnOffense;
+        if (newPossession)
+        {
+            _sim2DShotClock = 24f;
+            if (previous != null && !newPeriod)
+            {
+                int rebounderId = FindSim2DPlayerForStat(previous, "oreb", "dreb");
+                int stealerId = FindSim2DPlayerForStat(previous, "stl");
+                if (rebounderId > 0 && IsSim2DPlayerOnOffense(rebounderId))
+                {
+                    _sim2DBallHandlerId = rebounderId;
+                    if (FindSim2DPlayerForStat(previous, "dreb") == rebounderId)
+                        _sim2DInboundType = Sim2DInboundType.Outlet;
+                }
+                else if (stealerId > 0 && IsSim2DPlayerOnOffense(stealerId))
+                    _sim2DBallHandlerId = stealerId;
+                else if (Sim2DIsMadeBasket(previous) || Sim2DIsMadeFreeThrow(previous))
+                {
+                    _sim2DInboundType = Sim2DInboundType.Baseline;
+                    _sim2DBallHandlerId = FindSim2DPointGuardForCurrentOffense();
+                }
+                else if (FindSim2DPlayerForStat(previous, "to") > 0)
+                {
+                    bool sideline = previous.turnoverType == "sideline";
+                    _sim2DInboundType = sideline ? Sim2DInboundType.Sideline : Sim2DInboundType.DeadBall;
+                    _sim2DInboundY = sideline
+                        ? (_sim2DBallY < 0.5f ? 0.09f : 0.91f)
+                        : Mathf.Clamp(_sim2DBallY, 0.12f, 0.88f);
+                    _sim2DBallHandlerId = FindSim2DPointGuardForCurrentOffense();
+                }
+                else
+                    _sim2DBallHandlerId = FindSim2DPointGuardForCurrentOffense();
+            }
+            else
+                _sim2DBallHandlerId = FindSim2DPointGuardForCurrentOffense();
+        }
+        else if (Sim2DIsOffensiveRebound(previous))
+        {
+            _sim2DShotClock = 14f;
+            int rebounderId = FindSim2DPlayerForStat(previous, "oreb");
+            if (rebounderId > 0) _sim2DBallHandlerId = rebounderId;
+        }
+
+        UpdateSim2DShotClock(_sim2DShotClock);
+    }
+
+    int FindSim2DPointGuardForCurrentOffense()
+    {
+        var ids = _sim2DHomeOnOffense ? _sim2DHomeOnCourt : _sim2DAwayOnCourt;
+        return OrderSim2DOnCourt(ids)
+            .OrderBy(id => _sim2DPlayers[id].Player.position == "PG" ? 0
+                : _sim2DPlayers[id].Player.position == "SG" ? 1
+                : _sim2DPlayers[id].Player.position == "SF" ? 2 : 3)
+            .ThenByDescending(id => _sim2DPlayers[id].Player.dribbling + _sim2DPlayers[id].Player.passing)
+            .FirstOrDefault();
+    }
+
+    bool IsSim2DPlayerOnOffense(int playerId)
+    {
+        if (!_sim2DPlayers.TryGetValue(playerId, out var state)) return false;
+        int offenseTeamId = _sim2DHomeOnOffense ? _sim2DHomeTeamId : _sim2DAwayTeamId;
+        return state.TeamId == offenseTeamId;
+    }
+
+    static bool Sim2DIsMadeBasket(GameSimulator.PlayByPlayEvent ev) =>
+        ev?.deltas != null && ev.deltas.Any(d => d.stat == "fgm" && d.amount > 0);
+
+    static bool Sim2DIsMadeFreeThrow(GameSimulator.PlayByPlayEvent ev) =>
+        ev?.deltas != null && ev.deltas.Any(d => d.stat == "ftm" && d.amount > 0);
+
+    static bool Sim2DIsOffensiveRebound(GameSimulator.PlayByPlayEvent ev) =>
+        ev?.deltas != null && ev.deltas.Any(d => d.stat == "oreb" && d.amount > 0);
 
     static float GetSim2DAbsoluteMinutes(GameSimulator.PlayByPlayEvent ev)
     {
@@ -633,18 +756,28 @@ public partial class MatchDayController
     void OnSim2DCourtGeometryChanged(GeometryChangedEvent evt)
     {
         if (_sim2DCourt == null) return;
-        float width = evt.newRect.width;
-        if (width < 10f) return;
+        var wrap = _sim2DCourt.parent;
+        if (wrap == null) return;
+        float width = wrap.resolvedStyle.width;
+        float height = wrap.resolvedStyle.height;
+        if (width < 10f || height < 10f) return;
 
-        float targetHeight = width / SIM2D_COURT_ASPECT;
-        if (Mathf.Abs(_sim2DCourt.resolvedStyle.height - targetHeight) < 0.5f) return;
+        float reservedHeight = Mathf.Max(28f, _sim2DCourtTop?.resolvedStyle.height ?? 0f)
+            + Mathf.Max(64f, _sim2DHoopOwners?.resolvedStyle.height ?? 0f) + 14f;
+        float availableCourtHeight = Mathf.Max(10f, height - reservedHeight);
+        float courtHeight = Mathf.Min(width / SIM2D_COURT_ASPECT, availableCourtHeight);
+        float courtWidth = courtHeight * SIM2D_COURT_ASPECT;
+        if (Mathf.Abs(_sim2DCourt.resolvedStyle.height - courtHeight) < 0.5f
+            && Mathf.Abs(_sim2DCourt.resolvedStyle.width - courtWidth) < 0.5f) return;
 
         _sim2DCourt.style.flexGrow = 0;
         _sim2DCourt.style.flexShrink = 0;
-        // El USS usa flex:1 (flex-basis:0). Si solo se cambia height, el layout
-        // sigue midiendo por flex-basis y la cancha se queda a 0 px.
-        _sim2DCourt.style.flexBasis = targetHeight;
-        _sim2DCourt.style.height = targetHeight;
+        // Respeta la proporción y reserva sitio para la cabecera y los logos,
+        // incluso cuando la ventana es más baja que 1080 px.
+        _sim2DCourt.style.flexBasis = courtHeight;
+        _sim2DCourt.style.width = courtWidth;
+        _sim2DCourt.style.height = courtHeight;
+        _sim2DCourt.style.alignSelf = Align.Center;
     }
 
     void LayoutSim2DTargets(GameSimulator.PlayByPlayEvent ev, int eventIndex, bool animate)
@@ -656,6 +789,7 @@ public partial class MatchDayController
             state.TargetY = state.Y;
             state.Node?.RemoveFromClassList("sim2d-player--action");
             state.Node?.RemoveFromClassList("sim2d-player--pressure");
+            state.Node?.RemoveFromClassList("sim2d-player--inbound");
         }
 
         LayoutSim2DTeam(_sim2DHomeOnCourt, true, eventIndex);
@@ -667,10 +801,11 @@ public partial class MatchDayController
             state.Node.style.display = state.OnCourt ? DisplayStyle.Flex : DisplayStyle.None;
         }
 
-        _sim2DBallTargetX = 0.5f;
-        _sim2DBallTargetY = 0.5f;
-        _sim2DBallHasReceiver = false;
-        _sim2DBallHasVia = false;
+        _sim2DBallTargetX = _sim2DBallX;
+        _sim2DBallTargetY = _sim2DBallY;
+        _sim2DBallPath.Clear();
+        _sim2DPlayerPaths.Clear();
+        _sim2DBallFollowsHandler = false;
         ApplySim2DActionTargets(ev, eventIndex);
 
         if (!animate)
@@ -715,14 +850,14 @@ public partial class MatchDayController
 
             // El desplazamiento tiene fase, amplitud y trayectoria distintas por jugador:
             // PG organiza, exteriores abren/cortan e interiores trabajan cerca del aro.
-            float phase = eventIndex * 0.72f + state.Player.id * 0.113f;
+            float phase = eventIndex * 0.32f + state.Player.id * 0.113f;
             float amplitude = state.Player.position switch
             {
-                "PG" => 0.047f,
-                "SG" or "SF" => 0.054f,
-                "PF" => 0.037f,
-                "C" => 0.026f,
-                _ => 0.04f
+                "PG" => 0.014f,
+                "SG" or "SF" => 0.022f,
+                "PF" => 0.016f,
+                "C" => 0.010f,
+                _ => 0.015f
             };
             spot.x += Mathf.Sin(phase) * amplitude;
             spot.y += Mathf.Cos(phase * 1.31f) * amplitude * 1.65f;
@@ -737,12 +872,12 @@ public partial class MatchDayController
         {
             // El base organiza arriba; los escoltas/alero abren las alas y los interiores
             // ocupan codo, poste bajo y aro. Es una formación ilustrativa, no una jugada.
-            "PG" => new Vector2(offense ? 0.58f : 0.53f, 0.50f),
-            "SG" => new Vector2(offense ? 0.73f : 0.66f, 0.18f),
-            "SF" => new Vector2(offense ? 0.75f : 0.67f, 0.82f),
-            "PF" => new Vector2(offense ? 0.88f : 0.79f, 0.32f),
-            "C"  => new Vector2(offense ? 0.90f : 0.82f, 0.68f),
-            _    => new Vector2(offense ? 0.70f : 0.64f, 0.5f)
+            "PG" => new Vector2(offense ? 0.58f : 0.52f, 0.50f),
+            "SG" => new Vector2(offense ? 0.70f : 0.64f, 0.21f),
+            "SF" => new Vector2(offense ? 0.70f : 0.64f, 0.79f),
+            "PF" => new Vector2(offense ? 0.82f : 0.76f, 0.31f),
+            "C"  => new Vector2(offense ? 0.84f : 0.79f, 0.69f),
+            _    => new Vector2(offense ? 0.66f : 0.60f, 0.5f)
         };
         if (!attackRight) spot.x = 1f - spot.x;
         return spot;
@@ -760,129 +895,429 @@ public partial class MatchDayController
         bool shotAttempt = ev.deltas.Any(d => (d.stat == "fga" || d.stat == "fg3a") && d.amount > 0);
         bool threePointAttempt = ev.deltas.Any(d => d.stat == "fg3a" && d.amount > 0);
         bool madeShot = ev.deltas.Any(d => d.stat == "fgm" && d.amount > 0);
-        bool freeThrow = !shotAttempt && ev.deltas.Any(d => d.stat == "fta" && d.amount > 0);
+        bool freeThrow = ev.deltas.Any(d => d.stat == "fta" && d.amount > 0);
         bool attackRight = _sim2DHomeOnOffense;
+        var offenseIds = OrderSim2DOnCourt(_sim2DHomeOnOffense ? _sim2DHomeOnCourt : _sim2DAwayOnCourt);
+        var defenseIds = OrderSim2DOnCourt(_sim2DHomeOnOffense ? _sim2DAwayOnCourt : _sim2DHomeOnCourt);
 
-        // Cada atacante se recoloca desde su posición y función; el balón y los
-        // defensores responden a los eventos reales del motor.
+        if (!_sim2DPlayers.TryGetValue(_sim2DBallHandlerId, out var ballHandler)
+            || !ballHandler.OnCourt || !offenseIds.Contains(_sim2DBallHandlerId))
+        {
+            _sim2DBallHandlerId = FindSim2DPointGuardForCurrentOffense();
+            _sim2DPlayers.TryGetValue(_sim2DBallHandlerId, out ballHandler);
+        }
+
+        BeginSim2DBallPath();
+
+        if (_sim2DInboundType != Sim2DInboundType.None)
+        {
+            SetupSim2DInbound(offenseIds, attackRight);
+            if (_sim2DBallHandlerId > 0)
+                _sim2DPlayers.TryGetValue(_sim2DBallHandlerId, out ballHandler);
+        }
+
+        // Una visita a la línea de libres cambia por completo la formación: tirador
+        // en la línea, dos jugadores de cada equipo por cada lado para el rebote.
+        if (freeThrow)
+        {
+            int ftShooterId = FindSim2DPlayerForStat(ev, "fta");
+            if (ftShooterId <= 0) ftShooterId = shooterId > 0 ? shooterId : _sim2DBallHandlerId;
+            LayoutSim2DFreeThrow(ftShooterId, offenseIds, defenseIds, attackRight);
+
+            if (_sim2DPlayers.TryGetValue(ftShooterId, out var ftShooter))
+            {
+                AddSim2DBallWaypoint(new Vector2(ftShooter.TargetX, ftShooter.TargetY), 0.52f);
+                int ftRebounderId = FindSim2DPlayerForStat(ev, "oreb", "dreb");
+                if (ftRebounderId > 0 && _sim2DPlayers.TryGetValue(ftRebounderId, out var ftRebounder))
+                {
+                    float hoopX = attackRight ? SIM2D_RIGHT_HOOP_X : SIM2D_LEFT_HOOP_X;
+                    AddSim2DBallWaypoint(new Vector2(hoopX, SIM2D_HOOP_Y), 0.82f, isShot: true);
+                    SetSim2DTarget(ftRebounder, GetSim2DReboundPosition(ftRebounder, attackRight));
+                    AddSim2DBallWaypoint(new Vector2(ftRebounder.TargetX, ftRebounder.TargetY), 0.98f);
+                    _sim2DBallHandlerId = ftRebounderId;
+                    _sim2DBallFollowsHandler = true;
+                }
+                else
+                {
+                    float hoopX = attackRight ? SIM2D_RIGHT_HOOP_X : SIM2D_LEFT_HOOP_X;
+                    AddSim2DBallWaypoint(new Vector2(hoopX, SIM2D_HOOP_Y), 0.98f, isShot: true);
+                    _sim2DBallHandlerId = 0;
+                }
+            }
+            FinishSim2DBallPath();
+            return;
+        }
+
         if (shotAttempt && shooterId > 0 && _sim2DPlayers.TryGetValue(shooterId, out var shooter))
         {
-            if (!threePointAttempt)
-            {
-                float hoopX = attackRight ? 0.91f : 0.09f;
-                shooter.TargetX = Mathf.Lerp(shooter.TargetX, hoopX, 0.66f);
-                shooter.TargetY = Mathf.Lerp(shooter.TargetY, 0.50f, 0.44f);
-            }
+            Vector2 shotSpot = GetSim2DShotPosition(threePointAttempt, attackRight, eventIndex, shooter.Player.position);
+            SetSim2DFormationTarget(shooter, shotSpot, 0.70f);
             shooter.Node?.EnableInClassList("sim2d-player--action", true);
 
             int defenderId = blockId > 0 ? blockId : FindNearestSim2DDefender(shooterId);
             if (defenderId > 0 && _sim2DPlayers.TryGetValue(defenderId, out var defender))
             {
-                defender.TargetX = Mathf.Lerp(defender.TargetX, shooter.TargetX, blockId > 0 ? 0.88f : 0.68f);
-                defender.TargetY = Mathf.Lerp(defender.TargetY, shooter.TargetY, blockId > 0 ? 0.88f : 0.68f);
+                defender.TargetX = Mathf.Lerp(defender.TargetX, shooter.TargetX, blockId > 0 ? 0.88f : 0.56f);
+                defender.TargetY = Mathf.Lerp(defender.TargetY, shooter.TargetY, blockId > 0 ? 0.88f : 0.56f);
                 // La defensa llega a puntear todos los tiros; solo el delta real blk
                 // enciende el efecto de tapón y desvía la trayectoria del balón.
                 defender.Node?.EnableInClassList("sim2d-player--action", blockId > 0);
             }
-        }
 
-        if (turnoverId > 0 && _sim2DPlayers.TryGetValue(turnoverId, out var handler))
-        {
-            float driveX = attackRight ? 0.09f : -0.09f;
-            handler.TargetX = Mathf.Clamp(handler.TargetX + driveX, 0.04f, 0.96f);
-            handler.TargetY = Mathf.Lerp(handler.TargetY, 0.50f, 0.25f);
-        }
-        else if (!shotAttempt && stealId == 0 && blockId == 0 && reboundId == 0)
-        {
-            int handlerId = FindSim2DPrimaryPlayerFromCurrentEvent();
-            if (_sim2DPlayers.TryGetValue(handlerId, out var ballHandler))
+            if (ballHandler != null)
+                AddSim2DBallWaypoint(new Vector2(ballHandler.TargetX, ballHandler.TargetY), 0.24f);
+
+            int assistId = FindSim2DPlayerForStat(ev, "ast");
+            if (assistId > 0 && assistId != shooterId
+                && _sim2DPlayers.TryGetValue(assistId, out var passer) && passer.OnCourt)
             {
-                float direction = attackRight ? 1f : -1f;
-                ballHandler.TargetX = Mathf.Clamp(ballHandler.TargetX + direction * 0.045f, 0.04f, 0.96f);
-                _sim2DBallTargetX = ballHandler.TargetX;
-                _sim2DBallTargetY = ballHandler.TargetY;
+                if (assistId != _sim2DBallHandlerId)
+                    AddSim2DBallWaypoint(new Vector2(passer.TargetX, passer.TargetY), 0.52f);
+                AddSim2DBallWaypoint(new Vector2(shooter.TargetX, shooter.TargetY), 0.70f);
             }
+            else if (_sim2DBallHandlerId != shooterId)
+                AddSim2DBallWaypoint(new Vector2(shooter.TargetX, shooter.TargetY), 0.66f);
+
+            float hoopTargetX = attackRight ? SIM2D_RIGHT_HOOP_X : SIM2D_LEFT_HOOP_X;
+            var hoop = new Vector2(hoopTargetX, SIM2D_HOOP_Y);
+            if (reboundId > 0 && _sim2DPlayers.TryGetValue(reboundId, out var rebounder))
+            {
+                AddSim2DBallWaypoint(hoop, 0.82f, isShot: true);
+                SetSim2DFormationTarget(rebounder, GetSim2DReboundPosition(rebounder, attackRight), 0.88f);
+                rebounder.Node?.EnableInClassList("sim2d-player--action", true);
+                AddSim2DBallWaypoint(new Vector2(rebounder.TargetX, rebounder.TargetY), 0.98f);
+                _sim2DBallHandlerId = reboundId;
+                _sim2DBallFollowsHandler = true;
+            }
+            else if (blockId > 0 && _sim2DPlayers.TryGetValue(blockId, out var blocker))
+            {
+                AddSim2DBallWaypoint(new Vector2(blocker.TargetX, blocker.TargetY), 0.94f);
+                blocker.Node?.EnableInClassList("sim2d-player--action", true);
+                _sim2DBallHandlerId = blockId;
+                _sim2DBallFollowsHandler = true;
+            }
+            else if (madeShot)
+            {
+                AddSim2DBallWaypoint(hoop, 0.99f, isShot: true);
+                _sim2DBallHandlerId = 0;
+            }
+            else
+            {
+                AddSim2DBallWaypoint(hoop, 0.96f, isShot: true);
+                _sim2DBallHandlerId = 0;
+            }
+
+            FinishSim2DBallPath();
+            ApplySim2DDefensivePressure(eventIndex, shooterId);
+            return;
         }
 
         if (stealId > 0 && _sim2DPlayers.TryGetValue(stealId, out var thief))
         {
             if (turnoverId > 0 && _sim2DPlayers.TryGetValue(turnoverId, out var victim))
             {
-                thief.TargetX = Mathf.Lerp(thief.TargetX, victim.TargetX, 0.76f);
-                thief.TargetY = Mathf.Lerp(thief.TargetY, victim.TargetY, 0.76f);
+                Vector2 victimPoint = new Vector2(victim.TargetX, victim.TargetY);
+                thief.TargetX = Mathf.Lerp(thief.TargetX, victimPoint.x, 0.72f);
+                thief.TargetY = Mathf.Lerp(thief.TargetY, victimPoint.y, 0.72f);
                 victim.Node?.EnableInClassList("sim2d-player--action", true);
             }
-            _sim2DBallTargetX = thief.TargetX;
-            _sim2DBallTargetY = thief.TargetY;
+            AddSim2DBallWaypoint(new Vector2(thief.TargetX, thief.TargetY), 0.48f);
+            _sim2DBallHandlerId = stealId;
+            _sim2DBallFollowsHandler = true;
             thief.Node?.EnableInClassList("sim2d-player--action", true);
         }
         else if (blockId > 0 && _sim2DPlayers.TryGetValue(blockId, out var blocker))
         {
-            _sim2DBallTargetX = Mathf.Clamp(blocker.TargetX + (attackRight ? 0.1f : -0.1f), 0.04f, 0.96f);
-            _sim2DBallTargetY = Mathf.Clamp(blocker.TargetY + 0.12f, 0.08f, 0.92f);
+            AddSim2DBallWaypoint(new Vector2(blocker.TargetX, blocker.TargetY), 0.50f);
+            _sim2DBallHandlerId = blockId;
+            _sim2DBallFollowsHandler = true;
             blocker.Node?.EnableInClassList("sim2d-player--action", true);
         }
         else if (reboundId > 0 && _sim2DPlayers.TryGetValue(reboundId, out var rebounder))
         {
-            float hoopX = attackRight ? 0.91f : 0.09f;
-            rebounder.TargetX = Mathf.Lerp(rebounder.TargetX, hoopX, 0.48f);
-            rebounder.TargetY = Mathf.Lerp(rebounder.TargetY, 0.50f, 0.36f);
-            _sim2DBallTargetX = rebounder.TargetX;
-            _sim2DBallTargetY = rebounder.TargetY;
+            SetSim2DFormationTarget(rebounder, GetSim2DReboundPosition(rebounder, attackRight), 0.48f);
+            AddSim2DBallWaypoint(new Vector2(rebounder.TargetX, rebounder.TargetY), 0.52f);
+            _sim2DBallHandlerId = reboundId;
+            _sim2DBallFollowsHandler = true;
+            rebounder.Node?.EnableInClassList("sim2d-player--action", true);
         }
-        else if (shotAttempt && shooterId > 0 && _sim2DPlayers.TryGetValue(shooterId, out var shooterForBall))
+        else if (turnoverId > 0 && _sim2DPlayers.TryGetValue(turnoverId, out var offender))
         {
-            _sim2DBallTargetX = madeShot
-                ? (attackRight ? SIM2D_RIGHT_HOOP_X : SIM2D_LEFT_HOOP_X)
-                : shooterForBall.TargetX;
-            _sim2DBallTargetY = SIM2D_HOOP_Y;
+            bool sideline = ev.turnoverType == "sideline";
+            _sim2DInboundY = sideline
+                ? (offender.TargetY < 0.5f ? 0.09f : 0.91f)
+                : Mathf.Clamp(offender.TargetY, 0.12f, 0.88f);
+            Vector2 deadBall = sideline
+                ? new Vector2(offender.TargetX, _sim2DInboundY)
+                : new Vector2(offender.TargetX, offender.TargetY);
+            AddSim2DBallWaypoint(deadBall, 0.58f);
+            offender.Node?.EnableInClassList("sim2d-player--action", true);
+            _sim2DBallHandlerId = 0;
         }
-        else if (turnoverId > 0 && _sim2DPlayers.TryGetValue(turnoverId, out var ballLost))
+        else
         {
-            _sim2DBallTargetX = ballLost.TargetX;
-            _sim2DBallTargetY = Mathf.Clamp(ballLost.TargetY + 0.16f, 0.08f, 0.92f);
-        }
-        else if (freeThrow)
-        {
-            int freeThrowShooterId = FindSim2DPlayerForStat(ev, "ftm", "fta", "pts");
-            if (_sim2DPlayers.TryGetValue(freeThrowShooterId, out var freeThrowShooter))
+            if (ballHandler != null)
             {
-                float hoopX = attackRight ? 0.91f : 0.09f;
-                freeThrowShooter.TargetX = Mathf.Lerp(freeThrowShooter.TargetX, hoopX, 0.32f);
-                freeThrowShooter.TargetY = 0.50f;
-                _sim2DBallTargetX = freeThrowShooter.TargetX;
-                _sim2DBallTargetY = freeThrowShooter.TargetY;
+                if (_sim2DInboundType == Sim2DInboundType.None)
+                {
+                    float direction = attackRight ? 1f : -1f;
+                    ballHandler.TargetX = Mathf.Clamp(ballHandler.TargetX + direction * 0.035f, 0.05f, 0.95f);
+                }
+                AddSim2DBallWaypoint(new Vector2(ballHandler.TargetX, ballHandler.TargetY), 0.30f);
+                _sim2DBallHandlerId = ballHandler.Player.id;
+                _sim2DBallFollowsHandler = true;
             }
         }
 
-        Sim2DPlayerState receiver = null;
-        _sim2DBallHasReceiver = shotAttempt && shooterId > 0
-            && _sim2DPlayers.TryGetValue(shooterId, out receiver) && receiver.OnCourt;
-        if (_sim2DBallHasReceiver)
-        {
-            _sim2DBallReceiverX = receiver.TargetX;
-            _sim2DBallReceiverY = receiver.TargetY;
-        }
-
-        int assistId = FindSim2DPlayerForStat(ev, "ast");
-        Sim2DPlayerState passer = null;
-        _sim2DBallHasVia = _sim2DBallHasReceiver && assistId > 0 && assistId != shooterId
-            && _sim2DPlayers.TryGetValue(assistId, out passer) && passer.OnCourt;
-        if (_sim2DBallHasVia)
-        {
-            _sim2DBallViaX = passer.TargetX;
-            _sim2DBallViaY = passer.TargetY;
-        }
-
-        // La defensa presiona y cierra líneas de pase en cada posesión. Los robos y
-        // tapones visibles como resultado solo aparecen cuando GameSimulator los anotó.
         if (stealId == 0 && blockId == 0)
+            ApplySim2DDefensivePressure(eventIndex, turnoverId > 0 ? turnoverId : _sim2DBallHandlerId);
+
+        FinishSim2DBallPath();
+    }
+
+    void BeginSim2DBallPath()
+    {
+        _sim2DBallPath.Clear();
+        _sim2DBallFollowsHandler = false;
+        _sim2DBallPath.Add(new Sim2DBallWaypoint
         {
-            int pressureTargetId = shooterId > 0 ? shooterId
-                : turnoverId > 0 ? turnoverId
-                : FindSim2DPrimaryPlayerFromCurrentEvent();
-            ApplySim2DDefensivePressure(eventIndex, pressureTargetId);
+            Position = new Vector2(_sim2DBallX, _sim2DBallY),
+            Time = 0f
+        });
+    }
+
+    void AddSim2DBallWaypoint(Vector2 point, float time, bool isShot = false)
+    {
+        if (_sim2DBallPath.Count == 0) BeginSim2DBallPath();
+        float previousTime = _sim2DBallPath[_sim2DBallPath.Count - 1].Time;
+        _sim2DBallPath.Add(new Sim2DBallWaypoint
+        {
+            Position = new Vector2(Mathf.Clamp(point.x, 0.015f, 0.985f),
+                Mathf.Clamp(point.y, 0.02f, 0.98f)),
+            Time = Mathf.Clamp(Mathf.Max(time, previousTime + 0.001f), 0f, 1f),
+            IsShot = isShot
+        });
+    }
+
+    void FinishSim2DBallPath()
+    {
+        if (_sim2DBallPath.Count == 0) return;
+        var last = _sim2DBallPath[_sim2DBallPath.Count - 1].Position;
+        _sim2DBallTargetX = last.x;
+        _sim2DBallTargetY = last.y;
+    }
+
+    Vector2 GetSim2DShotPosition(bool threePointer, bool attackRight, int eventIndex, string position)
+    {
+        float side = (eventIndex % 2 == 0) ? 1f : -1f;
+        Vector2 point;
+        if (threePointer)
+            point = new Vector2(0.75f, side > 0 ? 0.20f : 0.80f);
+        else if (position is "C" or "PF")
+            point = new Vector2(0.86f, side * 0.05f + 0.5f);
+        else
+            point = new Vector2(0.82f, side > 0 ? 0.40f : 0.60f);
+
+        if (!attackRight) point.x = 1f - point.x;
+        return point;
+    }
+
+    Vector2 GetSim2DReboundPosition(Sim2DPlayerState player, bool attackRight)
+    {
+        float hoopX = attackRight ? SIM2D_RIGHT_HOOP_X : SIM2D_LEFT_HOOP_X;
+        float towardCenter = attackRight ? -1f : 1f;
+        string position = player?.Player.position;
+        float y = position switch
+        {
+            "PF" => 0.42f,
+            "C" => 0.58f,
+            _ => 0.50f
+        };
+        return new Vector2(hoopX + towardCenter * 0.06f, y);
+    }
+
+    void SetSim2DTarget(Sim2DPlayerState player, Vector2 target, float pathTime = 0.86f)
+    {
+        if (player == null) return;
+        player.TargetX = Mathf.Clamp(target.x, 0.025f, 0.975f);
+        player.TargetY = Mathf.Clamp(target.y, 0.04f, 0.96f);
+        if (_sim2DPlayerPaths.ContainsKey(player.Player.id))
+            AddSim2DPlayerWaypoint(player.Player.id,
+                new Vector2(player.TargetX, player.TargetY), pathTime);
+    }
+
+    void SetSim2DFormationTarget(Sim2DPlayerState player, Vector2 target, float pathTime)
+    {
+        if (player == null) return;
+        SetSim2DTarget(player, target, pathTime);
+        if (!_sim2DPlayerPaths.ContainsKey(player.Player.id))
+            AddSim2DPlayerWaypoint(player.Player.id,
+                new Vector2(player.TargetX, player.TargetY), pathTime);
+    }
+
+    void AddSim2DPlayerWaypoint(int playerId, Vector2 point, float time)
+    {
+        if (!_sim2DPlayers.TryGetValue(playerId, out var player)) return;
+        if (!_sim2DPlayerPaths.TryGetValue(playerId, out var path))
+        {
+            path = new List<Sim2DPlayerWaypoint>();
+            path.Add(new Sim2DPlayerWaypoint
+            {
+                Position = new Vector2(player.X, player.Y),
+                Time = 0f
+            });
+            _sim2DPlayerPaths[playerId] = path;
         }
+
+        float previousTime = path[path.Count - 1].Time;
+        path.Add(new Sim2DPlayerWaypoint
+        {
+            Position = new Vector2(Mathf.Clamp(point.x, 0.025f, 0.975f),
+                Mathf.Clamp(point.y, 0.04f, 0.96f)),
+            Time = Mathf.Clamp(Mathf.Max(time, previousTime + 0.001f), 0f, 1f)
+        });
+    }
+
+    void SetupSim2DInbound(List<int> offenseIds, bool attackRight)
+    {
+        int pointGuardId = FindSim2DPointGuardForCurrentOffense();
+        if (pointGuardId <= 0) return;
+        if (_sim2DInboundType == Sim2DInboundType.Outlet)
+        {
+            int rebounderId = _sim2DBallHandlerId;
+            if (!_sim2DPlayers.TryGetValue(rebounderId, out var rebounder)
+                || !_sim2DPlayers.TryGetValue(pointGuardId, out var outletGuard)) return;
+
+            Vector2 guardSet = GetSim2DPosition("PG", true, attackRight);
+            SetSim2DTarget(outletGuard, guardSet);
+            if (rebounderId == pointGuardId)
+            {
+                AddSim2DPlayerWaypoint(pointGuardId, guardSet, 0.52f);
+                AddSim2DBallWaypoint(guardSet, 0.52f);
+                _sim2DBallHandlerId = pointGuardId;
+                _sim2DBallFollowsHandler = true;
+                return;
+            }
+
+            SetSim2DTarget(rebounder, new Vector2(rebounder.X, rebounder.Y));
+            rebounder.Node?.EnableInClassList("sim2d-player--action", true);
+            float outletBackcourtX = attackRight ? 0.40f : 0.60f;
+            Vector2 outletReceivePoint = new Vector2(outletBackcourtX, 0.5f);
+            AddSim2DPlayerWaypoint(rebounderId,
+                new Vector2(rebounder.TargetX, rebounder.TargetY), 0.12f);
+            AddSim2DPlayerWaypoint(pointGuardId, outletReceivePoint, 0.38f);
+            AddSim2DPlayerWaypoint(pointGuardId, guardSet, 0.56f);
+            AddSim2DBallWaypoint(new Vector2(rebounder.TargetX, rebounder.TargetY), 0.12f);
+            AddSim2DBallWaypoint(outletReceivePoint, 0.38f);
+            AddSim2DBallWaypoint(guardSet, 0.56f);
+            _sim2DBallHandlerId = pointGuardId;
+            _sim2DBallFollowsHandler = true;
+            return;
+        }
+
+        int inbounderId = offenseIds
+            .Where(id => id != pointGuardId)
+            .OrderBy(id => _sim2DPlayers[id].Player.position == "SG" ? 0
+                : _sim2DPlayers[id].Player.position == "SF" ? 1
+                : _sim2DPlayers[id].Player.position == "PG" ? 2 : 3)
+            .ThenByDescending(id => _sim2DPlayers[id].Player.passing)
+            .FirstOrDefault();
+        // Plantillas cortas: si solo queda un jugador, que saque y conduzca él.
+        if (inbounderId <= 0) inbounderId = pointGuardId;
+        if (!_sim2DPlayers.TryGetValue(inbounderId, out var inbounder)
+            || !_sim2DPlayers.TryGetValue(pointGuardId, out var pointGuard)) return;
+
+        float baselineX = attackRight ? 0.055f : 0.945f;
+        float inboundX = _sim2DInboundType == Sim2DInboundType.Baseline
+            ? baselineX
+            : Mathf.Clamp(_sim2DBallX, 0.08f, 0.92f);
+        float inboundY = _sim2DInboundType == Sim2DInboundType.Baseline
+            ? 0.50f
+            : _sim2DInboundY;
+        Vector2 inbounderOffenseSpot = new Vector2(inbounder.TargetX, inbounder.TargetY);
+        SetSim2DTarget(inbounder, new Vector2(inboundX, inboundY));
+        inbounder.Node?.AddToClassList("sim2d-player--inbound");
+        AddSim2DPlayerWaypoint(inbounderId,
+            new Vector2(inbounder.TargetX, inbounder.TargetY), 0.10f);
+        if (inbounderId != pointGuardId)
+            AddSim2DPlayerWaypoint(inbounderId, inbounderOffenseSpot, 0.32f);
+        inbounder.TargetX = inbounderOffenseSpot.x;
+        inbounder.TargetY = inbounderOffenseSpot.y;
+
+        float backcourtX = attackRight ? 0.40f : 0.60f;
+        float receiveY = Mathf.Clamp(inboundY + (inboundY < 0.5f ? 0.12f : -0.12f), 0.18f, 0.82f);
+        Vector2 receivePoint = new Vector2(backcourtX, receiveY);
+        Vector2 pointGuardSet = GetSim2DPosition("PG", true, attackRight);
+        if (pointGuardId == inbounderId)
+        {
+            pointGuard.TargetX = pointGuardSet.x;
+            pointGuard.TargetY = pointGuardSet.y;
+        }
+        else
+            SetSim2DTarget(pointGuard, pointGuardSet);
+        AddSim2DPlayerWaypoint(pointGuardId, receivePoint, 0.30f);
+        AddSim2DPlayerWaypoint(pointGuardId, pointGuardSet, 0.49f);
+
+        // La pelota parte del jugador situado junto a la línea, viaja a un base
+        // claramente separado y este avanza desde campo propio hacia la pista rival.
+        AddSim2DBallWaypoint(new Vector2(inbounder.TargetX, inbounder.TargetY), 0.10f);
+        AddSim2DBallWaypoint(receivePoint, 0.30f);
+        AddSim2DBallWaypoint(new Vector2(pointGuardSet.x, pointGuardSet.y), 0.49f);
+        _sim2DBallHandlerId = pointGuardId;
+        _sim2DBallFollowsHandler = true;
+    }
+
+    void LayoutSim2DFreeThrow(int shooterId, List<int> offenseIds, List<int> defenseIds,
+                              bool attackRight)
+    {
+        if (!_sim2DPlayers.TryGetValue(shooterId, out var shooter)) return;
+        float hoopX = attackRight ? SIM2D_RIGHT_HOOP_X : SIM2D_LEFT_HOOP_X;
+        float ftX = attackRight ? SIM2D_RIGHT_FT_X : SIM2D_LEFT_FT_X;
+        float towardHoop = attackRight ? 1f : -1f;
+        SetSim2DFormationTarget(shooter, new Vector2(ftX, 0.5f), 0.48f);
+        shooter.Node?.EnableInClassList("sim2d-player--action", true);
+
+        var offenseRebounders = OrderSim2DRebounders(offenseIds.Where(id => id != shooterId).ToList());
+        var defenseRebounders = OrderSim2DRebounders(defenseIds);
+        for (int side = 0; side < 2; side++)
+        {
+            float y = side == 0 ? 0.39f : 0.61f;
+            if (side < offenseRebounders.Count
+                && _sim2DPlayers.TryGetValue(offenseRebounders[side], out var offensive))
+                SetSim2DFormationTarget(offensive, new Vector2(hoopX - towardHoop * 0.10f, y), 0.42f);
+            if (side < defenseRebounders.Count
+                && _sim2DPlayers.TryGetValue(defenseRebounders[side], out var defensive))
+                SetSim2DFormationTarget(defensive, new Vector2(hoopX - towardHoop * 0.045f, y), 0.42f);
+        }
+
+        int outsideOffenseIndex = 0;
+        foreach (int id in offenseIds.Where(id => id != shooterId && !offenseRebounders.Take(2).Contains(id)))
+        {
+            if (!_sim2DPlayers.TryGetValue(id, out var player)) continue;
+            float y = outsideOffenseIndex++ % 2 == 0 ? 0.25f : 0.75f;
+            SetSim2DFormationTarget(player, new Vector2(ftX - towardHoop * 0.09f, y), 0.42f);
+        }
+        int outsideDefenseIndex = 0;
+        foreach (int id in defenseIds.Where(id => !defenseRebounders.Take(2).Contains(id)))
+        {
+            if (!_sim2DPlayers.TryGetValue(id, out var player)) continue;
+            int slot = outsideDefenseIndex++;
+            float y = slot switch
+            {
+                0 => 0.25f,
+                1 => 0.75f,
+                _ => 0.50f
+            };
+            SetSim2DFormationTarget(player, new Vector2(ftX - towardHoop * 0.16f, y), 0.42f);
+        }
+    }
+
+    List<int> OrderSim2DRebounders(List<int> ids)
+    {
+        return OrderSim2DOnCourt(ids)
+            .OrderByDescending(id => _sim2DPlayers[id].Player.position is "C" or "PF" ? 1 : 0)
+            .ThenByDescending(id => _sim2DPlayers[id].Player.rebounding)
+            .ToList();
     }
 
     int FindNearestSim2DDefender(int attackerId)
@@ -909,17 +1344,6 @@ public partial class MatchDayController
         defender.Node?.AddToClassList("sim2d-player--pressure");
     }
 
-    int FindSim2DPrimaryPlayerFromCurrentEvent()
-    {
-        // El primer jugador ofensivo se usa solo para organizar la presión defensiva
-        // cuando el evento no identifica un tirador, reboteador, robo o tapón.
-        var ids = _sim2DHomeOnOffense ? _sim2DHomeOnCourt : _sim2DAwayOnCourt;
-        return OrderSim2DOnCourt(ids)
-            .OrderBy(id => Sim2DPositionOrder(_sim2DPlayers[id].Player.position))
-            .ThenByDescending(id => _sim2DPlayers[id].Player.passing)
-            .FirstOrDefault();
-    }
-
     static int FindSim2DPlayerForStat(GameSimulator.PlayByPlayEvent ev, params string[] stats)
     {
         if (ev?.deltas == null || ev.deltas.Count == 0 || stats == null) return 0;
@@ -944,7 +1368,7 @@ public partial class MatchDayController
     }
 
     IEnumerator AnimateSim2DPositions(int quarter, float clockStart, float clockTarget,
-                                      float duration)
+                                      float duration, float shotClockStart, float shotClockTarget)
     {
         duration = Mathf.Max(0.05f, duration);
         float clockDuration = duration;
@@ -961,48 +1385,22 @@ public partial class MatchDayController
                 yield return null;
 
             elapsed += Time.unscaledDeltaTime;
-            float t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / duration));
+            float rawT = Mathf.Clamp01(elapsed / duration);
+            float t = Mathf.SmoothStep(0f, 1f, rawT);
             UpdateSim2DClock(quarter, Mathf.Lerp(clockStart, clockTarget,
                 Mathf.Clamp01(elapsed / clockDuration)));
+            UpdateSim2DShotClock(Mathf.Lerp(shotClockStart, shotClockTarget, rawT));
             foreach (var state in _sim2DPlayers.Values)
             {
                 if (!state.OnCourt) continue;
                 Vector2 from = start[state.Player.id];
-                state.X = Mathf.Lerp(from.x, state.TargetX, t);
-                state.Y = Mathf.Lerp(from.y, state.TargetY, t);
+                Vector2 playerPosition = GetSim2DPlayerPositionAt(state, from, rawT, t);
+                state.X = playerPosition.x;
+                state.Y = playerPosition.y;
                 ApplySim2DNodePosition(state);
             }
 
-            // Con asistencia, el balón pasa por el asistente y luego por el tirador
-            // antes de llegar al aro. Sin asistencia va directo al desenlace.
-            if (_sim2DBallHasVia)
-            {
-                if (t <= 0.34f)
-                {
-                    float k = t / 0.34f;
-                    _sim2DBallX = Mathf.Lerp(startBallX, _sim2DBallViaX, k);
-                    _sim2DBallY = Mathf.Lerp(startBallY, _sim2DBallViaY, k);
-                }
-                else if (t <= 0.67f && _sim2DBallHasReceiver)
-                {
-                    float k = (t - 0.34f) / 0.33f;
-                    _sim2DBallX = Mathf.Lerp(_sim2DBallViaX, _sim2DBallReceiverX, k);
-                    _sim2DBallY = Mathf.Lerp(_sim2DBallViaY, _sim2DBallReceiverY, k);
-                }
-                else
-                {
-                    float k = (t - 0.67f) / 0.33f;
-                    float fromX = _sim2DBallHasReceiver ? _sim2DBallReceiverX : _sim2DBallViaX;
-                    float fromY = _sim2DBallHasReceiver ? _sim2DBallReceiverY : _sim2DBallViaY;
-                    _sim2DBallX = Mathf.Lerp(fromX, _sim2DBallTargetX, k);
-                    _sim2DBallY = Mathf.Lerp(fromY, _sim2DBallTargetY, k);
-                }
-            }
-            else
-            {
-                _sim2DBallX = Mathf.Lerp(startBallX, _sim2DBallTargetX, t);
-                _sim2DBallY = Mathf.Lerp(startBallY, _sim2DBallTargetY, t);
-            }
+            UpdateSim2DBallAlongPath(rawT, elapsed, startBallX, startBallY);
             ApplySim2DBallPosition();
             yield return null;
         }
@@ -1014,9 +1412,86 @@ public partial class MatchDayController
             state.Y = state.TargetY;
             ApplySim2DNodePosition(state);
         }
-        _sim2DBallX = _sim2DBallTargetX;
-        _sim2DBallY = _sim2DBallTargetY;
+        if (_sim2DBallFollowsHandler && _sim2DPlayers.TryGetValue(_sim2DBallHandlerId, out var finalHandler))
+        {
+            Vector2 follow = GetSim2DBallFollowPosition(finalHandler, duration);
+            _sim2DBallX = follow.x;
+            _sim2DBallY = follow.y;
+        }
+        else
+        {
+            _sim2DBallX = _sim2DBallTargetX;
+            _sim2DBallY = _sim2DBallTargetY;
+        }
         ApplySim2DBallPosition();
+    }
+
+    Vector2 GetSim2DPlayerPositionAt(Sim2DPlayerState state, Vector2 start,
+                                    float rawT, float easedT)
+    {
+        if (state == null || !_sim2DPlayerPaths.TryGetValue(state.Player.id, out var path)
+            || path.Count == 0)
+            return new Vector2(Mathf.Lerp(start.x, state.TargetX, easedT),
+                Mathf.Lerp(start.y, state.TargetY, easedT));
+
+        Vector2 from = start;
+        float fromTime = 0f;
+        foreach (var waypoint in path)
+        {
+            if (rawT <= waypoint.Time)
+            {
+                float segment = Mathf.Max(0.001f, waypoint.Time - fromTime);
+                float t = Mathf.SmoothStep(0f, 1f,
+                    Mathf.Clamp01((rawT - fromTime) / segment));
+                return Vector2.Lerp(from, waypoint.Position, t);
+            }
+            from = waypoint.Position;
+            fromTime = waypoint.Time;
+        }
+        return path[path.Count - 1].Position;
+    }
+
+    void UpdateSim2DBallAlongPath(float t, float elapsed, float startX, float startY)
+    {
+        if (_sim2DBallFollowsHandler && _sim2DBallPath.Count > 0
+            && t >= _sim2DBallPath[_sim2DBallPath.Count - 1].Time
+            && _sim2DPlayers.TryGetValue(_sim2DBallHandlerId, out var handler))
+        {
+            Vector2 follow = GetSim2DBallFollowPosition(handler, elapsed);
+            _sim2DBallX = follow.x;
+            _sim2DBallY = follow.y;
+            return;
+        }
+
+        if (_sim2DBallPath.Count < 2)
+        {
+            _sim2DBallX = Mathf.Lerp(startX, _sim2DBallTargetX, t);
+            _sim2DBallY = Mathf.Lerp(startY, _sim2DBallTargetY, t);
+            return;
+        }
+
+        for (int i = 1; i < _sim2DBallPath.Count; i++)
+        {
+            var from = _sim2DBallPath[i - 1];
+            var to = _sim2DBallPath[i];
+            if (t > to.Time && i < _sim2DBallPath.Count - 1) continue;
+
+            float segment = Mathf.Max(0.001f, to.Time - from.Time);
+            float k = Mathf.Clamp01((t - from.Time) / segment);
+            _sim2DBallX = Mathf.Lerp(from.Position.x, to.Position.x, k);
+            _sim2DBallY = Mathf.Lerp(from.Position.y, to.Position.y, k);
+            if (to.IsShot)
+                _sim2DBallY -= Mathf.Sin(k * Mathf.PI) * 0.12f;
+            return;
+        }
+    }
+
+    Vector2 GetSim2DBallFollowPosition(Sim2DPlayerState handler, float elapsed)
+    {
+        float direction = _sim2DHomeOnOffense ? 1f : -1f;
+        float bounce = Mathf.Abs(Mathf.Sin(elapsed * 8.5f)) * 0.012f;
+        return new Vector2(Mathf.Clamp(handler.X + direction * 0.028f, 0.02f, 0.98f),
+            Mathf.Clamp(handler.Y + bounce, 0.02f, 0.98f));
     }
 
     void UpdateSim2DClock(int quarter, float elapsed)
@@ -1027,6 +1502,13 @@ public partial class MatchDayController
         int ss = Mathf.RoundToInt((remaining - mm) * 60f);
         if (ss >= 60) { mm++; ss = 0; }
         if (_sim2DClock != null) _sim2DClock.text = $"{mm:D2}:{ss:D2}";
+    }
+
+    void UpdateSim2DShotClock(float seconds)
+    {
+        _sim2DShotClock = Mathf.Clamp(seconds, 0f, 24f);
+        if (_sim2DShotClockLabel != null)
+            _sim2DShotClockLabel.text = Mathf.CeilToInt(_sim2DShotClock).ToString("D2");
     }
 
     static void ApplySim2DNodePosition(Sim2DPlayerState state)
@@ -1054,13 +1536,13 @@ public partial class MatchDayController
             (d.stat == "fg3m" || d.stat == "fg3a") && d.amount > 0);
     }
 
-    void PlaySim2DScoreEffect(bool attackRight, bool threePointer)
+    void PlaySim2DScoreEffect(bool attackRight, bool threePointer, bool freeThrow = false)
     {
         if (!_sim2DActive || _sim2DEffectsLayer == null) return;
 
         float hoopX = attackRight ? SIM2D_RIGHT_HOOP_X : SIM2D_LEFT_HOOP_X;
         float hoopY = SIM2D_HOOP_Y;
-        float duration = threePointer ? 0.62f : 0.52f;
+        float duration = freeThrow ? 0.38f : threePointer ? 0.62f : 0.52f;
 
         var ring = new VisualElement { pickingMode = PickingMode.Ignore };
         ring.AddToClassList("sim2d-score-ring");
@@ -1073,7 +1555,7 @@ public partial class MatchDayController
         ring.style.opacity = 1f;
         _sim2DEffectsLayer.Add(ring);
 
-        int count = threePointer ? 16 : 11;
+        int count = freeThrow ? 6 : threePointer ? 16 : 11;
         var particles = new List<Sim2DScoreParticle>(count);
         for (int i = 0; i < count; i++)
         {

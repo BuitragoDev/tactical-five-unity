@@ -998,6 +998,16 @@ public class GameSimulatorTests
     }
 
     [Test]
+    public void IsSidelineTurnoverRoll_ClassifiesOnlyTheExistingNonStealRollRange()
+    {
+        Assert.That(GameSimulator.IsSidelineTurnoverRoll(0.49f), Is.False);
+        Assert.That(GameSimulator.IsSidelineTurnoverRoll(0.50f), Is.True);
+        Assert.That(GameSimulator.IsSidelineTurnoverRoll(0.69f), Is.True);
+        Assert.That(GameSimulator.IsSidelineTurnoverRoll(0.70f), Is.False);
+        Assert.That(GameSimulator.IsSidelineTurnoverRoll(1f), Is.False);
+    }
+
+    [Test]
     public void ShootFreeThrows_LastMissLeavesTheBallLive()
     {
         var shooter = new GameSimulator.PlayerStatSnapshot { name = "Tirador", overall = 70 };

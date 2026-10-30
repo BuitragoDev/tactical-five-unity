@@ -1107,6 +1107,19 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
 }
 
+.sim2d-shot-clock {
+    min-width: 42px;
+    padding: 2px 8px;
+    background-color: rgb(42, 35, 25);
+    border-width: 1px;
+    border-color: rgb(212, 160, 23);
+    border-radius: 4px;
+    font-size: 18px;
+    color: rgb(255, 214, 90);
+    -unity-text-align: middle-center;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+}
+
 .sim2d-venue {
     font-size: 18px;
     color: rgb(122, 138, 170);
@@ -1231,6 +1244,15 @@
 .sim2d-player--away .sim2d-player-photo {
     border-width: 4px;
     border-color: rgb(220, 60, 60);
+}
+
+.sim2d-player--inbound .sim2d-player-photo {
+    border-width: 5px;
+    border-color: rgb(255, 214, 90);
+}
+
+.sim2d-player--inbound .sim2d-player-plate {
+    background-color: rgb(52, 42, 22);
 }
 
 .sim2d-player-plate {

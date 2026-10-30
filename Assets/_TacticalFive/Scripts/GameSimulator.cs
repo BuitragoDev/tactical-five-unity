@@ -69,6 +69,8 @@ public static class GameSimulator
         /// <summary>Equipo que tiene la posesión cuando ocurre la jugada. La vista 2D
         /// lo usa para orientar el ataque; en eventos de periodo puede ser false.</summary>
         public bool homeOnOffense;
+        /// <summary>Tipo visual de pérdida cuando el motor puede distinguirlo.</summary>
+        public string turnoverType;
         /// <summary>Jugadores en pista (ids reales) al empezar la jugada. Permite que la
         /// vista 2D muestre el quinteto correcto y refleje las sustituciones.</summary>
         public List<int> homeOnCourt = new();
@@ -89,6 +91,8 @@ public static class GameSimulator
         /// <summary>Rebote ofensivo: el mismo equipo sigue atacando (segunda oportunidad).
         /// Canasta, pérdida, tapón o rebote defensivo lo dejan en false (cambia el balón).</summary>
         public bool offensiveRebound;
+        /// <summary>Clasificación solo para la crónica; no afecta al resultado.</summary>
+        public string turnoverType;
     }
 
     /// <summary>
@@ -898,7 +902,7 @@ public static class GameSimulator
 
     static void AddLog(List<PlayByPlayEvent> log, int quarter, string desc, int homeScore, int awayScore,
         float elapsed, List<StatDelta> deltas = null, List<int> homeOnCourt = null,
-        List<int> awayOnCourt = null, bool homeOnOffense = false)
+        List<int> awayOnCourt = null, bool homeOnOffense = false, string turnoverType = null)
     {
         if (log == null || string.IsNullOrEmpty(desc)) return;
         log.Add(new PlayByPlayEvent
@@ -910,6 +914,7 @@ public static class GameSimulator
             timeElapsed = elapsed,
             deltas = deltas,
             homeOnOffense = homeOnOffense,
+            turnoverType = turnoverType,
             homeOnCourt = homeOnCourt ?? new List<int>(),
             awayOnCourt = awayOnCourt ?? new List<int>()
         });
@@ -1041,13 +1046,13 @@ public static class GameSimulator
                     foreach (int i in homeOn) deltas.Add(new StatDelta { player_id = homePS[i].player_id, stat = "min", amount = minsPerPoss });
                     foreach (int i in awayOn) deltas.Add(new StatDelta { player_id = awayPS[i].player_id, stat = "min", amount = minsPerPoss });
                 }
-                AddLog(log, qNum, outcome.desc,
+                    AddLog(log, qNum, outcome.desc,
                     homeOnOffense ? preHomeScore + points : preHomeScore,
                     homeOnOffense ? preAwayScore : preAwayScore + points,
                     elapsed, deltas,
                     homeOn.Select(i => homePS[i].player_id).ToList(),
                     awayOn.Select(i => awayPS[i].player_id).ToList(),
-                    homeOnOffense);
+                    homeOnOffense, outcome.turnoverType);
             }
 
             attacksSoFar++;
@@ -1084,11 +1089,12 @@ public static class GameSimulator
         float toPct = TurnoverChance(offR, defR, BallSecurity(off), defPlan);
         if (random.Value < toPct)
         {
-            string toName = DoTO(off, def, random);
+            string toName = DoTO(off, def, random, out bool sidelineTurnover);
             return new PossessionOutcome
             {
                 pts = 0,
-                desc = $"{toName ?? "Pérdida de balón"} pierde el balón"
+                desc = $"{toName ?? "Pérdida de balón"} pierde el balón",
+                turnoverType = sidelineTurnover ? "sideline" : null
             };
         }
 
@@ -1454,9 +1460,11 @@ public static class GameSimulator
         };
     }
 
-    static string DoTO(List<PlayerStatSnapshot> off, List<PlayerStatSnapshot> def, IRandomSource random = null)
+    static string DoTO(List<PlayerStatSnapshot> off, List<PlayerStatSnapshot> def,
+        IRandomSource random, out bool sidelineTurnover)
     {
         random ??= UnityRandomSource.Instance;
+        sidelineTurnover = false;
         string toName = null;
         var handlers = off.Where(p => p.position is "PG" or "SG" or "SF").ToList();
         if (handlers.Count == 0) handlers = off;
@@ -1473,8 +1481,15 @@ public static class GameSimulator
             }
         }
 
-        // Only ~50% of TOs result in a steal (rest are offensive fouls, out-of-bounds, etc.)
-        if (random.Value >= 0.5f) return toName;
+        // Conserva la misma tirada y el mismo 50 % de robos. En las pérdidas sin
+        // robo, una parte se etiqueta como balón fuera para que la vista represente
+        // el saque lateral; es metadato de presentación, no cambia las reglas ni el azar.
+        float stealRoll = random.Value;
+        if (stealRoll >= 0.5f)
+        {
+            sidelineTurnover = IsSidelineTurnoverRoll(stealRoll);
+            return toName;
+        }
         if (def.Count == 0) return toName;
         var stlW = def.Select(p => Mathf.Pow(p.steals_attr, 3)).ToList();
         float t = stlW.Sum();
@@ -1491,6 +1506,8 @@ public static class GameSimulator
         def.OrderByDescending(p => p.steals_attr).First().steals++;
         return toName;
     }
+
+    public static bool IsSidelineTurnoverRoll(float roll) => roll >= 0.5f && roll < 0.7f;
 
     /// <summary>Probabilidad de falta sin tiro en la penetración (F2-03).</summary>
     static float ReachInFoulChance(GamePlan defPlan) => Mathf.Max(0f, BASE_REACH_IN_FOUL_CHANCE + defPlan.FoulDelta());
