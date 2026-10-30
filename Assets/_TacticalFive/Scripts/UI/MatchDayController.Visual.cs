@@ -77,7 +77,7 @@ public partial class MatchDayController
         public float X, Y, Vx, Vy;
     }
 
-    private enum Sim2DInboundType { None, Baseline, Sideline, DeadBall, Outlet }
+    private enum Sim2DInboundType { None, TipOff, Baseline, Sideline, DeadBall, Outlet }
 
     private class Sim2DBallWaypoint
     {
@@ -674,7 +674,14 @@ public partial class MatchDayController
         if (newPossession)
         {
             _sim2DShotClock = 24f;
-            if (previous != null && !newPeriod)
+            if (previous == null && current.quarter == 1)
+            {
+                // El motor asigna el primer saque al local; la vista representa
+                // el salto inicial sin volver a decidir ni cambiar el resultado.
+                _sim2DInboundType = Sim2DInboundType.TipOff;
+                _sim2DBallHandlerId = FindSim2DPointGuardForCurrentOffense();
+            }
+            else if (previous != null && !newPeriod)
             {
                 int rebounderId = FindSim2DPlayerForStat(previous, "oreb", "dreb");
                 int stealerId = FindSim2DPlayerForStat(previous, "stl");
@@ -1178,10 +1185,100 @@ public partial class MatchDayController
         });
     }
 
+    void SetupSim2DTipOff(int pointGuardId, bool attackRight)
+    {
+        int homeJumperId = FindSim2DJumpBallPlayer(_sim2DHomeOnCourt);
+        int awayJumperId = FindSim2DJumpBallPlayer(_sim2DAwayOnCourt);
+        var normalTargets = _sim2DPlayers.Values
+            .Where(player => player.OnCourt)
+            .ToDictionary(player => player.Player.id,
+                player => new Vector2(player.TargetX, player.TargetY));
+
+        SetupTipOffTeam(_sim2DHomeOnCourt, homeJumperId, pointGuardId,
+            true, attackRight, normalTargets);
+        SetupTipOffTeam(_sim2DAwayOnCourt, awayJumperId, 0,
+            false, attackRight, normalTargets);
+
+        if (!normalTargets.TryGetValue(pointGuardId, out var guardSet)) return;
+        float receiveX = attackRight ? 0.42f : 0.58f;
+        Vector2 receivePoint = new Vector2(receiveX, 0.5f);
+        Vector2 jumpTipPoint = homeJumperId > 0
+            ? new Vector2(0.49f, 0.42f)
+            : new Vector2(0.5f, 0.5f);
+        AddSim2DBallWaypoint(new Vector2(0.5f, 0.5f), 0.14f);
+        AddSim2DBallWaypoint(jumpTipPoint, 0.22f);
+        AddSim2DBallWaypoint(receivePoint, 0.36f);
+        AddSim2DBallWaypoint(guardSet, 0.48f);
+        _sim2DBallHandlerId = pointGuardId;
+        _sim2DBallFollowsHandler = true;
+    }
+
+    void SetupTipOffTeam(List<int> courtIds, int jumperId, int pointGuardId,
+                         bool isHome, bool attackRight, Dictionary<int, Vector2> normalTargets)
+    {
+        var ids = OrderSim2DOnCourt(courtIds).Where(normalTargets.ContainsKey).ToList();
+        int nonJumperSlot = 0;
+        foreach (int id in ids)
+        {
+            if (!_sim2DPlayers.TryGetValue(id, out var player)) continue;
+            Vector2 startSpot;
+            if (id == jumperId)
+            {
+                startSpot = new Vector2(isHome ? 0.49f : 0.51f,
+                    isHome ? 0.42f : 0.58f);
+            }
+            else
+            {
+                int slot = nonJumperSlot++;
+                float x = isHome
+                    ? (slot % 2 == 0 ? 0.29f : 0.41f)
+                    : (slot % 2 == 0 ? 0.71f : 0.59f);
+                float y = slot switch
+                {
+                    0 => 0.20f,
+                    1 => 0.80f,
+                    2 => 0.36f,
+                    _ => 0.64f
+                };
+                startSpot = new Vector2(x, y);
+            }
+
+            var regularSpot = normalTargets[id];
+            player.TargetX = startSpot.x;
+            player.TargetY = startSpot.y;
+            AddSim2DPlayerWaypoint(id, startSpot, 0.14f);
+            if (id == pointGuardId && isHome)
+            {
+                float receiveX = attackRight ? 0.42f : 0.58f;
+                AddSim2DPlayerWaypoint(id, new Vector2(receiveX, 0.5f), 0.32f);
+                AddSim2DPlayerWaypoint(id, regularSpot, 0.46f);
+            }
+            else
+                AddSim2DPlayerWaypoint(id, regularSpot, 0.74f);
+
+            player.TargetX = regularSpot.x;
+            player.TargetY = regularSpot.y;
+        }
+    }
+
+    int FindSim2DJumpBallPlayer(List<int> courtIds)
+    {
+        return OrderSim2DOnCourt(courtIds)
+            .OrderBy(id => _sim2DPlayers[id].Player.position == "C" ? 0
+                : _sim2DPlayers[id].Player.position == "PF" ? 1 : 2)
+            .ThenByDescending(id => _sim2DPlayers[id].Player.rebounding)
+            .FirstOrDefault();
+    }
+
     void SetupSim2DInbound(List<int> offenseIds, bool attackRight)
     {
         int pointGuardId = FindSim2DPointGuardForCurrentOffense();
         if (pointGuardId <= 0) return;
+        if (_sim2DInboundType == Sim2DInboundType.TipOff)
+        {
+            SetupSim2DTipOff(pointGuardId, attackRight);
+            return;
+        }
         if (_sim2DInboundType == Sim2DInboundType.Outlet)
         {
             int rebounderId = _sim2DBallHandlerId;
