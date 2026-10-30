@@ -845,6 +845,9 @@
     flex-shrink: 0;
     margin-left: 6px;
     margin-right: 6px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
 .sim2d-team-copy {
@@ -868,8 +871,8 @@
 }
 
 .sim2d-team-name {
-    font-size: 15px;
-    color: rgb(122, 138, 170);
+    font-size: 19px;
+    color: rgb(220, 226, 238);
     text-transform: uppercase;
     letter-spacing: 1px;
     max-width: 260px;
@@ -928,7 +931,8 @@
 }
 
 .sim2d-side {
-    width: 280px;
+    width: 360px;
+    min-width: 340px;
     flex-shrink: 0;
     flex-direction: column;
     background-color: rgb(19, 24, 35);
@@ -1222,6 +1226,15 @@
     border-color: rgb(230, 120, 100);
 }
 
+.sim2d-player--pressure .sim2d-player-photo {
+    border-color: rgb(212, 160, 23);
+}
+
+.sim2d-player--action .sim2d-player-photo {
+    border-width: 4px;
+    border-color: rgb(255, 206, 84);
+}
+
 .sim2d-player-plate {
     flex-direction: row;
     align-items: center;
@@ -1278,9 +1291,11 @@
 }
 
 .sim2d-ticker-text {
+    flex-grow: 1;
     font-size: 22px;
     color: rgb(232, 236, 245);
     white-space: normal;
+    -unity-text-align: middle-left;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-SemiBold.ttf");
 }
 

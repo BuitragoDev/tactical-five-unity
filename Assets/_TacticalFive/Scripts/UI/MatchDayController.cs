@@ -686,6 +686,8 @@ public partial class MatchDayController : UIScreenController
         _pbpGameId = myGame.id;
         _pbpHomeTeamId = myGame.home_team_id;
         _pbpAwayTeamId = myGame.away_team_id;
+        _sim2DHomeTeamId = myGame.home_team_id;
+        _sim2DAwayTeamId = myGame.away_team_id;
         _pbpTotalMinutes = 48 + Mathf.Max(0, log.Max(e => e.quarter) - 4) * 5;
 
         if (mode == UIScreenController.SimModeVisual)

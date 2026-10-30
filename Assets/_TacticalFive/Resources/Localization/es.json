@@ -5198,6 +5198,10 @@
       "value": "SALTAR ►"
     },
     {
+      "key": "ui.match_day.sim2d_speed_normal",
+      "value": "NORMAL"
+    },
+    {
       "key": "ui.match_day.pts",
       "value": "PTS"
     },

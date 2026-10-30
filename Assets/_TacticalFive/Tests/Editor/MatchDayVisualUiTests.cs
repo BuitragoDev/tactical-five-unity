@@ -24,6 +24,12 @@ public class MatchDayVisualUiTests
         Assert.That(root.Q<VisualElement>("Sim2DTeamList"), Is.Not.Null);
         Assert.That(root.Q<Label>("Sim2DScore"), Is.Not.Null);
         Assert.That(root.Q<Label>("Sim2DTickerText"), Is.Not.Null);
+        Assert.That(root.Q<Button>("Sim2DHomeTab"), Is.Not.Null);
+        Assert.That(root.Q<Button>("Sim2DAwayTab"), Is.Not.Null);
+        Assert.That(root.Q<Button>("Sim2DSpeed1"), Is.Not.Null,
+            "Debe existir una opción de velocidad NORMAL");
+        Assert.That(root.Q<Button>("Sim2DSpeed1").text,
+            Is.EqualTo("{loc:ui.match_day.sim2d_speed_normal}"));
         Assert.That(root.Q<Button>("Sim2DSkip"), Is.Not.Null);
     }
 

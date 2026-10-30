@@ -189,9 +189,9 @@
                 </ui:VisualElement>
                 <ui:VisualElement class="sim2d-controls">
                     <ui:Button name="Sim2DPause" class="sim2d-control-btn" text="" />
-                    <ui:Button name="Sim2DSpeed1" class="sim2d-speed-btn" text="{loc:ui.match_day.pbp_btn_speed1}" />
+                    <ui:Button name="Sim2DSpeed1" class="sim2d-speed-btn sim2d-speed-btn--active" text="{loc:ui.match_day.sim2d_speed_normal}" />
                     <ui:Button name="Sim2DSpeed3" class="sim2d-speed-btn" text="{loc:ui.match_day.pbp_btn_speed3}" />
-                    <ui:Button name="Sim2DSpeed5" class="sim2d-speed-btn sim2d-speed-btn--active" text="{loc:ui.match_day.pbp_btn_speed5}" />
+                    <ui:Button name="Sim2DSpeed5" class="sim2d-speed-btn" text="{loc:ui.match_day.pbp_btn_speed5}" />
                     <ui:Button name="Sim2DSpeed10" class="sim2d-speed-btn" text="{loc:ui.match_day.pbp_btn_speed10}" />
                     <ui:VisualElement class="sim2d-spacer" />
                     <ui:Button name="Sim2DSkip" class="sim2d-skip" text="{loc:ui.code.match_day_controller.saltar}" />
