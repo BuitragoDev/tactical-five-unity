@@ -1229,9 +1229,9 @@
 }
 
 .sim2d-player-photo {
-    width: 46px;
-    height: 46px;
-    border-radius: 23px;
+    width: 50px;
+    height: 50px;
+    border-radius: 25px;
     background-color: rgb(38, 47, 65);
     background-size: cover;
     background-position: center;
@@ -1264,7 +1264,7 @@
 }
 
 .sim2d-player-number {
-    font-size: 11px;
+    font-size: 16px;
     color: rgb(212, 160, 23);
     margin-right: 3px;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
@@ -1272,7 +1272,7 @@
 
 .sim2d-player-name {
     flex-shrink: 0;
-    font-size: 11px;
+    font-size: 16px;
     color: rgb(220, 226, 238);
     white-space: nowrap;
     overflow: visible;
