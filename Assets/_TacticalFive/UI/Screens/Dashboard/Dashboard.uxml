@@ -385,6 +385,7 @@
                             <ui:VisualElement class="settings-quality-options">
                                 <ui:Button name="ConfigBtnSimDirect" text="{loc:ui.dashboard.config_btn_sim_direct}" class="settings-quality-btn"/>
                                 <ui:Button name="ConfigBtnSimPlay" text="{loc:ui.dashboard.config_btn_sim_play}" class="settings-quality-btn settings-quality-btn--wide"/>
+                                <ui:Button name="ConfigBtnSimVisual" text="{loc:ui.dashboard.config_btn_sim_visual}" class="settings-quality-btn settings-quality-btn--wide"/>
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>

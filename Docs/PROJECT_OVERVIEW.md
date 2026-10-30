@@ -12,7 +12,7 @@
 
 - You are the **manager** (`ManagerData`) of one of **30 NBA-like franchises** (`TeamData`) named after real NBA teams (division/conference/arena/capacity/owner/logo/jerseys are seeded real data).
 - A season runs roughly from **October 22 to mid-April** plus Play-In/Playoffs, modeled as a sequence of **game days** (one `GameData` row per match, up to 15 matches/day).
-- You do **not** control a player live: matches are **simulated possession-by-possession** (`GameSimulator`) with your starting lineup (`LineupData`), substitutions, chemistry, morale, fatigue and injuries. The match can be shown live in a **play-by-play overlay** (marcador, reloj, barra de progreso, boxscore en vivo y velocidades x1/x3/x5/x10) or simulated directly (`Directa`), configurable via "Vista de Partido" en los ajustes (`TF_SimMode`).
+- You do **not** control a player live: matches are **simulated possession-by-possession** (`GameSimulator`) with your starting lineup (`LineupData`), substitutions, chemistry, morale, fatigue and injuries. The match can be shown live in a **play-by-play overlay** (marcador, reloj, barra de progreso, boxscore en vivo y velocidades x1/x3/x5/x10), in a **2D visual overlay** (cancha, jugadores, balón, quintetos y PTS/REB/AST) or simulated directly (`Directa`), configurable via "Vista de Partido" en los ajustes (`TF_SimMode`).
 - The strategic layer includes: roster building (trades, free agents, renewals, sign-and-trade), finances (budget, ticket price, subscriptions, sponsors, TV deals, loans, arena renovations, luxury tax, buyout), training, staff (employees/scouts/psychologist), morale/relationships/chemistry, and a full league simulation (draft lottery, playoffs, awards, historical records, Hall of Fame, retired numbers, GM achievements).
 
 ## 2. Game modes
@@ -93,7 +93,7 @@ Docs/  .agent/            this knowledge base (keep in sync)
 | `overall` = media redondeada de 11 atributos capada por `potential`, con **fuente única** en `PlayerRating` | `Scripts/Data/PlayerRating.cs`, `PlayerData.cs` |
 | No C# event bus — cross-controller communication via DB, `GameResultCache` statics, `PlayerPrefs`, and `ScreenManager` static state | `EVENTS.md` |
 | Partido reproducible por inyección: `GameSimulator.SimulateGame` acepta `IRandomSource`; null conserva `UnityEngine.Random`, `SeededRandomSource(seed)` reproduce el mismo partido | F3-01, `GameSimulator.cs`, `IRandomSource.cs` |
-| Audio/volumes/graphics persisted in `PlayerPrefs` keys `TF_Audio_*`, `TF_Graphics_Quality`, `TF_SimMode`, `TF_PbpSpeed`, `TF_LoadMgmt_Enabled` | `AudioManager.cs`, `UIScreenController.cs`, `MatchDayController.cs` |
+| Audio/volumes/graphics persisted in `PlayerPrefs` keys `TF_Audio_*`, `TF_Graphics_Quality`, `TF_SimMode`, `TF_PbpSpeed`, `TF_Sim2DSpeed`, `TF_LoadMgmt_Enabled` | `AudioManager.cs`, `UIScreenController.cs`, `MatchDayController.cs` |
 | Screen controllers inherit `UIScreenController` (base: fullscreen, header/sidebar injection, nav, config modal, sim-mode toggle) | `UIScreenController.cs` |
 
 ## 7. Critical systems (deep links)

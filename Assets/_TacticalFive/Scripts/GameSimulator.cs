@@ -66,6 +66,13 @@ public static class GameSimulator
         public int awayScore;
         public float timeElapsed;
         public List<StatDelta> deltas;
+        /// <summary>Equipo que tiene la posesión cuando ocurre la jugada. La vista 2D
+        /// lo usa para orientar el ataque; en eventos de periodo puede ser false.</summary>
+        public bool homeOnOffense;
+        /// <summary>Jugadores en pista (ids reales) al empezar la jugada. Permite que la
+        /// vista 2D muestre el quinteto correcto y refleje las sustituciones.</summary>
+        public List<int> homeOnCourt = new();
+        public List<int> awayOnCourt = new();
     }
 
     public class StatDelta
@@ -889,7 +896,9 @@ public static class GameSimulator
             weights[i] = Mathf.Max(0.0001f, mean + (weights[i] - mean) * factor);
     }
 
-    static void AddLog(List<PlayByPlayEvent> log, int quarter, string desc, int homeScore, int awayScore, float elapsed, List<StatDelta> deltas = null)
+    static void AddLog(List<PlayByPlayEvent> log, int quarter, string desc, int homeScore, int awayScore,
+        float elapsed, List<StatDelta> deltas = null, List<int> homeOnCourt = null,
+        List<int> awayOnCourt = null, bool homeOnOffense = false)
     {
         if (log == null || string.IsNullOrEmpty(desc)) return;
         log.Add(new PlayByPlayEvent
@@ -899,7 +908,10 @@ public static class GameSimulator
             homeScore = homeScore,
             awayScore = awayScore,
             timeElapsed = elapsed,
-            deltas = deltas
+            deltas = deltas,
+            homeOnOffense = homeOnOffense,
+            homeOnCourt = homeOnCourt ?? new List<int>(),
+            awayOnCourt = awayOnCourt ?? new List<int>()
         });
     }
 
@@ -1032,7 +1044,10 @@ public static class GameSimulator
                 AddLog(log, qNum, outcome.desc,
                     homeOnOffense ? preHomeScore + points : preHomeScore,
                     homeOnOffense ? preAwayScore : preAwayScore + points,
-                    elapsed, deltas);
+                    elapsed, deltas,
+                    homeOn.Select(i => homePS[i].player_id).ToList(),
+                    awayOn.Select(i => awayPS[i].player_id).ToList(),
+                    homeOnOffense);
             }
 
             attacksSoFar++;

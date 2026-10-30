@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-public class MatchDayController : UIScreenController
+public partial class MatchDayController : UIScreenController
 {
     private Label _homeScore, _awayScore, _homeName, _awayName;
     private VisualElement _homeLogo, _awayLogo;
@@ -166,6 +166,7 @@ public class MatchDayController : UIScreenController
 
         _pbpSpeed = PlayerPrefs.GetInt(PBP_SPEED_PREF, 5);
         UpdatePbpSpeedButtons();
+        CacheSimVisualReferences();
     }
 
     protected override void LoadData()
@@ -183,6 +184,7 @@ public class MatchDayController : UIScreenController
         if (Input.GetKeyDown(KeyCode.D))
         {
             PlayClick();
+            if (_sim2DActive) { if (!_sim2DFinished) JumpToSimVisualEnd(); return; }
             if (_pbpActive) { if (!_pbpFinished) JumpToPbpEnd(); return; }
             OnContinue();
         }
@@ -196,6 +198,7 @@ public class MatchDayController : UIScreenController
         _pbpBtnSpeed3?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SelectPbpSpeed(3); });
         _pbpBtnSpeed5?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SelectPbpSpeed(5); });
         _pbpBtnSpeed10?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SelectPbpSpeed(10); });
+        RegisterSimVisualCallbacks();
 
         _root.Q<Button>("NavDashboard")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });
@@ -301,6 +304,8 @@ public class MatchDayController : UIScreenController
         {
             var btnNames = new[] {
                 "BtnContinue", "PbpSkip", "PbpBtnSpeed1", "PbpBtnSpeed3", "PbpBtnSpeed5", "PbpBtnSpeed10",
+                "Sim2DHomeTab", "Sim2DAwayTab", "Sim2DPause", "Sim2DSkip",
+                "Sim2DSpeed1", "Sim2DSpeed3", "Sim2DSpeed5", "Sim2DSpeed10",
                 "NavDashboard", "NavRoster", "NavCalendar",
                 "NavCompeticiones", "NavPalmares", "NavPlayoffs",
                 "NavStats", "NavRecords", "NavMarket", "NavFinances",
@@ -664,7 +669,8 @@ public class MatchDayController : UIScreenController
 
     void TryPlayByPlay()
     {
-        if (UIScreenController.GetSimMode() != 1) return;
+        int mode = UIScreenController.GetSimMode();
+        if (mode == UIScreenController.SimModeDirect) return;
         if (_season == null || _myTeam == null) return;
 
         int gameDay = GameResultCache.LastGameDay > 0 ? GameResultCache.LastGameDay : _season.current_game_day;
@@ -681,6 +687,15 @@ public class MatchDayController : UIScreenController
         _pbpHomeTeamId = myGame.home_team_id;
         _pbpAwayTeamId = myGame.away_team_id;
         _pbpTotalMinutes = 48 + Mathf.Max(0, log.Max(e => e.quarter) - 4) * 5;
+
+        if (mode == UIScreenController.SimModeVisual)
+        {
+            StopPlayByPlay();
+            BuildSimVisual(myGame.id, log);
+            return;
+        }
+
+        StopSimVisual();
         BuildPbpBoxscore();
         StartPlayByPlay(log);
     }

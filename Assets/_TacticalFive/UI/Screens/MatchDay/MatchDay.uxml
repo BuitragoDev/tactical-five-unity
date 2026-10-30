@@ -121,6 +121,84 @@
 
         </ui:VisualElement>
 
+        <!-- SIMULACIÓN VISUAL 2D -->
+        <ui:VisualElement name="SimVisualOverlay" class="sim2d-overlay" style="display: none;">
+            <ui:VisualElement class="sim2d-header">
+                <ui:VisualElement class="sim2d-team sim2d-team--home">
+                    <ui:VisualElement name="Sim2DHomeLogo" class="sim2d-team-logo" />
+                    <ui:VisualElement class="sim2d-team-copy sim2d-team-copy--home">
+                        <ui:Label name="Sim2DHomeAbbr" class="sim2d-team-abbr" text="" />
+                        <ui:Label name="Sim2DHomeName" class="sim2d-team-name" text="" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="sim2d-scoreboard">
+                    <ui:Label name="Sim2DScore" class="sim2d-score" text="0 - 0" />
+                    <ui:VisualElement class="sim2d-clock-row">
+                        <ui:Label name="Sim2DQuarter" class="sim2d-quarter" text="" />
+                        <ui:Label name="Sim2DClock" class="sim2d-clock" text="12:00" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="sim2d-team sim2d-team--away">
+                    <ui:VisualElement class="sim2d-team-copy sim2d-team-copy--away">
+                        <ui:Label name="Sim2DAwayAbbr" class="sim2d-team-abbr" text="" />
+                        <ui:Label name="Sim2DAwayName" class="sim2d-team-name" text="" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="Sim2DAwayLogo" class="sim2d-team-logo" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:VisualElement class="sim2d-body">
+                <ui:VisualElement class="sim2d-side">
+                    <ui:VisualElement class="sim2d-tabs">
+                        <ui:Button name="Sim2DHomeTab" class="sim2d-tab" text="" />
+                        <ui:Button name="Sim2DAwayTab" class="sim2d-tab" text="" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="sim2d-roster-head">
+                        <ui:Label class="sim2d-col-player" text="{loc:ui.match_day.jugador}" />
+                        <ui:Label class="sim2d-col-stat" text="{loc:ui.match_day.pts}" />
+                        <ui:Label class="sim2d-col-stat" text="{loc:ui.match_day.reb}" />
+                        <ui:Label class="sim2d-col-stat" text="{loc:ui.match_day.ast}" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="Sim2DTeamList" class="sim2d-team-list" />
+                </ui:VisualElement>
+
+                <ui:VisualElement class="sim2d-court-wrap">
+                    <ui:VisualElement class="sim2d-court-top">
+                        <ui:Label name="Sim2DPossession" class="sim2d-possession" text="" />
+                        <ui:Label name="Sim2DVenue" class="sim2d-venue" text="" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="Sim2DCourt" class="sim2d-court">
+                        <ui:VisualElement class="sim2d-court-line sim2d-center-line" />
+                        <ui:VisualElement class="sim2d-court-circle sim2d-center-circle" />
+                        <ui:VisualElement class="sim2d-paint sim2d-paint--left" />
+                        <ui:VisualElement class="sim2d-paint sim2d-paint--right" />
+                        <ui:VisualElement class="sim2d-three sim2d-three--left" />
+                        <ui:VisualElement class="sim2d-three sim2d-three--right" />
+                        <ui:VisualElement class="sim2d-hoop sim2d-hoop--left" />
+                        <ui:VisualElement class="sim2d-hoop sim2d-hoop--right" />
+                        <ui:VisualElement name="Sim2DHomeLayer" class="sim2d-player-layer" />
+                        <ui:VisualElement name="Sim2DAwayLayer" class="sim2d-player-layer" />
+                        <ui:VisualElement name="Sim2DBall" class="sim2d-ball" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:VisualElement class="sim2d-footer">
+                <ui:VisualElement class="sim2d-ticker">
+                    <ui:Label name="Sim2DTickerText" class="sim2d-ticker-text" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="sim2d-controls">
+                    <ui:Button name="Sim2DPause" class="sim2d-control-btn" text="" />
+                    <ui:Button name="Sim2DSpeed1" class="sim2d-speed-btn" text="{loc:ui.match_day.pbp_btn_speed1}" />
+                    <ui:Button name="Sim2DSpeed3" class="sim2d-speed-btn" text="{loc:ui.match_day.pbp_btn_speed3}" />
+                    <ui:Button name="Sim2DSpeed5" class="sim2d-speed-btn sim2d-speed-btn--active" text="{loc:ui.match_day.pbp_btn_speed5}" />
+                    <ui:Button name="Sim2DSpeed10" class="sim2d-speed-btn" text="{loc:ui.match_day.pbp_btn_speed10}" />
+                    <ui:VisualElement class="sim2d-spacer" />
+                    <ui:Button name="Sim2DSkip" class="sim2d-skip" text="{loc:ui.code.match_day_controller.saltar}" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
         <!-- PLAY-BY-PLAY OVERLAY -->
         <ui:VisualElement name="PlayByPlayOverlay" class="pbp-overlay" style="display: none;">
             <ui:VisualElement class="pbp-header">

@@ -382,6 +382,34 @@ public class GameSimulatorTests
     }
 
     [Test]
+    public void SimulateGame_WithCapture_IncludesOnCourtAndPossessionData()
+    {
+        var r = GameSimulator.SimulateGame(FakeGame(), AutoRoster(1), AutoRoster(100), persistToDb: false,
+            capturePlayByPlay: true);
+
+        var withCourt = r.playByPlay
+            .Where(e => e.homeOnCourt != null && e.homeOnCourt.Count > 0
+                     && e.awayOnCourt != null && e.awayOnCourt.Count > 0)
+            .ToList();
+
+        Assert.That(withCourt, Is.Not.Empty, "La crónica debe incluir el quinteto en pista");
+        Assert.That(withCourt.All(e => e.homeOnCourt.Count <= 5 && e.awayOnCourt.Count <= 5), Is.True);
+        Assert.That(withCourt.Any(e => e.homeOnCourt.Count == 5 && e.awayOnCourt.Count == 5), Is.True,
+            "Con plantillas completas debe haber eventos con cinco jugadores por equipo");
+        Assert.That(withCourt.Any(e => e.homeOnOffense), Is.True);
+        Assert.That(withCourt.Any(e => !e.homeOnOffense), Is.True,
+            "La posesión debe alternar entre local y visitante");
+
+        var homeIds = new HashSet<int>(r.home_stats.Select(s => s.player_id));
+        var awayIds = new HashSet<int>(r.away_stats.Select(s => s.player_id));
+        foreach (var ev in withCourt)
+        {
+            Assert.That(ev.homeOnCourt.All(homeIds.Contains), Is.True);
+            Assert.That(ev.awayOnCourt.All(awayIds.Contains), Is.True);
+        }
+    }
+
+    [Test]
     public void SimulateGame_CaptureCost_IsMeasured()
     {
         // Medición de un día completo de la liga (15 partidos) en cada modo. No se

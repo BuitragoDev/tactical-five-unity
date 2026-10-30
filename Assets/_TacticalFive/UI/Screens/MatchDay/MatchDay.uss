@@ -795,3 +795,559 @@
     color: rgb(150, 220, 180);
 }
 
+
+/* ── SIMULACIÓN VISUAL 2D ─────────────────────────────── */
+
+.sim2d-overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: rgb(10, 14, 22);
+    flex-direction: column;
+    padding: 18px 24px 16px 24px;
+    z-index: 110;
+}
+
+.sim2d-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 88px;
+    flex-shrink: 0;
+    padding: 8px 18px;
+    background-color: rgb(19, 24, 35);
+    border-width: 1px;
+    border-color: rgb(45, 56, 78);
+    border-radius: 10px;
+    margin-bottom: 14px;
+}
+
+.sim2d-team {
+    flex-direction: row;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+}
+
+.sim2d-team--home {
+    justify-content: flex-start;
+}
+
+.sim2d-team--away {
+    justify-content: flex-end;
+}
+
+.sim2d-team-logo {
+    width: 70px;
+    height: 70px;
+    flex-shrink: 0;
+    margin-left: 6px;
+    margin-right: 6px;
+}
+
+.sim2d-team-copy {
+    flex-direction: column;
+    min-width: 0;
+}
+
+.sim2d-team-copy--home {
+    align-items: flex-start;
+}
+
+.sim2d-team-copy--away {
+    align-items: flex-end;
+}
+
+.sim2d-team-abbr {
+    font-size: 30px;
+    color: rgb(255, 255, 255);
+    letter-spacing: 2px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+}
+
+.sim2d-team-name {
+    font-size: 15px;
+    color: rgb(122, 138, 170);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    max-width: 260px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sim2d-scoreboard {
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    padding: 0 24px;
+}
+
+.sim2d-score {
+    font-size: 52px;
+    color: rgb(212, 160, 23);
+    line-height: 1;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+}
+
+.sim2d-clock-row {
+    flex-direction: row;
+    align-items: center;
+    margin-top: 4px;
+}
+
+.sim2d-quarter {
+    font-size: 14px;
+    color: rgb(100, 150, 245);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    background-color: rgb(25, 38, 62);
+    padding: 3px 10px;
+    border-radius: 4px;
+    margin-right: 8px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+}
+
+.sim2d-clock {
+    font-size: 16px;
+    color: rgb(212, 160, 23);
+    letter-spacing: 1px;
+    background-color: rgb(41, 38, 27);
+    padding: 3px 10px;
+    border-radius: 4px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+}
+
+.sim2d-body {
+    flex-direction: row;
+    flex: 1;
+    min-height: 0;
+    margin-bottom: 12px;
+}
+
+.sim2d-side {
+    width: 280px;
+    flex-shrink: 0;
+    flex-direction: column;
+    background-color: rgb(19, 24, 35);
+    border-width: 1px;
+    border-color: rgb(45, 56, 78);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-right: 14px;
+}
+
+.sim2d-tabs {
+    flex-direction: row;
+    flex-shrink: 0;
+    padding: 10px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(45, 56, 78);
+}
+
+.sim2d-tab {
+    flex: 1;
+    min-width: 0;
+    height: 38px;
+    background-color: rgb(24, 30, 44);
+    border-width: 1px;
+    border-color: rgb(49, 61, 84);
+    border-radius: 6px;
+    color: rgb(122, 138, 170);
+    font-size: 17px;
+    letter-spacing: 1px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    -unity-text-align: middle-center;
+    margin-right: 6px;
+    cursor: pointer;
+}
+
+.sim2d-tab:last-child {
+    margin-right: 0;
+}
+
+.sim2d-tab--active {
+    background-color: rgb(37, 35, 28);
+    border-color: rgb(212, 160, 23);
+    color: rgb(212, 160, 23);
+}
+
+.sim2d-roster-head {
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+    padding: 8px 12px;
+    background-color: rgb(24, 30, 44);
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(45, 56, 78);
+}
+
+.sim2d-col-player {
+    flex: 1;
+    min-width: 0;
+    font-size: 13px;
+    color: rgb(122, 138, 170);
+    letter-spacing: 1px;
+}
+
+.sim2d-col-stat {
+    width: 38px;
+    flex-shrink: 0;
+    font-size: 13px;
+    color: rgb(122, 138, 170);
+    text-align: center;
+    letter-spacing: 1px;
+}
+
+.sim2d-team-list {
+    flex: 1;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 6px;
+}
+
+.sim2d-roster-row {
+    flex-direction: row;
+    align-items: center;
+    min-height: 48px;
+    padding: 5px 6px;
+    border-radius: 6px;
+    margin-bottom: 3px;
+}
+
+.sim2d-roster-row--active {
+    background-color: rgb(28, 38, 55);
+}
+
+.sim2d-roster-photo {
+    width: 34px;
+    height: 34px;
+    border-radius: 17px;
+    background-color: rgb(38, 47, 65);
+    background-size: cover;
+    background-position: center;
+    flex-shrink: 0;
+    margin-right: 8px;
+    border-width: 1px;
+    border-color: rgb(75, 90, 120);
+}
+
+.sim2d-roster-name {
+    flex: 1;
+    min-width: 0;
+    font-size: 15px;
+    color: rgb(220, 226, 238);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sim2d-roster-pos {
+    font-size: 11px;
+    color: rgb(212, 160, 23);
+    margin-right: 4px;
+}
+
+.sim2d-roster-stat {
+    width: 34px;
+    flex-shrink: 0;
+    font-size: 15px;
+    color: rgb(220, 226, 238);
+    text-align: center;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+}
+
+.sim2d-court-wrap {
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.sim2d-court-top {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    min-height: 28px;
+    margin-bottom: 6px;
+}
+
+.sim2d-possession {
+    font-size: 14px;
+    color: rgb(100, 200, 140);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.sim2d-venue {
+    font-size: 13px;
+    color: rgb(122, 138, 170);
+    letter-spacing: 1px;
+}
+
+.sim2d-court {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    background-color: rgb(91, 62, 38);
+    border-width: 3px;
+    border-color: rgb(211, 174, 112);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.sim2d-court-line {
+    position: absolute;
+    background-color: rgb(226, 197, 145);
+    opacity: 0.75;
+}
+
+.sim2d-center-line {
+    left: 50%;
+    top: 0;
+    width: 2px;
+    height: 100%;
+}
+
+.sim2d-court-circle {
+    position: absolute;
+    border-width: 2px;
+    border-color: rgb(226, 197, 145);
+    border-radius: 45px;
+    opacity: 0.75;
+}
+
+.sim2d-center-circle {
+    left: 50%;
+    top: 50%;
+    width: 90px;
+    height: 90px;
+    margin-left: -45px;
+    margin-top: -45px;
+}
+
+.sim2d-paint {
+    position: absolute;
+    top: 28%;
+    width: 17%;
+    height: 44%;
+    border-width: 2px;
+    border-color: rgb(226, 197, 145);
+    opacity: 0.75;
+}
+
+.sim2d-paint--left {
+    left: 0;
+}
+
+.sim2d-paint--right {
+    right: 0;
+}
+
+.sim2d-three {
+    position: absolute;
+    top: 18%;
+    width: 22%;
+    height: 64%;
+    border-width: 2px;
+    border-color: rgb(226, 197, 145);
+    border-radius: 100px;
+    opacity: 0.65;
+}
+
+.sim2d-three--left {
+    left: -10%;
+}
+
+.sim2d-three--right {
+    right: -10%;
+}
+
+.sim2d-hoop {
+    position: absolute;
+    top: 47%;
+    width: 18px;
+    height: 18px;
+    border-width: 3px;
+    border-color: rgb(240, 140, 60);
+    border-radius: 9px;
+    background-color: rgb(120, 45, 30);
+}
+
+.sim2d-hoop--left {
+    left: 2%;
+}
+
+.sim2d-hoop--right {
+    right: 2%;
+}
+
+.sim2d-player-layer {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+.sim2d-player {
+    position: absolute;
+    width: 58px;
+    height: 72px;
+    align-items: center;
+    flex-direction: column;
+    margin-left: -29px;
+    margin-top: -36px;
+}
+
+.sim2d-player-photo {
+    width: 46px;
+    height: 46px;
+    border-radius: 23px;
+    background-color: rgb(38, 47, 65);
+    background-size: cover;
+    background-position: center;
+    border-width: 3px;
+    border-color: rgb(220, 226, 238);
+    flex-shrink: 0;
+}
+
+.sim2d-player--home .sim2d-player-photo {
+    border-color: rgb(100, 150, 245);
+}
+
+.sim2d-player--away .sim2d-player-photo {
+    border-color: rgb(230, 120, 100);
+}
+
+.sim2d-player-plate {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(20, 24, 33);
+    border-radius: 4px;
+    padding: 1px 5px;
+    margin-top: -2px;
+    max-width: 84px;
+}
+
+.sim2d-player-number {
+    font-size: 11px;
+    color: rgb(212, 160, 23);
+    margin-right: 3px;
+}
+
+.sim2d-player-name {
+    font-size: 11px;
+    color: rgb(220, 226, 238);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sim2d-ball {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    background-color: rgb(232, 128, 42);
+    border-width: 2px;
+    border-color: rgb(90, 40, 20);
+    margin-left: -9px;
+    margin-top: -9px;
+}
+
+.sim2d-footer {
+    flex-shrink: 0;
+    flex-direction: row;
+    align-items: center;
+    min-height: 72px;
+    background-color: rgb(19, 24, 35);
+    border-width: 1px;
+    border-color: rgb(45, 56, 78);
+    border-radius: 10px;
+    padding: 10px 14px;
+}
+
+.sim2d-ticker {
+    flex: 1;
+    min-width: 0;
+    padding: 0 12px;
+}
+
+.sim2d-ticker-text {
+    font-size: 22px;
+    color: rgb(232, 236, 245);
+    white-space: normal;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-SemiBold.ttf");
+}
+
+.sim2d-controls {
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.sim2d-control-btn,
+.sim2d-speed-btn,
+.sim2d-skip {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    border-width: 2px;
+    border-radius: 7px;
+    font-size: 15px;
+    letter-spacing: 1px;
+    -unity-text-align: middle-center;
+    cursor: pointer;
+}
+
+.sim2d-control-btn {
+    min-width: 86px;
+    background-color: rgb(20, 24, 33);
+    border-color: rgb(42, 51, 71);
+    color: rgb(122, 138, 170);
+    padding: 8px 12px;
+    margin-right: 6px;
+}
+
+.sim2d-speed-btn {
+    min-width: 48px;
+    background-color: rgb(20, 24, 33);
+    border-color: rgb(42, 51, 71);
+    color: rgb(122, 138, 170);
+    padding: 8px 10px;
+    margin-right: 4px;
+}
+
+.sim2d-speed-btn:hover,
+.sim2d-control-btn:hover {
+    background-color: rgb(28, 33, 48);
+    border-color: rgb(58, 74, 99);
+    color: rgb(208, 216, 232);
+}
+
+.sim2d-speed-btn--active {
+    background-color: rgb(37, 35, 28);
+    border-color: rgb(212, 160, 23);
+    color: rgb(212, 160, 23);
+}
+
+.sim2d-spacer {
+    flex: 1;
+    min-width: 10px;
+}
+
+.sim2d-skip {
+    background-color: rgb(20, 36, 35);
+    border-color: rgb(39, 174, 96);
+    color: rgb(100, 200, 140);
+    padding: 8px 16px;
+    margin-left: 6px;
+}
+
+.sim2d-skip:hover {
+    background-color: rgb(23, 59, 45);
+    border-color: rgb(80, 210, 130);
+    color: rgb(150, 220, 180);
+}

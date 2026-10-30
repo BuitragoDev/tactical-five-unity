@@ -72,7 +72,7 @@ protected virtual void OnEnable()
 - **Fullscreen:** `MakeFullscreen` (absolute 0/0/100%/100%). (Redundant with `FullScreenUI.Awake`.)
 - **Chrome injection:** `RegisterCallbacks` calls `SidebarController.Attach(_root, ScreenId)` + `HeaderController.Attach(_root, registerBtnAction:false)`, binds `BtnAction` → `PlayClick(); OnBtnActionClicked()`, `RegisterNavButtons()`, `RegisterHandCursors()`, and the config icon → `OpenConfigModal()`.
 - **Navigation:** `RegisterNavButtons` wires 13 navs + 18 submenu items (sidebar submenu toggling with `nav-submenu--visible` class).
-- **Config modal:** `InitConfigModal`/`OpenConfigModal`/`CloseConfigModal` — 3 `CustomSlider`s (Master/Music/SFX), quality Low/Medium/High/Ultra, **sim-mode toggle** (Directa / Play-by-play, `TF_SimMode`), main-menu confirm overlay, exit confirm overlay. **This replaced the old per-screen copy-paste duplication.**
+- **Config modal:** `InitConfigModal`/`OpenConfigModal`/`CloseConfigModal` — 3 `CustomSlider`s (Master/Music/SFX), quality Low/Medium/High/Ultra, **sim-mode toggle** (Directa / Play-by-play / Visual 2D, `TF_SimMode`), main-menu confirm overlay, exit confirm overlay. **This replaced the old per-screen copy-paste duplication.**
 - `PlayClick()` → `AudioManager.Instance?.PlaySFX("click")`.
 - `Refresh()` → default cursor + `RefreshHeader()` (rebuilds the header stat blocks) in try/catch.
 - **Localización (F7-06):** `LocalizationService.Apply(_root)` resuelve tokens `{loc:clave}` en textos, tooltips y placeholders después de `Refresh`; así también cubre el header/sidebar inyectados. Los controllers usan `LocalizationService.T("clave", args)` para texto dinámico. Detalle: [`Docs/LOCALIZATION.md`](LOCALIZATION.md).
@@ -117,7 +117,7 @@ protected virtual void OnEnable()
 | 28 | Arena | `Screens/Arena` | `ArenaController` | Arena management (tickets/subscriptions/renovations) |
 | 29 | Manager | `Screens/Manager` | `ManagerController` | Manager profile, morale/fans circles, psychologist, objective |
 | 30 | Messages | `Screens/Messages` | `MessagesController` | Inbox |
-| 31 | MatchDay | `Screens/MatchDay` | `MatchDayController` | Pre-match (matchup preview) + play-by-play overlay + boxscore |
+| 31 | MatchDay | `Screens/MatchDay` | `MatchDayController` | Pre-match (matchup preview) + play-by-play overlay + visual 2D overlay (`MatchDayController.Visual.cs`) + boxscore |
 | 32 | GameResults | `Screens/GameResults` | `GameResultsController` | Post-match box score |
 | 33 | LoadGame | `Screens/LoadGame` | `LoadGameController` | Save slots |
 | 34 | Editor | `Screens/Editor` | `EditorController` | Editor (template DB) |

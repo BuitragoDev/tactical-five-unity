@@ -38,6 +38,7 @@ public class UIScreenController : MonoBehaviour
     protected Button _configBtnQualityUltra;
     protected Button _configBtnSimDirect;
     protected Button _configBtnSimPlay;
+    protected Button _configBtnSimVisual;
 
     // Config confirm modals
     protected VisualElement _configMainMenuConfirmOverlay;
@@ -477,19 +478,24 @@ public class UIScreenController : MonoBehaviour
 
     // ── Config modal: modo de simulación ────────────────────
     public const string SimModePrefKey = "TF_SimMode";
+    public const int SimModeDirect = 0;
+    public const int SimModePlayByPlay = 1;
+    public const int SimModeVisual = 2;
 
     public static int GetSimMode()
     {
-        return PlayerPrefs.GetInt(SimModePrefKey, 0);
+        return PlayerPrefs.GetInt(SimModePrefKey, SimModeDirect);
     }
 
     protected void InitConfigSimToggle()
     {
         _configBtnSimDirect = _root.Q<Button>("ConfigBtnSimDirect");
         _configBtnSimPlay   = _root.Q<Button>("ConfigBtnSimPlay");
+        _configBtnSimVisual = _root.Q<Button>("ConfigBtnSimVisual");
 
-        _configBtnSimDirect?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SelectConfigSimMode(0); });
-        _configBtnSimPlay?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SelectConfigSimMode(1); });
+        _configBtnSimDirect?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SelectConfigSimMode(SimModeDirect); });
+        _configBtnSimPlay?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SelectConfigSimMode(SimModePlayByPlay); });
+        _configBtnSimVisual?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SelectConfigSimMode(SimModeVisual); });
     }
 
     protected void UpdateConfigSimToggle()
@@ -507,9 +513,11 @@ public class UIScreenController : MonoBehaviour
     void UpdateConfigSimButtons(int activeIndex)
     {
         if (_configBtnSimDirect != null)
-            _configBtnSimDirect.EnableInClassList("settings-quality-btn--active", activeIndex == 0);
+            _configBtnSimDirect.EnableInClassList("settings-quality-btn--active", activeIndex == SimModeDirect);
         if (_configBtnSimPlay != null)
-            _configBtnSimPlay.EnableInClassList("settings-quality-btn--active", activeIndex == 1);
+            _configBtnSimPlay.EnableInClassList("settings-quality-btn--active", activeIndex == SimModePlayByPlay);
+        if (_configBtnSimVisual != null)
+            _configBtnSimVisual.EnableInClassList("settings-quality-btn--active", activeIndex == SimModeVisual);
     }
 
     protected virtual void OpenConfigModal()

@@ -1390,8 +1390,20 @@
       "value": "OESTE"
     },
     {
+      "key": "ui.code.match_day_controller.pausa",
+      "value": "PAUSA"
+    },
+    {
+      "key": "ui.code.match_day_controller.reanudar",
+      "value": "REANUDAR"
+    },
+    {
       "key": "ui.code.match_day_controller.saltar",
       "value": "SALTAR ►"
+    },
+    {
+      "key": "ui.code.match_day_controller.sim_ataque",
+      "value": "ATAQUE {0}"
     },
     {
       "key": "ui.code.match_day_controller.totales",
@@ -1524,6 +1536,62 @@
     {
       "key": "ui.code.new_season_controller.summer_league_completada",
       "value": "SUMMER LEAGUE COMPLETADA"
+    },
+    {
+      "key": "ui.code.new_season_controller.summer_league_count",
+      "value": "CONVOCADOS: {0}/{1}"
+    },
+    {
+      "key": "ui.code.new_season_controller.summer_league_gain",
+      "value": " · +1 ATRIBUTO"
+    },
+    {
+      "key": "ui.code.new_season_controller.summer_league_gain_badge",
+      "value": "+{0} ATRIBUTO"
+    },
+    {
+      "key": "ui.code.new_season_controller.summer_league_legend",
+      "value": "Pulsa CONVOCADO o FUERA para cambiar la convocatoria."
+    },
+    {
+      "key": "ui.code.new_season_controller.summer_league_out",
+      "value": "FUERA"
+    },
+    {
+      "key": "ui.code.new_season_controller.summer_league_player_meta",
+      "value": "{0} · {1} años · MED {2} / POT {3}"
+    },
+    {
+      "key": "ui.code.new_season_controller.summer_league_selected",
+      "value": "CONVOCADO"
+    },
+    {
+      "key": "ui.code.new_season_controller.summer_league_stat_asi",
+      "value": "ASI"
+    },
+    {
+      "key": "ui.code.new_season_controller.summer_league_stat_min",
+      "value": "MIN"
+    },
+    {
+      "key": "ui.code.new_season_controller.summer_league_stat_pj",
+      "value": "PJ"
+    },
+    {
+      "key": "ui.code.new_season_controller.summer_league_stat_pts",
+      "value": "PTS"
+    },
+    {
+      "key": "ui.code.new_season_controller.summer_league_stat_reb",
+      "value": "REB"
+    },
+    {
+      "key": "ui.code.new_season_controller.summer_league_subtitle",
+      "value": "Ventana post-draft: 3 partidos para rookies y sophomores. Elige hasta {0} convocados. El desarrollo es acotado: como máximo +1 en un atributo y nunca supera el potencial."
+    },
+    {
+      "key": "ui.code.new_season_controller.summer_league_summary_line",
+      "value": "{0} PJ · {1} min · {2} pts · {3} reb · {4} as{5}"
     },
     {
       "key": "ui.code.palmares_controller.aun_no_hay_all_stars_registrados",
@@ -2134,6 +2202,10 @@
       "value": "Play-by-play"
     },
     {
+      "key": "ui.dashboard.config_btn_sim_visual",
+      "value": "Visual 2D"
+    },
+    {
       "key": "ui.dashboard.configuracion",
       "value": "CONFIGURACIÓN"
     },
@@ -2222,6 +2294,10 @@
       "value": "PJ"
     },
     {
+      "key": "ui.dashboard.preparando_partido",
+      "value": "PREPARANDO PARTIDO"
+    },
+    {
       "key": "ui.dashboard.presupuesto",
       "value": "PRESUPUESTO"
     },
@@ -2268,10 +2344,6 @@
     {
       "key": "ui.dashboard.simulacion",
       "value": "SIMULACIÓN"
-    },
-    {
-      "key": "ui.dashboard.preparando_partido",
-      "value": "PREPARANDO PARTIDO"
     },
     {
       "key": "ui.dashboard.simulando_encuentro",
@@ -4348,6 +4420,10 @@
     {
       "key": "ui.main_menu.config_btn_sim_play",
       "value": "Play-by-play"
+    },
+    {
+      "key": "ui.main_menu.config_btn_sim_visual",
+      "value": "Visual 2D"
     },
     {
       "key": "ui.main_menu.configuracion",
@@ -7586,6 +7662,54 @@
       "value": "CONFIGURACIÓN"
     },
     {
+      "key": "ui.standings.cup_knockout_empty",
+      "value": "AÚN NO HAY PARTIDOS DE ELIMINATORIA"
+    },
+    {
+      "key": "ui.standings.cup_knockout_pending",
+      "value": "LA ELIMINATORIA SE GENERA AL TERMINAR LA FASE DE GRUPOS"
+    },
+    {
+      "key": "ui.standings.cup_ko_away",
+      "value": "VISITANTE"
+    },
+    {
+      "key": "ui.standings.cup_ko_home",
+      "value": "LOCAL"
+    },
+    {
+      "key": "ui.standings.cup_ko_score",
+      "value": "RESULTADO"
+    },
+    {
+      "key": "ui.standings.cup_round_final",
+      "value": "FINAL"
+    },
+    {
+      "key": "ui.standings.cup_round_qf",
+      "value": "CUARTOS DE FINAL"
+    },
+    {
+      "key": "ui.standings.cup_round_sf",
+      "value": "SEMIFINALES"
+    },
+    {
+      "key": "ui.standings.cup_standings_empty",
+      "value": "NO HAY CLASIFICACIÓN DE LA NBA CUP"
+    },
+    {
+      "key": "ui.standings.cup_tab_east",
+      "value": "NBA CUP ESTE"
+    },
+    {
+      "key": "ui.standings.cup_tab_knockout",
+      "value": "NBA CUP ELIMINATORIAS"
+    },
+    {
+      "key": "ui.standings.cup_tab_west",
+      "value": "NBA CUP OESTE"
+    },
+    {
       "key": "ui.standings.dif",
       "value": "DIF"
     },
@@ -8500,110 +8624,6 @@
     {
       "key": "ui.tv.volver_al_menu_principal",
       "value": "VOLVER AL MENÚ PRINCIPAL"
-    },
-    {
-      "key": "ui.code.new_season_controller.summer_league_subtitle",
-      "value": "Ventana post-draft: 3 partidos para rookies y sophomores. Elige hasta {0} convocados. El desarrollo es acotado: como máximo +1 en un atributo y nunca supera el potencial."
-    },
-    {
-      "key": "ui.code.new_season_controller.summer_league_count",
-      "value": "CONVOCADOS: {0}/{1}"
-    },
-    {
-      "key": "ui.code.new_season_controller.summer_league_legend",
-      "value": "Pulsa CONVOCADO o FUERA para cambiar la convocatoria."
-    },
-    {
-      "key": "ui.code.new_season_controller.summer_league_selected",
-      "value": "CONVOCADO"
-    },
-    {
-      "key": "ui.code.new_season_controller.summer_league_out",
-      "value": "FUERA"
-    },
-    {
-      "key": "ui.code.new_season_controller.summer_league_player_meta",
-      "value": "{0} · {1} años · MED {2} / POT {3}"
-    },
-    {
-      "key": "ui.code.new_season_controller.summer_league_summary_line",
-      "value": "{0} PJ · {1} min · {2} pts · {3} reb · {4} as{5}"
-    },
-    {
-      "key": "ui.code.new_season_controller.summer_league_gain",
-      "value": " · +1 ATRIBUTO"
-    },
-    {
-      "key": "ui.code.new_season_controller.summer_league_stat_pj",
-      "value": "PJ"
-    },
-    {
-      "key": "ui.code.new_season_controller.summer_league_stat_min",
-      "value": "MIN"
-    },
-    {
-      "key": "ui.code.new_season_controller.summer_league_stat_pts",
-      "value": "PTS"
-    },
-    {
-      "key": "ui.code.new_season_controller.summer_league_stat_reb",
-      "value": "REB"
-    },
-    {
-      "key": "ui.code.new_season_controller.summer_league_stat_asi",
-      "value": "ASI"
-    },
-    {
-      "key": "ui.code.new_season_controller.summer_league_gain_badge",
-      "value": "+{0} ATRIBUTO"
-    },
-    {
-      "key": "ui.standings.cup_tab_east",
-      "value": "NBA CUP ESTE"
-    },
-    {
-      "key": "ui.standings.cup_tab_west",
-      "value": "NBA CUP OESTE"
-    },
-    {
-      "key": "ui.standings.cup_tab_knockout",
-      "value": "NBA CUP ELIMINATORIAS"
-    },
-    {
-      "key": "ui.standings.cup_knockout_pending",
-      "value": "LA ELIMINATORIA SE GENERA AL TERMINAR LA FASE DE GRUPOS"
-    },
-    {
-      "key": "ui.standings.cup_knockout_empty",
-      "value": "AÚN NO HAY PARTIDOS DE ELIMINATORIA"
-    },
-    {
-      "key": "ui.standings.cup_standings_empty",
-      "value": "NO HAY CLASIFICACIÓN DE LA NBA CUP"
-    },
-    {
-      "key": "ui.standings.cup_round_qf",
-      "value": "CUARTOS DE FINAL"
-    },
-    {
-      "key": "ui.standings.cup_round_sf",
-      "value": "SEMIFINALES"
-    },
-    {
-      "key": "ui.standings.cup_round_final",
-      "value": "FINAL"
-    },
-    {
-      "key": "ui.standings.cup_ko_home",
-      "value": "LOCAL"
-    },
-    {
-      "key": "ui.standings.cup_ko_score",
-      "value": "RESULTADO"
-    },
-    {
-      "key": "ui.standings.cup_ko_away",
-      "value": "VISITANTE"
     }
   ]
 }

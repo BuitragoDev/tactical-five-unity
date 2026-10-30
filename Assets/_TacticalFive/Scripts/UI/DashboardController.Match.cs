@@ -49,7 +49,7 @@ public partial class DashboardController
         var result = GameSimulator.SimulateGame(game, homePlayers, awayPlayers, homeChem, awayChem,
             homePlan: PlanFor(game.home_team_id), awayPlan: PlanFor(game.away_team_id),
             homeCoachBonus: CoachBonusFor(game.home_team_id), awayCoachBonus: CoachBonusFor(game.away_team_id),
-            capturePlayByPlay: game.game_type != "allstar" && UIScreenController.GetSimMode() == 1);
+            capturePlayByPlay: game.game_type != "allstar" && UIScreenController.GetSimMode() != UIScreenController.SimModeDirect);
         DatabaseManager.Instance.UpdateGame(game);
         GameResultCache.SimulatedGameIds.Add(game.id);
 
@@ -59,7 +59,7 @@ public partial class DashboardController
             && (game.home_team_id == _myTeam.id || game.away_team_id == _myTeam.id))
             NotifyShortRoster(result, game);
 
-        if (UIScreenController.GetSimMode() == 1 && result.playByPlay != null)
+        if (UIScreenController.GetSimMode() != UIScreenController.SimModeDirect && result.playByPlay != null)
             GameResultCache.PlayByPlayLogs[game.id] = result.playByPlay;
 
         if (game.game_type == "allstar")
