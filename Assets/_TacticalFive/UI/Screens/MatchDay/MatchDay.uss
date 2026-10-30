@@ -737,21 +737,36 @@
 
 .pbp-speed-btn {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    background-color: #1c2130;
-    border-width: 1px;
-    border-color: #2a3347;
-    color: #7a8aaa;
+    min-width: 64px;
+    background-color: rgb(20, 24, 33);
+    border-width: 2px;
+    border-color: rgb(42, 51, 71);
+    color: rgb(122, 138, 170);
     font-size: 18px;
-    padding: 8px 20px;
-    border-radius: 4px;
+    letter-spacing: 1px;
+    padding: 9px 18px;
+    border-radius: 8px;
     -unity-text-align: middle-center;
-    margin-right: 10px;
+    margin-right: 8px;
+    cursor: pointer;
+}
+
+.pbp-speed-btn:hover {
+    background-color: rgb(28, 33, 48);
+    border-color: rgb(58, 74, 99);
+    color: rgb(208, 216, 232);
 }
 
 .pbp-speed-btn--active {
-    background-color: rgb(42, 95, 201);
-    border-color: rgb(42, 95, 201);
-    color: rgb(255, 255, 255);
+    background-color: rgb(37, 35, 28);
+    border-color: rgb(212, 160, 23);
+    color: rgb(212, 160, 23);
+}
+
+.pbp-speed-btn--active:hover {
+    background-color: rgb(66, 56, 27);
+    border-color: rgb(240, 192, 64);
+    color: rgb(240, 192, 64);
 }
 
 .pbp-spacer {
@@ -760,15 +775,23 @@
 
 .pbp-skip {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    background-color: rgb(42, 95, 201);
-    border-width: 0;
-    color: rgb(255, 255, 255);
+    background-color: rgb(20, 36, 35);
+    border-width: 2px;
+    border-color: rgb(39, 174, 96);
+    color: rgb(100, 200, 140);
     font-size: 18px;
     letter-spacing: 2px;
     text-transform: uppercase;
     padding: 10px 24px;
-    border-radius: 4px;
+    border-radius: 8px;
     -unity-text-align: middle-center;
     margin-left: 10px;
+    cursor: pointer;
+}
+
+.pbp-skip:hover {
+    background-color: rgb(23, 59, 45);
+    border-color: rgb(80, 210, 130);
+    color: rgb(150, 220, 180);
 }
 
