@@ -29,7 +29,7 @@
 | User feedback | insert `MessageData` via `DatabaseManager.AddMessage` | everywhere |
 | Money formatting | `$"{value:N0}"` / `$"{value:N0} $"` | `DashboardController`, `FinancesController` |
 | Logos | `Resources.LoadAll<Sprite>("Teams/Logos/{size}x{size}")` into `Dictionary<string,Sprite>` | every controller with team logos |
-| Modals | overlay + box elements; toggle `DisplayStyle.Flex/None`; register close buttons | `UIScreenController.InitConfigModal`; `RosterController` modals |
+| Modals | overlay + box elements; the shared `modal-overlay` is shown/hidden with the `modal-overlay--visible`/`modal-box--visible` classes (opaque black backdrop, no inline colors); register close buttons | `UIScreenController.InitConfigModal`; `RosterController` modals |
 
 ## 2.1 Modern modal styles (from Dashboard/Roster)
 

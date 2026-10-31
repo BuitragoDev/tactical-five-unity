@@ -98,4 +98,27 @@ public class UiStyleTests
             "La UI todavía usa -unity-text-transform o text-transform: upper:\n" +
             string.Join("\n", offenders.OrderBy(x => x)));
     }
+
+    // F7-01: el overlay compartido de los modales pinta el fondo negro desde la
+    // clase .modal-overlay--visible. Un color inline con alfa gana a la clase y
+    // deja el modal translúcido (era el caso del modal de configuración).
+    [Test]
+    public void ModalOverlays_DoNotUseInlineTranslucentBackground()
+    {
+        string root = Path.Combine(Application.dataPath, "_TacticalFive", "Scripts");
+        Assert.That(Directory.Exists(root), Is.True, $"No existe {root}");
+
+        var inlineBackground = new Regex(
+            @"style\.backgroundColor\s*=\s*new StyleColor\(\s*new Color\(\s*0\s*,\s*0\s*,\s*0\s*,");
+        var offenders = new List<string>();
+        foreach (string file in Directory.GetFiles(root, "*.cs", SearchOption.AllDirectories))
+        {
+            if (inlineBackground.IsMatch(File.ReadAllText(file)))
+                offenders.Add(file.Substring(root.Length).TrimStart('/', '\\'));
+        }
+
+        Assert.That(offenders, Is.Empty,
+            "Hay modales con fondo inline (translúcido) en vez de la clase " +
+            "modal-overlay--visible:\n" + string.Join("\n", offenders.OrderBy(x => x)));
+    }
 }

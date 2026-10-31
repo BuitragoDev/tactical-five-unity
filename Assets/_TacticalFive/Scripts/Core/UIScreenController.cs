@@ -535,7 +535,8 @@ public class UIScreenController : MonoBehaviour
         UpdateConfigQualityButtons(Mathf.Clamp(q, 0, 3));
         UpdateConfigSimToggle();
 
-        _configModalOverlay.style.backgroundColor = new StyleColor(new Color(0, 0, 0, 0.35f));
+        // El fondo negro opaco lo pone la clase compartida .modal-overlay--visible;
+        // un color inline con alfa ganaría a la clase y dejaría el modal translúcido.
         _configModalOverlay.AddToClassList("modal-overlay--visible");
         _configModalBox.AddToClassList("modal-box--visible");
     }
@@ -578,7 +579,6 @@ public class UIScreenController : MonoBehaviour
     {
         CloseConfigModal();
         PlayClick();
-        _configMainMenuConfirmOverlay.style.backgroundColor = new StyleColor(new Color(0, 0, 0, 0.35f));
         _configMainMenuConfirmOverlay.AddToClassList("modal-overlay--visible");
         _configMainMenuConfirmOverlay.Q<VisualElement>("ConfigMainMenuConfirmBox")?.AddToClassList("modal-box--visible");
     }
@@ -594,7 +594,6 @@ public class UIScreenController : MonoBehaviour
     {
         CloseConfigModal();
         PlayClick();
-        _configExitConfirmOverlay.style.backgroundColor = new StyleColor(new Color(0, 0, 0, 0.35f));
         _configExitConfirmOverlay.AddToClassList("modal-overlay--visible");
         _configExitConfirmOverlay.Q<VisualElement>("ConfigExitConfirmBox")?.AddToClassList("modal-box--visible");
     }

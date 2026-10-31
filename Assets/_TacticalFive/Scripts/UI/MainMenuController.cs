@@ -236,31 +236,6 @@ public class MainMenuController : UIScreenController
         InitConfigSimToggle();
     }
 
-    protected override void OpenConfigModal()
-    {
-        CursorManager.Instance?.SetDefaultCursor();
-        var am = AudioManager.Instance;
-        if (am != null)
-        {
-            _configSliderMaster.SetValueWithoutNotify(am.MasterVolume);
-            _configSliderMusic.SetValueWithoutNotify(am.MusicVolume);
-            _configSliderSFX.SetValueWithoutNotify(am.SFXVolume);
-            UpdateConfigLabels();
-        }
-        int q = QualitySettings.GetQualityLevel();
-        UpdateConfigQualityButtons(Mathf.Clamp(q, 0, 3));
-        UpdateConfigSimToggle();
-
-        _configModalOverlay.style.display = DisplayStyle.Flex;
-        _configModalBox.style.display     = DisplayStyle.Flex;
-    }
-
-    protected override void CloseConfigModal()
-    {
-        _configModalOverlay.style.display = DisplayStyle.None;
-        _configModalBox.style.display     = DisplayStyle.None;
-    }
-
     void UpdateConfigLabels()
     {
         var am = AudioManager.Instance;

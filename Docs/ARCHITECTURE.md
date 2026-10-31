@@ -212,7 +212,7 @@ Legend: solid = direct call; the biggest coupling is every controller → `Datab
 
 - **[F]** Controllers load team logos as dictionaries: `Resources.LoadAll<Sprite>("Teams/Logos/{64}x{64}")` then lookup by `TeamData.logo`. Repeated in `UIScreenController.RefreshHeader` and several controllers.
 - **[F]** `_manager`, `_myTeam`, `_season` are fetched by the `UIScreenController.LoadData` base method; screens override only when they need more.
-- **[F]** The config modal (master/music/sfx sliders + quality + sim-mode toggle + exit/back confirmations) is **centralized in `UIScreenController`** (`InitConfigModal`/`OpenConfigModal`/`CloseConfigModal`), eliminating the old per-screen copy-paste. `MainMenuController` overrides the modal to use `style.display` instead of the base's CSS classes.
+- **[F]** The config modal (master/music/sfx sliders + quality + sim-mode toggle + exit/back confirmations) is **centralized in `UIScreenController`** (`InitConfigModal`/`OpenConfigModal`/`CloseConfigModal`), eliminating the old per-screen copy-paste. Todos los controllers —incluido `MainMenuController`— usan la implementación base: el overlay compartido se muestra con las clases `modal-overlay--visible`/`modal-box--visible` (fondo negro opaco) y **nunca** con un color inline con alfa, que ganaría a la clase y dejaría el modal translúcido.
 - **[F]** Currency formatting `$X,XXX,XXX` via `:N0` / `:N0 $`.
 
 ## 10. Open questions

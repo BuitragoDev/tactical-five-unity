@@ -584,7 +584,6 @@ using System.Linq;
                 "Se simularán automáticamente todos los partidos, incluidos los de tu equipo, " +
                 "sin poder modificar quintetos ni ver resultados hasta el final.";
         }
-        _fastSimConfirmOverlay.style.backgroundColor = new StyleColor(new Color(0, 0, 0, 0.35f));
         _fastSimConfirmOverlay.AddToClassList("modal-overlay--visible");
         _fastSimConfirmOverlay.Q<VisualElement>("FastSimConfirmBox")?.AddToClassList("modal-box--visible");
     }

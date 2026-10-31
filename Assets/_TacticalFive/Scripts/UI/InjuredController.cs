@@ -898,7 +898,6 @@ public class InjuredController : UIScreenController
         else
             _forceReturnRisk.AddToClassList("force-return-risk--low");
 
-        _forceReturnOverlay.style.backgroundColor = new StyleColor(new Color(0, 0, 0, 0.35f));
         _forceReturnOverlay.AddToClassList("modal-overlay--visible");
         _forceReturnOverlay.Q<VisualElement>(null, "modal-box")?.AddToClassList("modal-box--visible");
     }
@@ -954,7 +953,6 @@ public class InjuredController : UIScreenController
         var track = _root.Q<VisualElement>("LeagueInjuredScrollTrack");
         var thumb = _root.Q<VisualElement>("LeagueInjuredScrollThumb");
         _leagueBar = BindScrollBar(viewport, list, track, thumb);
-        _leagueInjuredOverlay.style.backgroundColor = new StyleColor(new Color(0, 0, 0, 0.35f));
         _leagueInjuredOverlay.AddToClassList("modal-overlay--visible");
         _leagueInjuredOverlay.Q<VisualElement>(null, "modal-box")?.AddToClassList("modal-box--visible");
     }

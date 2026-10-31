@@ -394,7 +394,6 @@ using System.Linq;
         _confirmRenovationDuration.text = $" {info.durationWeeks} semanas";
         _confirmRenovationCapacity.text = $" +{info.capacityBonus:N0} asientos";
 
-        _confirmRenovationOverlay.style.backgroundColor = new StyleColor(new Color(0, 0, 0, 0.35f));
         _confirmRenovationOverlay.AddToClassList("modal-overlay--visible");
         var box = _confirmRenovationOverlay.Q<VisualElement>("ConfirmRenovationBox");
         box?.AddToClassList("modal-box--visible");
