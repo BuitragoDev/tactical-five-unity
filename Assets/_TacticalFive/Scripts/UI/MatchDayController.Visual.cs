@@ -1097,6 +1097,8 @@ public partial class MatchDayController
         }
         else if (reboundId > 0 && _sim2DPlayers.TryGetValue(reboundId, out var rebounder))
         {
+            // El balón llega a donde el reboteador está en ese instante (0,52 s de
+            // la jugada), no a una coordenada futura que aún no ocupa.
             SetSim2DFormationTarget(rebounder, GetSim2DReboundPosition(rebounder, attackRight), 0.48f);
             AddSim2DBallWaypoint(GetSim2DPlayerPathPositionAt(rebounder, 0.52f), 0.52f);
             _sim2DBallHandlerId = reboundId;
@@ -1202,11 +1204,21 @@ public partial class MatchDayController
     void SetSim2DTarget(Sim2DPlayerState player, Vector2 target, float pathTime = 0.86f)
     {
         if (player == null) return;
-        player.TargetX = Mathf.Clamp(target.x, 0.025f, 0.975f);
-        player.TargetY = Mathf.Clamp(target.y, 0.04f, 0.96f);
+        SetSim2DTargetOnly(player, target);
         if (_sim2DPlayerPaths.ContainsKey(player.Player.id))
             AddSim2DPlayerWaypoint(player.Player.id,
                 new Vector2(player.TargetX, player.TargetY), pathTime);
+    }
+
+    // Fija el destino final sin crear un waypoint en 0.86. Lo usan las jugadas que
+    // van a repartir su propio recorrido (saque, outlet): si se añadiera primero el
+    // waypoint final, los intermedios se clampearían detrás de él y el jugador (y
+    // el balón que lo sigue) rebotarían entre el destino y la pista.
+    void SetSim2DTargetOnly(Sim2DPlayerState player, Vector2 target)
+    {
+        if (player == null) return;
+        player.TargetX = Mathf.Clamp(target.x, 0.025f, 0.975f);
+        player.TargetY = Mathf.Clamp(target.y, 0.04f, 0.96f);
     }
 
     void SetSim2DFormationTarget(Sim2DPlayerState player, Vector2 target, float pathTime)
@@ -1342,9 +1354,9 @@ public partial class MatchDayController
                 || !_sim2DPlayers.TryGetValue(pointGuardId, out var outletGuard)) return;
 
             Vector2 guardSet = GetSim2DPosition("PG", true, attackRight);
-            SetSim2DTarget(outletGuard, guardSet);
             if (rebounderId == pointGuardId)
             {
+                SetSim2DTargetOnly(outletGuard, guardSet);
                 AddSim2DPlayerWaypoint(pointGuardId, guardSet, 0.52f);
                 AddSim2DBallWaypoint(guardSet, 0.52f);
                 _sim2DBallHandlerId = pointGuardId;
@@ -1352,18 +1364,17 @@ public partial class MatchDayController
                 return;
             }
 
-            SetSim2DTarget(rebounder, new Vector2(rebounder.X, rebounder.Y));
+            // El pívot suelta el balón donde lo capturó y el base lo recibe en su
+            // posición real: no se le manda a una coordenada fija que aún no ocupa.
+            Vector2 reboundPoint = new Vector2(rebounder.X, rebounder.Y);
+            Vector2 outletReceivePoint = new Vector2(outletGuard.X, outletGuard.Y);
+            SetSim2DTargetOnly(rebounder, reboundPoint);
+            SetSim2DTargetOnly(outletGuard, guardSet);
             rebounder.Node?.EnableInClassList("sim2d-player--action", true);
-            float outletBackcourtX = attackRight ? 0.18f : 0.82f;
-            float outletMidcourtX = attackRight ? 0.42f : 0.58f;
-            Vector2 outletReceivePoint = new Vector2(outletBackcourtX, 0.5f);
-            Vector2 outletMidcourtPoint = new Vector2(outletMidcourtX, 0.5f);
-            AddSim2DPlayerWaypoint(rebounderId,
-                new Vector2(rebounder.TargetX, rebounder.TargetY), 0.12f);
+            AddSim2DPlayerWaypoint(rebounderId, reboundPoint, 0.12f);
             AddSim2DPlayerWaypoint(pointGuardId, outletReceivePoint, 0.42f);
-            AddSim2DPlayerWaypoint(pointGuardId, outletMidcourtPoint, 0.62f);
             AddSim2DPlayerWaypoint(pointGuardId, guardSet, 0.80f);
-            AddSim2DBallWaypoint(new Vector2(rebounder.TargetX, rebounder.TargetY), 0.12f);
+            AddSim2DBallWaypoint(reboundPoint, 0.12f);
             AddSim2DBallWaypoint(outletReceivePoint, 0.42f);
             _sim2DBallHandlerId = pointGuardId;
             _sim2DBallFollowsHandler = true;
@@ -1391,14 +1402,14 @@ public partial class MatchDayController
             ? 0.50f
             : _sim2DInboundY;
         Vector2 inbounderOffenseSpot = new Vector2(inbounder.TargetX, inbounder.TargetY);
-        SetSim2DTarget(inbounder, new Vector2(inboundX, inboundY));
+        SetSim2DTargetOnly(inbounder, new Vector2(inboundX, inboundY));
         if (_sim2DInboundType == Sim2DInboundType.Baseline)
             inbounder.TargetX = baselineX;
         inbounder.Node?.AddToClassList("sim2d-player--inbound");
+        Vector2 inboundPoint = new Vector2(inbounder.TargetX, inbounder.TargetY);
         if (_sim2DInboundType == Sim2DInboundType.Baseline)
             AddSim2DBallWaypoint(new Vector2(_sim2DBallX, _sim2DBallY), 0.16f);
-        AddSim2DPlayerWaypoint(inbounderId,
-            new Vector2(inbounder.TargetX, inbounder.TargetY), 0.25f);
+        AddSim2DPlayerWaypoint(inbounderId, inboundPoint, 0.25f);
         if (inbounderId != pointGuardId)
         {
             float direction = attackRight ? 1f : -1f;
@@ -1416,26 +1427,29 @@ public partial class MatchDayController
             inbounder.TargetY = inbounderOffenseSpot.y;
         }
 
-        float backcourtX = attackRight ? 0.12f : 0.88f;
-        float midcourtX = attackRight ? 0.42f : 0.58f;
-        float receiveY = Mathf.Clamp(inboundY + (inboundY < 0.5f ? 0.12f : -0.12f), 0.18f, 0.82f);
-        Vector2 receivePoint = new Vector2(backcourtX, receiveY);
-        Vector2 midcourtPoint = new Vector2(midcourtX, 0.5f);
-        Vector2 pointGuardSet = GetSim2DPosition("PG", true, attackRight);
+        // Plantillas cortas: el mismo jugador saca y conduce; no hay pase que dar.
         if (pointGuardId == inbounderId)
         {
-            pointGuard.TargetX = pointGuardSet.x;
-            pointGuard.TargetY = pointGuardSet.y;
+            Vector2 soloSet = GetSim2DPosition("PG", true, attackRight);
+            SetSim2DTargetOnly(pointGuard, soloSet);
+            AddSim2DPlayerWaypoint(pointGuardId, soloSet, 0.80f);
+            AddSim2DBallWaypoint(inboundPoint, 0.28f);
+            _sim2DBallHandlerId = pointGuardId;
+            _sim2DBallFollowsHandler = true;
+            return;
         }
-        else
-            SetSim2DTarget(pointGuard, pointGuardSet);
+
+        // El base recibe donde está realmente; si ya está en su sitio de ataque
+        // no retrocede a una coordenada fija de campo propio.
+        Vector2 receivePoint = new Vector2(pointGuard.X, pointGuard.Y);
+        Vector2 pointGuardSet = GetSim2DPosition("PG", true, attackRight);
+        SetSim2DTargetOnly(pointGuard, pointGuardSet);
         AddSim2DPlayerWaypoint(pointGuardId, receivePoint, 0.42f);
-        AddSim2DPlayerWaypoint(pointGuardId, midcourtPoint, 0.62f);
         AddSim2DPlayerWaypoint(pointGuardId, pointGuardSet, 0.80f);
 
-        // La pelota parte del jugador situado junto a la línea, viaja a un base
-        // claramente separado y este avanza desde campo propio hacia la pista rival.
-        AddSim2DBallWaypoint(new Vector2(inbounder.TargetX, inbounder.TargetY), 0.28f);
+        // La pelota parte del jugador situado junto a la línea y viaja directa al
+        // base; después lo sigue mientras avanza hacia la pista rival.
+        AddSim2DBallWaypoint(inboundPoint, 0.28f);
         AddSim2DBallWaypoint(receivePoint, 0.42f);
         _sim2DBallHandlerId = pointGuardId;
         _sim2DBallFollowsHandler = true;
