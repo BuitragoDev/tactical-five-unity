@@ -436,7 +436,12 @@ Los **hilos narrativos** convierten los resultados reales en situaciones con con
 - **Hilos por jugador:** `jugador_caliente` y `sequia` admiten **varios hilos a la vez**
   (hasta 2 protagonistas cada uno, `StorylineCatalog.MAX_PLAYER_HILOS`), porque cada
   `storyline` lleva su `subject_player_id`: la sequía de un jugador no tapa la de otro.
-  El resto de tipos son de equipo (sujeto 0) y siguen siendo únicos.
+  El resto de tipos son **únicos por tipo**, pero varios llevan protagonista
+  (`baja_estrella`, `descontento`, `rumor_traspaso`): `StorylineService.TransitionsFor`
+  evalúa el detector contra **cada hilo abierto** (no solo contra el de sujeto 0) y, si
+  un cierre/escalada no marca protagonista, lo hereda del hilo evaluado. Así un hilo con
+  `subject_player_id > 0` puede cerrarse (antes quedaba abierto hasta el rollover).
+  `baja_estrella` se cierra en cuanto el jugador vuelve (`injury_days <= 0`).
 - **Tipos y umbrales** (`StorylineCatalog`):
   | Tipo | Señal | Umbral |
   |---|---|---|

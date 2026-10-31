@@ -76,6 +76,51 @@ public static class StorylineService
         return (sign * (1 + magnitude), sign * magnitude, sign * (2 + magnitude));
     }
 
+    /// <summary>
+    /// Transiciones de un tipo para el día. Es puro (sin DB) para poder probar el despacho:
+    /// los tipos multi-protagonista delegan en su detector; el resto se evalúa contra CADA
+    /// hilo abierto (los de equipo usan sujeto 0, pero baja de estrella, descontento y rumor
+    /// abren hilos con protagonista) y, si no hay ninguno, contra `null` para abrir uno nuevo.
+    /// </summary>
+    public static List<StorylineTransition> TransitionsFor(StorylineContext ctx, StorylineDef def,
+                                                            StorylineSubjects subjects)
+    {
+        var result = new List<StorylineTransition>();
+        if (ctx == null || def == null) return result;
+        if (subjects == null) subjects = new StorylineSubjects();
+
+        if (def.detectPlayers != null)
+        {
+            var multi = def.detectPlayers(ctx, def, subjects);
+            if (multi != null) result.AddRange(multi);
+            return result;
+        }
+
+        if (def.detect == null) return result;
+
+        if (subjects.Actives.Count == 0)
+        {
+            var start = def.detect(ctx, def, null);
+            if (start != null) result.AddRange(start);
+            return result;
+        }
+
+        foreach (var active in subjects.Actives)
+        {
+            var transitions = def.detect(ctx, def, active);
+            if (transitions == null) continue;
+            foreach (var t in transitions)
+            {
+                // Un cierre/escalada sin protagonista explícito pertenece al hilo evaluado:
+                // sin esto, `Apply` buscaría el hilo por sujeto 0 y descartaría el cierre.
+                if (t.action != Action.Start && t.subjectPlayerId <= 0)
+                    t.subjectPlayerId = active.subject_player_id;
+                result.Add(t);
+            }
+        }
+        return result;
+    }
+
     // ── DÍA A DÍA (DB) ──────────────────────────────────────
 
     /// <summary>Evalúa todos los hilos del equipo del usuario tras simular el día.</summary>
@@ -109,7 +154,9 @@ public static class StorylineService
         foreach (var def in StorylineCatalog.All)
         {
             // Los hilos por jugador se gobiernan por protagonista (varios a la vez, uno por
-            // jugador); el resto son de equipo (sujeto 0, uno por tipo).
+            // jugador); el resto son únicos por tipo, pero algunos llevan protagonista
+            // (baja_estrella, descontento, rumor_traspaso), así que hay que evaluar el
+            // detector contra CADA hilo abierto, no solo contra el de sujeto 0.
             var subjects = new StorylineSubjects
             {
                 // Solo hilos abiertos: los cerrados en el paso anterior (protagonista que
@@ -120,10 +167,7 @@ public static class StorylineService
             List<StorylineTransition> transitions;
             try
             {
-                transitions = def.detectPlayers != null
-                    ? def.detectPlayers(ctx, def, subjects)
-                    : def.detect(ctx, def, subjects.For(0));
-                if (transitions == null) transitions = new List<StorylineTransition>();
+                transitions = TransitionsFor(ctx, def, subjects);
             }
             catch (System.Exception e)
             {

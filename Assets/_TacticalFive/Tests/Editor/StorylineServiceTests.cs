@@ -419,6 +419,109 @@ public class StorylineServiceTests
         var closed = StorylineCatalog.DetectStarInjury(ctx, def, active);
         Assert.That(closed[0].action, Is.EqualTo(StorylineService.Action.Resolve));
         Assert.That(closed[0].resolution, Is.EqualTo(StorylineResolution.Completed));
+        Assert.That(closed[0].subjectPlayerId, Is.EqualTo(9),
+            "el cierre debe llevar el protagonista para que Apply encuentre su hilo");
+    }
+
+    // ── DESPACHO POR TIPO (puro) ────────────────────────────
+
+    static StorylineSubjects Hilos(params StorylineData[] actives)
+        => new StorylineSubjects { Actives = actives.ToList() };
+
+    [Test]
+    public void TransitionsFor_ClosesSubjectHiloOfTeamType()
+    {
+        // Regresión: `baja_estrella` abre el hilo con protagonista (sujeto 9), no con
+        // sujeto 0. El despacho debe evaluar ese hilo y cerrarlo al recuperarse.
+        var star = new PlayerData { id = 9, first_name = "Nikola", last_name = "P", overall = 92, injury_days = 0 };
+        var ctx = Ctx(star);
+        var def = StorylineCatalog.Find(StorylineType.BajaEstrella);
+        var subjects = Hilos(new StorylineData
+        {
+            id = 1, type = StorylineType.BajaEstrella, subject_player_id = 9, intensity = 1, resolved = 0
+        });
+
+        var t = StorylineService.TransitionsFor(ctx, def, subjects);
+
+        Assert.That(t, Has.Count.EqualTo(1));
+        Assert.That(t[0].action, Is.EqualTo(StorylineService.Action.Resolve));
+        Assert.That(t[0].subjectPlayerId, Is.EqualTo(9), "el cierre debe apuntar al hilo del protagonista");
+    }
+
+    [Test]
+    public void TransitionsFor_OpensWhenNoActiveHilo()
+    {
+        var star = new PlayerData { id = 9, first_name = "Nikola", last_name = "P", overall = 92, injury_days = 12 };
+        var ctx = Ctx(star);
+        var def = StorylineCatalog.Find(StorylineType.BajaEstrella);
+
+        var t = StorylineService.TransitionsFor(ctx, def, Hilos());
+
+        Assert.That(t, Has.Count.EqualTo(1));
+        Assert.That(t[0].action, Is.EqualTo(StorylineService.Action.Start));
+        Assert.That(t[0].subjectPlayerId, Is.EqualTo(9));
+    }
+
+    [Test]
+    public void TransitionsFor_ClosesEveryActiveSubject()
+    {
+        var a = new PlayerData { id = 8, overall = 90, injury_days = 0 };
+        var b = new PlayerData { id = 9, overall = 92, injury_days = 0 };
+        var ctx = Ctx(a, b);
+        var def = StorylineCatalog.Find(StorylineType.BajaEstrella);
+        var subjects = Hilos(
+            new StorylineData { id = 1, type = StorylineType.BajaEstrella, subject_player_id = 8, intensity = 1, resolved = 0 },
+            new StorylineData { id = 2, type = StorylineType.BajaEstrella, subject_player_id = 9, intensity = 1, resolved = 0 });
+
+        var t = StorylineService.TransitionsFor(ctx, def, subjects);
+
+        Assert.That(t, Has.Count.EqualTo(2));
+        Assert.That(t.Select(x => x.subjectPlayerId), Is.EquivalentTo(new[] { 8, 9 }));
+        Assert.That(t.All(x => x.action == StorylineService.Action.Resolve), Is.True);
+    }
+
+    [Test]
+    public void TransitionsFor_KeepsTeamHiloWorking()
+    {
+        var ctx = Ctx();
+        ctx.Streak = 0;
+        var def = StorylineCatalog.Find(StorylineType.Bache);
+        var subjects = Hilos(new StorylineData
+        {
+            id = 1, type = StorylineType.Bache, subject_player_id = 0, intensity = 1, resolved = 0
+        });
+
+        var t = StorylineService.TransitionsFor(ctx, def, subjects);
+
+        Assert.That(t, Has.Count.EqualTo(1));
+        Assert.That(t[0].action, Is.EqualTo(StorylineService.Action.Resolve));
+        Assert.That(t[0].subjectPlayerId, Is.EqualTo(0));
+    }
+
+    [Test]
+    public void TransitionsFor_InheritsSubjectOnResolveWithoutExplicitId()
+    {
+        var ctx = Ctx();
+        var def = new StorylineDef
+        {
+            type = "custom",
+            detect = (c, d, active) => active == null
+                ? new List<StorylineTransition>()
+                : new List<StorylineTransition>
+                {
+                    new StorylineTransition { type = d.type, action = StorylineService.Action.Resolve }
+                }
+        };
+        var subjects = Hilos(new StorylineData
+        {
+            id = 1, type = "custom", subject_player_id = 42, resolved = 0
+        });
+
+        var t = StorylineService.TransitionsFor(ctx, def, subjects);
+
+        Assert.That(t, Has.Count.EqualTo(1));
+        Assert.That(t[0].subjectPlayerId, Is.EqualTo(42),
+            "el cierre hereda el protagonista del hilo evaluado");
     }
 
     [Test]

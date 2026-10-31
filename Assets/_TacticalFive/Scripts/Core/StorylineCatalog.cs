@@ -271,6 +271,7 @@ public static class StorylineCatalog
                     type = def.type,
                     action = StorylineService.Action.Resolve,
                     resolution = StorylineResolution.Completed,
+                    subjectPlayerId = subj?.id ?? active.subject_player_id,
                     summary = subj != null ? $"{subj.first_name} {subj.last_name} recuperó la calma" : "El jugador ya no está en el equipo",
                     title = "Vuelve la calma al vestuario",
                     body = $"{active.title} se desactiva: la situación en el vestuario del {ctx.myTeam.name} se ha normalizado.",
@@ -338,6 +339,7 @@ public static class StorylineCatalog
                 {
                     type = def.type, action = StorylineService.Action.Resolve,
                     resolution = StorylineResolution.Completed,
+                    subjectPlayerId = active.subject_player_id,
                     summary = "El jugador salió del equipo",
                     title = "Se resolvió el culebrón",
                     body = $"{active.title} termina: el jugador ya no está en el {ctx.myTeam.name} y la operación se ha cerrado.",
@@ -349,6 +351,7 @@ public static class StorylineCatalog
                 result.Add(new StorylineTransition
                 {
                     type = def.type, action = StorylineService.Action.Resolve,
+                    subjectPlayerId = active.subject_player_id,
                     title = "Vuelve la calma",
                     summary = $"{subj.first_name} {subj.last_name} ya no está en el mercado",
                     body = $"{subj.first_name} {subj.last_name} deja de estar en el mercado y su situación en el {ctx.myTeam.name} se normaliza.",
@@ -420,6 +423,7 @@ public static class StorylineCatalog
                 {
                     type = def.type, action = StorylineService.Action.Resolve,
                     resolution = StorylineResolution.Completed,
+                    subjectPlayerId = subj.id,
                     summary = $"{subj.first_name} {subj.last_name} vuelve a las canchas",
                     title = $"Vuelve {subj.first_name} {subj.last_name}",
                     body = $"{subj.first_name} {subj.last_name} está de vuelta después de su lesión. La afición del {ctx.myTeam.name} recupera la ilusión.",
