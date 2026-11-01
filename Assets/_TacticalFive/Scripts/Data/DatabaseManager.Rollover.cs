@@ -455,6 +455,38 @@ public partial class DatabaseManager
         // Draft order projection captured before clearing games (for pick positions).
         var projectedDraftOrder = BuildDraftOrder(oldSeason != null ? (int?)oldSeason.id : null);
 
+        // Objetivos de temporada: la clasificación final y el campeón/finalista de la
+        // temporada cerrada se capturan ANTES de borrar los partidos (paso 5), porque
+        // el objetivo de la temporada que empieza depende del resultado anterior.
+        var previousObjectives = new Dictionary<int, string>();
+        var finalConferenceRanks = new Dictionary<int, int>();
+        int championTeamId = 0;
+        int finalistTeamId = 0;
+        if (oldSeason != null)
+        {
+            var previousTeams = GetAllTeams();
+            var previousGames = _db.Table<GameData>()
+                .Where(g => g.season_id == oldSeason.id && g.is_played == 1)
+                .ToList();
+            foreach (var conf in new[] { "East", "West" })
+            {
+                var confTeams = previousTeams.Where(t => t.conference == conf).ToList();
+                foreach (var row in StandingsHelper.Build(confTeams, previousGames))
+                    finalConferenceRanks[row.teamId] = row.rank;
+            }
+            foreach (var t in previousTeams)
+                previousObjectives[t.id] = t.objective;
+
+            var oldRecord = _db.Table<SeasonRecord>()
+                .Where(r => r.season_id == oldSeason.id)
+                .FirstOrDefault();
+            if (oldRecord != null)
+            {
+                championTeamId = oldRecord.champion_id;
+                finalistTeamId = oldRecord.finalist_id;
+            }
+        }
+
         // 5. Clear tables
         // Punto seguro: si se cambió de partida durante el rollover, abortar aquí
         // (rollback completo) antes de borrar datos.
@@ -568,6 +600,15 @@ public partial class DatabaseManager
         }
         AutoSeedLineup(newTeamId, userPlayers);
 
+        // 6b. Objetivo de la temporada para los 30 equipos: expectativa del dueño por
+        // fuerza de plantilla (percentil de media OVR) ajustada por el resultado de la
+        // temporada cerrada (campeón/finalista/cumplimiento). Se aplica igual en
+        // Manager y ProManager; el cese por objetivo de ProManager sigue igual.
+        string userObjectiveBefore = GetTeamById(newTeamId)?.objective;
+        ApplySeasonObjectives(previousObjectives, finalConferenceRanks,
+                              championTeamId, finalistTeamId);
+        string userObjectiveAfter = GetTeamById(newTeamId)?.objective;
+
         // 7. Topes de la nueva temporada desde la tabla CBA (F4-07). La tabla sustituye
         // el crecimiento ciego del +5 %; el mínimo sigue congelado en el suelo interno
         // hasta F4-08 (mínimo por experiencia).
@@ -669,6 +710,32 @@ public partial class DatabaseManager
         };
         _db.Insert(newSeason);
 
+        // 10b. Aviso al jugador si el objetivo de su equipo cambió respecto a la
+        // temporada anterior (sube tras un éxito o baja tras un fracaso).
+        if (!string.IsNullOrEmpty(userObjectiveBefore) &&
+            !string.IsNullOrEmpty(userObjectiveAfter) &&
+            userObjectiveBefore != userObjectiveAfter)
+        {
+            string now = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            var newTeam = GetTeamById(newTeamId);
+            string teamName = newTeam != null ? newTeam.name : "tu equipo";
+            AddMessage(new MessageData
+            {
+                manager_id = managerId,
+                sender_type = 0,
+                sender_id = 0,
+                title = "Nuevo objetivo de temporada",
+                body = $"El dueño de {teamName} ha fijado el objetivo para esta temporada: " +
+                       $"{userObjectiveAfter} (la pasada era {userObjectiveBefore}).",
+                game_day = 0,
+                game_date = newSeason.current_date,
+                created_at = now,
+                date_sent = now,
+                is_read = 0,
+                category = NewsCategory.CLUB
+            });
+        }
+
         // 11b. Deuda muerta (buyouts con stretch): cobrar el tramo de la nueva
         // temporada. dead_money es persistente (no la borra el rollover).
         var deadRows = _db.Table<DeadMoneyData>().ToList();
@@ -707,6 +774,57 @@ public partial class DatabaseManager
         _db.Rollback();
         Debug.LogError($"[DB] StartNewSeason error, rolled back: {ex.Message}\n{ex.StackTrace}");
         throw;
+        }
+    }
+
+    /// <summary>
+    /// Recalcula el objetivo de temporada de los 30 equipos con la regla híbrida de
+    /// <see cref="ObjectiveHelper.NextObjective"/>: base por fuerza de plantilla
+    /// (puesto 1..30 por media de `overall` de los jugadores asignados) y ajuste por
+    /// el resultado de la temporada cerrada. Solo escribe los equipos cuyo objetivo
+    /// cambia. Corre en el lote de fondo del rollover: usa la conexión ambient.
+    /// </summary>
+    void ApplySeasonObjectives(
+        Dictionary<int, string> previousObjectives,
+        Dictionary<int, int> finalConferenceRanks,
+        int championTeamId,
+        int finalistTeamId)
+    {
+        var teams = GetAllTeams();
+        if (teams.Count == 0) return;
+
+        // Fuerza de plantilla = media de los overall canónicos de los asignados
+        // (misma población que la media que muestra el Dashboard).
+        var strength = new Dictionary<int, int>();
+        foreach (var team in teams)
+        {
+            var roster = GetPlayersByTeam(team.id);
+            strength[team.id] = roster.Count > 0
+                ? (int)System.Math.Round(roster.Average(p => p.GetCalculatedAverage()))
+                : 0;
+        }
+
+        // Puesto 1..N por media de plantilla; desempate por id para ser determinista.
+        var strengthRank = new Dictionary<int, int>();
+        int rank = 1;
+        foreach (var team in teams.OrderByDescending(t => strength[t.id]).ThenBy(t => t.id))
+            strengthRank[team.id] = rank++;
+
+        foreach (var team in teams)
+        {
+            previousObjectives.TryGetValue(team.id, out string current);
+            int conferenceRank = finalConferenceRanks.TryGetValue(team.id, out int r) ? r : 0;
+
+            string next = ObjectiveHelper.NextObjective(
+                current,
+                conferenceRank,
+                strengthRank[team.id],
+                team.id == championTeamId,
+                team.id == finalistTeamId);
+
+            if (string.IsNullOrEmpty(next) || next == team.objective) continue;
+            team.objective = next;
+            UpdateTeam(team);
         }
     }
 

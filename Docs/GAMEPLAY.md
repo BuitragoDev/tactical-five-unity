@@ -36,6 +36,18 @@
 - **Desarrollo acotado:** si acumula ≥45 minutos y `overall < potential`, gana **+1** en su atributo más bajo (nunca supera 99 ni el potencial). Se aplica una sola vez y antes del rollover. Si el jugador ya está en su techo, no hay mejora.
 - **Idempotencia:** si ya hay resultados para esa temporada, el camp no se repite tras un fallo/reintento del rollover.
 
+### Objetivo de temporada del dueño (`teams.objective`)
+- **Cuatro niveles**, de menos a más exigente: `Zona tranquila` (top 12), `Play-In` (top 10), `Playoffs` (top 6) y `Campeonato` (top 2). El cumplimiento se mide por la **posición en la conferencia** (`ObjectiveHelper.IsObjectiveMet`).
+- **Se recalcula en cada rollover** (`StartNewSeason`), para los 30 equipos y **igual en Manager y ProManager**. Regla híbrida (`ObjectiveHelper.NextObjective`):
+  1. **Base por fuerza de plantilla**: se ordenan los 30 equipos por media de los `overall` canónicos de sus jugadores asignados (la misma media que muestra el Dashboard) y se asignan tramos: puestos **1–5 → Campeonato**, **6–12 → Playoffs**, **13–22 → Play-In**, **23–30 → Zona tranquila**.
+  2. **Campeón** de la temporada cerrada → `Campeonato` (defiende el título aunque la plantilla se debilite).
+  3. **Finalista** → como mínimo `Playoffs`.
+  4. Si **cumplió** el objetivo anterior, el dueño **no baja el listón** (`max(base, objetivo anterior)`).
+  5. Si **lo falló**, manda la base de plantilla (la exigencia se ajusta al roster real; sin dobles castigos).
+- **Cuándo se calcula:** la clasificación final y el campeón/finalista (`season_records`) se capturan **antes** de borrar los partidos en el rollover; la fuerza de plantilla se mide **después** del relleno de plantillas de la IA (paso 6), ya con la progresión y el draft aplicados. Solo se escribe el equipo cuyo objetivo cambia.
+- **Efectos:** el Dashboard/Manager muestran el objetivo y su cumplimiento; en ProManager fallarlo al final de temporada supone el cese (el campeón está exento); la asistencia en casa usa el cumplimiento del objetivo (`TeamEconomyService.GetObjectiveComplianceFactor`). Si el objetivo de tu equipo cambia, recibes un mensaje de sistema (`MessageData`, categoría CLUB) al empezar la temporada.
+- **Sin migración:** las partidas antiguas adoptan la regla en su primer rollover; el seed/Editor solo fijan el valor inicial.
+
 ## 2. Match simulation (core mechanic)
 
 **Script:** `GameSimulator.cs` (~1.370 ln). **Data:** `GameData`, `PlayerData` (11 attributes + `morale` + `fisico`), `LineupData` (rotation). **DTOs:** `PlayerStatSnapshot`, `TeamStats`, `PlayByPlayEvent`, `StatDelta`, `PossessionOutcome`, `PossessionTally`, `PossessionState`, `GameResult`.
