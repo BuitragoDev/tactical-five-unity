@@ -272,9 +272,9 @@ public static class TradeValueHelper
 
         string reason = null;
         if (!ovrGapOk)
-            reason = $"entregaría un {bestOut} por un {bestIn}";
+            reason = $"Entregaría un {bestOut} por un {bestIn}";
         else if (!valueOk)
-            reason = $"entregaría {outgoing:0.0} de valor y recibiría {incoming:0.0}";
+            reason = $"Entregaría {outgoing:0.0} de valor y recibiría {incoming:0.0}";
 
         return new OfferCheck
         {
