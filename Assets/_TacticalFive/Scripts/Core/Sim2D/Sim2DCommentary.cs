@@ -19,6 +19,8 @@ public static class Sim2DCommentary
 
     public static string Screen(string name) => $"Bloqueo de {name}.";
 
+    public static string ScreenRoll(string name) => $"{name} continúa al aro.";
+
     public static string Cut(string name) => $"{name} corta al aro.";
 
     public static string PostUp(string name) => $"{name} juega en el poste.";

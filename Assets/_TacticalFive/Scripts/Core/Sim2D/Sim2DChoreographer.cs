@@ -74,6 +74,9 @@ public static class Sim2DChoreographer
         public int PressureId;
         public bool IsFreeThrow;
         public float DeltasTime = 0.96f;
+        /// <summary>Acción sin balón elegida para esta posesión (para tests y depuración).</summary>
+        public OffBallActionKind OffBallKind;
+        public int OffBallActorId;
     }
 
     public enum InboundKind
@@ -84,6 +87,30 @@ public static class Sim2DChoreographer
         Sideline,
         DeadBall,
         Outlet
+    }
+
+    /// <summary>Acción sin balón que da vida a la construcción: bloqueo y
+    /// continuación, corte al aro o posteo. Es solo presentación.</summary>
+    public enum OffBallActionKind
+    {
+        None,
+        Screen,
+        Cut,
+        PostUp
+    }
+
+    class OffBallAction
+    {
+        public OffBallActionKind Kind;
+        public PlayerInfo Actor;
+        public float ActionTime;
+        public float EndTime;
+        public float ClearTime;
+        public Vector2 ActionPoint;
+        public Vector2 EndPoint;
+        public Vector2 ClearPoint;
+        public Vector2 DefenderActionPoint;
+        public Vector2 DefenderEndPoint;
     }
 
     /// <summary>
@@ -278,6 +305,28 @@ public static class Sim2DChoreographer
                 break;
         }
 
+        // Acción sin balón de la construcción (F3): bloqueo y continuación,
+        // corte al aro o posteo. Se elige de forma determinista y solo en
+        // posesiones de media cancha con tiro; en contragolpe/putback no hay
+        // tiempo para montarla.
+        var likelyPasser = Find(offense, assisterId) ?? handler;
+        if (shooter != null && likelyPasser.Id == shooter.Id) likelyPasser = handler;
+        int likelyReceiverId = likelyPasser.Id != handler.Id
+            ? likelyPasser.Id
+            : shooter != null && shooter.Id != handler.Id
+                ? shooter.Id
+                : PickWing(offense, handler, shooter)?.Id ?? 0;
+        OffBallAction offBall = null;
+        if (isShot && !isTurnover && !putback && !fastBreak)
+            offBall = PickOffBallAction(eventIndex, gameId, offense, spots, handler, shooter,
+                rebounder, inbounderId, outletPasserId, likelyReceiverId, offensiveRebound,
+                attackRight);
+        if (offBall != null)
+        {
+            script.OffBallKind = offBall.Kind;
+            script.OffBallActorId = offBall.Actor.Id;
+        }
+
         // ── Recorridos de ataque ──
         foreach (var p in offense)
         {
@@ -306,6 +355,9 @@ public static class Sim2DChoreographer
                 AddPlayerPoint(script, p.Id, setupTime, spot);
             }
 
+            if (offBall != null && p.Id == offBall.Actor.Id)
+                AddOffBallPlayerPath(script, offBall);
+
             if (shooter != null && p.Id == shooter.Id)
             {
                 AddPlayerPoint(script, p.Id, shotTime, spots[shooter.Id]);
@@ -329,6 +381,9 @@ public static class Sim2DChoreographer
             Vector2 target = Sim2DCourt.DefensiveSpot(manSpot, handlerSpot, attackRight,
                 d.Position == "C", onBall);
             AddPlayerPoint(script, d.Id, setupTime, target);
+
+            if (offBall != null && man.Id == offBall.Actor.Id)
+                AddOffBallDefenderPath(script, d, offBall, handlerSpot, attackRight);
 
             if (onBall)
             {
@@ -474,6 +529,9 @@ public static class Sim2DChoreographer
         AddCue(script, receiveTime + 0.06f, Sim2DCommentary.BringUp(handler.Name), 1, CueKind.BuildUp);
         AddCue(script, Mathf.Max(0.30f, bringTime - 0.02f), Sim2DCommentary.Organize(handler.Name),
             2, CueKind.BuildUp);
+
+        if (offBall != null)
+            AddOffBallCues(script, offBall);
 
         if (isShot && shooter != null)
         {
@@ -725,6 +783,234 @@ public static class Sim2DChoreographer
         foreach (var spot in SpotOrder)
             if (!used.Contains(spot)) return spot;
         return Sim2DCourt.Spot.WingLeft;
+    }
+
+    // ── Acciones sin balón (F3) ──────────────────────────────────────────────
+
+    static OffBallAction PickOffBallAction(
+        int eventIndex, int gameId,
+        IReadOnlyList<PlayerInfo> offense,
+        Dictionary<int, Vector2> spots,
+        PlayerInfo handler,
+        PlayerInfo shooter,
+        PlayerInfo rebounder,
+        int inbounderId,
+        int outletPasserId,
+        int likelyReceiverId,
+        bool offensiveRebound,
+        bool attackRight)
+    {
+        int handlerId = handler?.Id ?? 0;
+        int shooterId = shooter?.Id ?? 0;
+        int rebounderId = rebounder?.Id ?? 0;
+        bool Eligible(PlayerInfo p) =>
+            p != null
+            && p.Id != handlerId
+            && p.Id != shooterId
+            && p.Id != inbounderId
+            && p.Id != outletPasserId
+            && p.Id != likelyReceiverId
+            && !(offensiveRebound && p.Id == rebounderId);
+
+        var bigs = offense.Where(Eligible)
+            .Where(p => p.Position is "PF" or "C").ToList();
+        var wings = offense.Where(Eligible)
+            .Where(p => p.Position is "SG" or "SF").ToList();
+
+        int roll = StableHash(eventIndex, gameId, 7) % 6;
+        OffBallActionKind kind;
+        List<PlayerInfo> pool;
+        if (roll < 2 && bigs.Count > 0)
+        {
+            kind = OffBallActionKind.Screen;
+            pool = bigs;
+        }
+        else if (roll < 4 && bigs.Count > 0)
+        {
+            kind = OffBallActionKind.PostUp;
+            pool = bigs;
+        }
+        else if (wings.Count > 0)
+        {
+            kind = OffBallActionKind.Cut;
+            pool = wings;
+        }
+        else if (bigs.Count > 0)
+        {
+            kind = OffBallActionKind.Screen;
+            pool = bigs;
+        }
+        else
+        {
+            return null;
+        }
+
+        var actor = pool[StableHash(eventIndex, gameId, 11) % pool.Count];
+        Vector2 handlerSpot = spots[handlerId];
+        bool ballOnLeft = handlerSpot.y < 0.5f;
+        var action = new OffBallAction { Kind = kind, Actor = actor };
+
+        switch (kind)
+        {
+            case OffBallActionKind.Screen:
+            {
+                // El bloqueador se cruza en la línea del defensor del balón y
+                // luego continúa al aro (pick-and-roll).
+                Vector2 onBallDefender = Sim2DCourt.DefensiveSpot(handlerSpot, handlerSpot,
+                    attackRight, false, true);
+                action.ActionPoint = Vector2.Lerp(handlerSpot, onBallDefender, 0.55f);
+                action.ActionTime = 0.54f;
+                action.EndTime = 0.76f;
+                action.EndPoint = ResolveActionSpot(Sim2DCourt.Spot.Rim,
+                    new[]
+                    {
+                        ballOnLeft ? Sim2DCourt.Spot.DunkerRight : Sim2DCourt.Spot.DunkerLeft,
+                        ballOnLeft ? Sim2DCourt.Spot.DunkerLeft : Sim2DCourt.Spot.DunkerRight,
+                        Sim2DCourt.Spot.PostLeft, Sim2DCourt.Spot.PostRight
+                    }, spots, actor.Id, attackRight);
+                action.DefenderActionPoint = Sim2DCourt.DefensiveSpot(action.ActionPoint,
+                    handlerSpot, attackRight, false, false);
+                action.DefenderEndPoint = Sim2DCourt.DefensiveSpot(action.EndPoint,
+                    handlerSpot, attackRight, false, false);
+                break;
+            }
+            case OffBallActionKind.Cut:
+            {
+                // Corte a canasta y apertura a la esquina débil si no recibe.
+                action.ActionTime = 0.64f;
+                action.ClearTime = 0.80f;
+                action.EndPoint = ResolveActionSpot(Sim2DCourt.Spot.Rim,
+                    new[]
+                    {
+                        ballOnLeft ? Sim2DCourt.Spot.DunkerRight : Sim2DCourt.Spot.DunkerLeft,
+                        ballOnLeft ? Sim2DCourt.Spot.DunkerLeft : Sim2DCourt.Spot.DunkerRight,
+                        Sim2DCourt.Spot.PostLeft, Sim2DCourt.Spot.PostRight
+                    }, spots, actor.Id, attackRight);
+                action.ClearPoint = ResolveActionSpot(
+                    ballOnLeft ? Sim2DCourt.Spot.CornerRight : Sim2DCourt.Spot.CornerLeft,
+                    new[]
+                    {
+                        ballOnLeft ? Sim2DCourt.Spot.WingRight : Sim2DCourt.Spot.WingLeft,
+                        ballOnLeft ? Sim2DCourt.Spot.SlotRight : Sim2DCourt.Spot.SlotLeft
+                    }, spots, actor.Id, attackRight);
+                action.DefenderActionPoint = Sim2DCourt.DefensiveSpot(action.EndPoint,
+                    handlerSpot, attackRight, false, false);
+                action.DefenderEndPoint = Sim2DCourt.DefensiveSpot(action.ClearPoint,
+                    handlerSpot, attackRight, false, false);
+                break;
+            }
+            case OffBallActionKind.PostUp:
+            {
+                action.ActionTime = 0.62f;
+                action.EndTime = 0.74f;
+                var post = ballOnLeft ? Sim2DCourt.Spot.PostRight : Sim2DCourt.Spot.PostLeft;
+                action.EndPoint = ResolveActionSpot(post,
+                    new[]
+                    {
+                        ballOnLeft ? Sim2DCourt.Spot.ElbowRight : Sim2DCourt.Spot.ElbowLeft,
+                        ballOnLeft ? Sim2DCourt.Spot.SlotRight : Sim2DCourt.Spot.SlotLeft,
+                        Sim2DCourt.Spot.PostLeft, Sim2DCourt.Spot.PostRight
+                    }, spots, actor.Id, attackRight);
+                action.DefenderActionPoint = Sim2DCourt.DefensiveSpot(action.EndPoint,
+                    handlerSpot, attackRight, actor.Position == "C", false);
+                action.DefenderEndPoint = action.DefenderActionPoint;
+                break;
+            }
+        }
+        return action;
+    }
+
+    static void AddOffBallPlayerPath(Script script, OffBallAction action)
+    {
+        if (action?.Actor == null) return;
+        switch (action.Kind)
+        {
+            case OffBallActionKind.Screen:
+                AddPlayerPoint(script, action.Actor.Id, action.ActionTime, action.ActionPoint);
+                AddPlayerPoint(script, action.Actor.Id, action.EndTime, action.EndPoint);
+                break;
+            case OffBallActionKind.Cut:
+                AddPlayerPoint(script, action.Actor.Id, action.ActionTime, action.EndPoint);
+                AddPlayerPoint(script, action.Actor.Id, action.ClearTime, action.ClearPoint);
+                break;
+            case OffBallActionKind.PostUp:
+                AddPlayerPoint(script, action.Actor.Id, action.ActionTime, action.EndPoint);
+                break;
+        }
+    }
+
+    static void AddOffBallDefenderPath(Script script, PlayerInfo defender, OffBallAction action,
+        Vector2 handlerSpot, bool attackRight)
+    {
+        if (defender == null || action == null) return;
+        AddPlayerPoint(script, defender.Id, action.ActionTime, action.DefenderActionPoint);
+        if (action.Kind == OffBallActionKind.Cut)
+            AddPlayerPoint(script, defender.Id, action.ClearTime, action.DefenderEndPoint);
+        else
+            AddPlayerPoint(script, defender.Id, action.EndTime, action.DefenderEndPoint);
+    }
+
+    static void AddOffBallCues(Script script, OffBallAction action)
+    {
+        if (action?.Actor == null) return;
+        switch (action.Kind)
+        {
+            case OffBallActionKind.Screen:
+                AddCue(script, action.ActionTime - 0.02f,
+                    Sim2DCommentary.Screen(action.Actor.Name), 1, CueKind.BuildUp);
+                AddCue(script, action.EndTime - 0.06f,
+                    Sim2DCommentary.ScreenRoll(action.Actor.Name), 1, CueKind.BuildUp);
+                break;
+            case OffBallActionKind.Cut:
+                AddCue(script, action.ActionTime - 0.02f,
+                    Sim2DCommentary.Cut(action.Actor.Name), 1, CueKind.BuildUp);
+                break;
+            case OffBallActionKind.PostUp:
+                AddCue(script, action.ActionTime - 0.02f,
+                    Sim2DCommentary.PostUp(action.Actor.Name), 1, CueKind.BuildUp);
+                break;
+        }
+    }
+
+    static Vector2 ResolveActionSpot(Sim2DCourt.Spot preferred,
+        IReadOnlyList<Sim2DCourt.Spot> fallbacks, Dictionary<int, Vector2> spots,
+        int actorId, bool attackRight)
+    {
+        var occupied = new List<Vector2>();
+        foreach (var entry in spots)
+            if (entry.Key != actorId) occupied.Add(entry.Value);
+
+        Vector2 position = Sim2DCourt.SpotPosition(preferred, attackRight);
+        if (ActionSpotFree(position, occupied)) return position;
+
+        if (fallbacks != null)
+        {
+            foreach (var spot in fallbacks)
+            {
+                position = Sim2DCourt.SpotPosition(spot, attackRight);
+                if (ActionSpotFree(position, occupied)) return position;
+            }
+        }
+        return Sim2DCourt.SpotPosition(preferred, attackRight);
+    }
+
+    static bool ActionSpotFree(Vector2 position, List<Vector2> occupied)
+    {
+        foreach (var other in occupied)
+            if (Vector2.Distance(other, position) < 0.045f) return false;
+        return true;
+    }
+
+    static int StableHash(int eventIndex, int gameId, int salt)
+    {
+        unchecked
+        {
+            uint hash = 2166136261u;
+            hash = (hash ^ (uint)eventIndex) * 16777619u;
+            hash = (hash ^ (uint)gameId) * 16777619u;
+            hash = (hash ^ (uint)salt) * 16777619u;
+            return (int)(hash & 0x7FFFFFFF);
+        }
     }
 
     public static Dictionary<int, PlayerInfo> AssignMatchups(IReadOnlyList<PlayerInfo> offense,

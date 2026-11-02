@@ -87,10 +87,20 @@ MatchDayController.Sim2D.* (renderer: keyframes, ticker, marcador, TL, OOB)
       zona de un compañero, este se reubica en la libre más cercana.
 - [x] Tiros desde el spot correcto (triple fuera del arco).
 - [x] 1-3 pases en la construcción (asistente real cuando existe).
-- [ ] Bloqueo y continuación / corte al aro / poste: los textos `Screen`/`Cut`/
-      `PostUp` existen, pero la coreografía actual no genera bloqueos ni cortes
-      como acciones separadas; el movimiento se limita a la construcción y el
-      tiro. Queda como mejora de una segunda pasada.
+- [x] Acción sin balón por posesión: **bloqueo y continuación**, **corte al
+      aro** o **posteo**, elegida de forma determinista (hash FNV estable sobre
+      `eventIndex`/`gameId`; nunca toca `IRandomSource`).
+      - Bloqueo: el interior se cruza en la línea del defensor del balón y
+        continúa al aro (`Bloqueo de X.` / `X continúa al aro.`).
+      - Corte: el alero corta al aro y, si no recibe, abre a la esquina débil
+        (`X corta al aro.`).
+      - Posteo: el interior se sitúa en el poste del lado débil
+        (`X juega en el poste.`).
+      - El defensor de cada acción acompaña el movimiento (persigue el corte,
+        defiende el poste, ayuda en el bloqueo).
+      - Solo en media cancha con tiro: se omite en pérdidas, putbacks y
+        contragolpes, y nunca coincide con tirador, pasador, receptor
+        probable, sacador ni reboteador ofensivo.
 - [x] Balón pegado al manejador y pases a receptores reales.
 
 ### F4 — Defensa por posición
@@ -114,8 +124,8 @@ MatchDayController.Sim2D.* (renderer: keyframes, ticker, marcador, TL, OOB)
       no se ha medido el coste de allocations en un partido completo.
 
 ### Verificación
-- [x] `Sim2DChoreographerTests` (spacing, matchups, determinismo, TL, OOB, reloj).
-- [x] Suite EditMode completa verde: **621/621** (608 base + 13 nuevos).
+- [x] `Sim2DChoreographerTests` (spacing, matchups, determinismo, TL, OOB, acciones sin balón, reloj): **17/17**.
+- [x] Suite EditMode completa verde: **625/625** (608 base + 17 nuevos).
 - [ ] Partido de prueba visual (x1 y x10) sin desincronización: pendiente de una pasada manual en el editor; en batchmode no se puede validar la sincronización visual.
 - [x] Docs actualizadas: `Docs/GAMEPLAY.md`, `.agent/MEMORY.md`, este doc.
 
@@ -139,7 +149,8 @@ MatchDayController.Sim2D.* (renderer: keyframes, ticker, marcador, TL, OOB)
 | 2026-11-01 | F0 | Hecho | Metadatos de TL por intento y `out_of_bounds` sin cambiar la tirada. |
 | 2026-11-01 | F1 | Hecho | Coreógrafo, ticker por beats, marcador por pasos, TL 1/2/3 y OOB. |
 | 2026-11-01 | F2 | Hecho | Saque de fondo/lateral, subida, outlet, contragolpe y segunda oportunidad. |
-| 2026-11-01 | F3 | Hecho (parcial) | Zonas, spacing, tiros por spot y pases; bloqueos/cortes quedan para otra pasada. |
+| 2026-11-01 | F3 | Hecho | Zonas, spacing, tiros por spot, pases y acciones sin balón (bloqueo y continuación, corte, posteo). |
 | 2026-11-01 | F4 | Hecho | Emparejamiento por posición, on-ball/deny/help, pívot y closeout. |
 | 2026-11-02 | F5 | Parcial | HUD 24/14; faltan icono de ticker, faltas, animación de cambios y medición de allocations. |
 | 2026-11-02 | Tests | Hecho | `Sim2DChoreographerTests`: 13/13 en verde. Suite EditMode completa: 621/621. |
+| 2026-11-02 | F3 (2.ª pasada) | Hecho | Bloqueo y continuación, corte al aro y posteo con rutas, ticker y reacción defensiva; `Sim2DChoreographerTests`: 17/17 y suite completa 625/625. |

@@ -107,6 +107,78 @@ public class Sim2DChoreographerTests
     }
 
     [Test]
+    public void Build_OffBallActions_AppearAcrossEvents()
+    {
+        var seen = new HashSet<Sim2DChoreographer.OffBallActionKind>();
+        for (int i = 0; i < 40; i++)
+        {
+            var ev = Ev(D(1, "fga"), D(1, "fgm"), D(1, "pts", 2));
+            var script = Build(ev, eventIndex: i);
+            if (script.OffBallKind != Sim2DChoreographer.OffBallActionKind.None)
+                seen.Add(script.OffBallKind);
+        }
+
+        Assert.That(seen, Does.Contain(Sim2DChoreographer.OffBallActionKind.Screen));
+        Assert.That(seen, Does.Contain(Sim2DChoreographer.OffBallActionKind.Cut));
+        Assert.That(seen, Does.Contain(Sim2DChoreographer.OffBallActionKind.PostUp));
+    }
+
+    [Test]
+    public void Build_OffBallAction_HasMatchingCue()
+    {
+        for (int i = 0; i < 40; i++)
+        {
+            var ev = Ev(D(1, "fga"), D(1, "fgm"), D(1, "pts", 2));
+            var script = Build(ev, eventIndex: i);
+            if (script.OffBallKind == Sim2DChoreographer.OffBallActionKind.None) continue;
+
+            string expected = script.OffBallKind switch
+            {
+                Sim2DChoreographer.OffBallActionKind.Screen => "Bloqueo",
+                Sim2DChoreographer.OffBallActionKind.Cut => "corta",
+                Sim2DChoreographer.OffBallActionKind.PostUp => "poste",
+                _ => null
+            };
+            Assert.That(script.Cues.Any(c => c.Text != null && c.Text.Contains(expected)),
+                Is.True, $"Falta el comentario de {script.OffBallKind} en el evento {i}");
+        }
+    }
+
+    [Test]
+    public void Build_OffBallAction_IsDeterministic()
+    {
+        var ev = Ev(D(1, "fga"), D(1, "fgm"), D(1, "pts", 2));
+
+        var a = Build(ev, eventIndex: 7);
+        var b = Build(ev, eventIndex: 7);
+
+        Assert.That(b.OffBallKind, Is.EqualTo(a.OffBallKind));
+        Assert.That(b.OffBallActorId, Is.EqualTo(a.OffBallActorId));
+        Assert.That(string.Join("|", b.Cues.Select(c => c.Text)),
+            Is.EqualTo(string.Join("|", a.Cues.Select(c => c.Text))));
+    }
+
+    [Test]
+    public void Build_OffBallAction_DoesNotOverlapShooter()
+    {
+        for (int i = 0; i < 40; i++)
+        {
+            var ev = Ev(D(1, "fga"), D(1, "fgm"), D(1, "pts", 2));
+            var script = Build(ev, eventIndex: i);
+            if (script.OffBallKind == Sim2DChoreographer.OffBallActionKind.None) continue;
+
+            var actor = script.PlayerPaths.First(p => p.PlayerId == script.OffBallActorId);
+            var shooter = script.PlayerPaths.First(p => p.PlayerId == 1);
+            var a = actor.Points[actor.Points.Count - 1];
+            var s = shooter.Points[shooter.Points.Count - 1];
+            var pa = new UnityEngine.Vector2(a.X, a.Y);
+            var ps = new UnityEngine.Vector2(s.X, s.Y);
+            Assert.That(UnityEngine.Vector2.Distance(pa, ps), Is.GreaterThan(0.02f),
+                $"El actor {script.OffBallActorId} se solapa con el tirador en el evento {i}");
+        }
+    }
+
+    [Test]
     public void Build_IsDeterministic()
     {
         var ev = Ev(D(1, "fga"), D(1, "fgm"), D(1, "pts", 2));
