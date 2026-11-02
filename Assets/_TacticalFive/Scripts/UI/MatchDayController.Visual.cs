@@ -63,6 +63,19 @@ public partial class MatchDayController
     private Sim2DInboundType _sim2DInboundType;
     private float _sim2DInboundY = 0.5f;
 
+    // Guion de presentación (Sim2DChoreographer): ticker por beats, marcador por
+    // pasos y deltas diferidos hasta el instante en que ocurre la jugada.
+    private List<Sim2DChoreographer.Cue> _sim2DCues = new();
+    private int _sim2DCueIndex;
+    private List<Sim2DChoreographer.ScoreStep> _sim2DScoreSteps = new();
+    private int _sim2DScoreStepIndex;
+    private int _sim2DDisplayedHome, _sim2DDisplayedAway;
+    private List<GameSimulator.StatDelta> _sim2DPendingDeltas;
+    private bool _sim2DDeltasApplied = true;
+    private float _sim2DDeltasTime = 0.96f;
+    private bool _sim2DScoreEffectDone;
+    private GameSimulator.PlayByPlayEvent _sim2DCurrentEvent;
+
     private readonly Dictionary<int, Sim2DPlayerState> _sim2DPlayers = new();
 
     private class Sim2DPlayerState
@@ -291,6 +304,16 @@ public partial class MatchDayController
         ClearSim2DScoreEffects();
         _sim2DGameId = gameId;
         _sim2DLog = log;
+        _sim2DDisplayedHome = 0;
+        _sim2DDisplayedAway = 0;
+        _sim2DCues = new List<Sim2DChoreographer.Cue>();
+        _sim2DScoreSteps = new List<Sim2DChoreographer.ScoreStep>();
+        _sim2DCueIndex = 0;
+        _sim2DScoreStepIndex = 0;
+        _sim2DPendingDeltas = null;
+        _sim2DDeltasApplied = true;
+        _sim2DDeltasTime = 0.96f;
+        _sim2DScoreEffectDone = false;
         _sim2DActive = true;
         _sim2DFinished = false;
         _sim2DPaused = false;
@@ -619,6 +642,93 @@ public partial class MatchDayController
         _sim2DClock.text = $"{mm:D2}:{ss:D2}";
     }
 
+    void UpdateSim2DCues(float rawT)
+    {
+        while (_sim2DCueIndex < _sim2DCues.Count
+               && rawT >= _sim2DCues[_sim2DCueIndex].Time)
+            ApplySim2DCue(_sim2DCues[_sim2DCueIndex++]);
+    }
+
+    void ApplySim2DCue(Sim2DChoreographer.Cue cue)
+    {
+        if (cue == null || cue.Priority > MaxSim2DCuePriority()) return;
+        if (cue.Kind == Sim2DChoreographer.CueKind.Outcome)
+            _sim2DTickerText.text = Sim2DEventText(_sim2DCurrentEvent);
+        else if (!string.IsNullOrEmpty(cue.Text))
+            _sim2DTickerText.text = cue.Text;
+    }
+
+    int MaxSim2DCuePriority()
+    {
+        if (_sim2DSpeed >= 10) return 0;
+        if (_sim2DSpeed >= 5) return 1;
+        return 2;
+    }
+
+    void UpdateSim2DScoreSteps(float rawT)
+    {
+        while (_sim2DScoreStepIndex < _sim2DScoreSteps.Count
+               && rawT >= _sim2DScoreSteps[_sim2DScoreStepIndex].Time)
+            ApplySim2DScoreStep(_sim2DScoreSteps[_sim2DScoreStepIndex++], _sim2DCurrentEvent);
+    }
+
+    /// <summary>
+    /// Aplica las estadísticas (PTS/REB/AST) en el beat de la jugada, no al
+    /// empezar la posesión. El guion fija `DeltasTime` en el último paso de
+    /// marcador (canasta o último tiro libre); en jugadas sin puntos cae cerca
+    /// del final (rebote, pérdida). `ApplySim2DFinalState` sigue siendo la red
+    /// de seguridad si la animación se corta.
+    /// </summary>
+    void UpdateSim2DDeltas(float rawT)
+    {
+        if (_sim2DDeltasApplied || _sim2DPendingDeltas == null) return;
+        if (rawT < _sim2DDeltasTime) return;
+        ApplySim2DDeltas(_sim2DPendingDeltas);
+        _sim2DDeltasApplied = true;
+        UpdateSim2DRoster();
+    }
+
+    void ApplySim2DScoreStep(Sim2DChoreographer.ScoreStep step, GameSimulator.PlayByPlayEvent ev)
+    {
+        if (step == null) return;
+        _sim2DDisplayedHome = step.Home;
+        _sim2DDisplayedAway = step.Away;
+        if (_sim2DScore != null) _sim2DScore.text = $"{step.Home} - {step.Away}";
+
+        if (!_sim2DScoreEffectDone && Sim2DIsFieldGoalMade(ev))
+        {
+            PlaySim2DScoreEffect(ev.homeOnOffense, Sim2DIsThreePointer(ev));
+            _sim2DScoreEffectDone = true;
+        }
+        else if (Sim2DIsMadeFreeThrow(ev))
+        {
+            PlaySim2DScoreEffect(ev.homeOnOffense, false, true);
+        }
+    }
+
+    void ApplySim2DFinalState(GameSimulator.PlayByPlayEvent ev)
+    {
+        while (_sim2DScoreStepIndex < _sim2DScoreSteps.Count)
+            ApplySim2DScoreStep(_sim2DScoreSteps[_sim2DScoreStepIndex++], ev);
+        while (_sim2DCueIndex < _sim2DCues.Count)
+            ApplySim2DCue(_sim2DCues[_sim2DCueIndex++]);
+
+        if (_sim2DDisplayedHome != ev.homeScore || _sim2DDisplayedAway != ev.awayScore)
+        {
+            _sim2DDisplayedHome = ev.homeScore;
+            _sim2DDisplayedAway = ev.awayScore;
+            if (_sim2DScore != null) _sim2DScore.text = $"{ev.homeScore} - {ev.awayScore}";
+        }
+
+        if (!_sim2DDeltasApplied)
+        {
+            ApplySim2DDeltas(_sim2DPendingDeltas);
+            _sim2DDeltasApplied = true;
+            UpdateSim2DRoster();
+        }
+        _sim2DPendingDeltas = null;
+    }
+
     void UpdateSim2DPossession()
     {
         if (_sim2DPossession == null) return;
@@ -636,7 +746,6 @@ public partial class MatchDayController
         {
             while (_sim2DPaused) yield return null;
             var ev = log[i];
-            ApplySim2DDeltas(ev.deltas);
             bool hasLineups = ev.homeOnCourt != null && ev.homeOnCourt.Count > 0;
             if (hasLineups)
             {
@@ -646,11 +755,17 @@ public partial class MatchDayController
                 PrepareSim2DPossession(previousAction, ev);
             }
 
-            UpdateSim2DScoreboard(ev.homeScore, ev.awayScore, ev.quarter, ev.timeElapsed);
-            _sim2DTickerText.text = Sim2DEventText(ev);
+            _sim2DCurrentEvent = ev;
+            _sim2DPendingDeltas = ev.deltas;
+            _sim2DDeltasApplied = false;
+            // El marcador arranca en el resultado anterior: los puntos entran en el
+            // beat de la canasta, no al empezar la posesión.
+            UpdateSim2DScoreboard(_sim2DDisplayedHome, _sim2DDisplayedAway, ev.quarter, ev.timeElapsed);
             UpdateSim2DPossession();
             UpdateSim2DRoster();
-            LayoutSim2DTargets(ev, i, animate: true);
+            LayoutSim2DTargets(ev, i, animate: true, previousAction);
+            if (_sim2DCues == null || _sim2DCues.Count == 0)
+                _sim2DTickerText.text = Sim2DEventText(ev);
 
             float currentAbsolute = GetSim2DAbsoluteMinutes(ev);
             var next = i + 1 < log.Count ? log[i + 1] : null;
@@ -665,11 +780,7 @@ public partial class MatchDayController
             yield return AnimateSim2DPositions(ev.quarter, ev.timeElapsed, clockTarget,
                 eventDuration, shotClockStart, shotClockEnd);
 
-            // El aro se enciende cuando el balón ya ha llegado a la canasta.
-            if (Sim2DIsFieldGoalMade(ev))
-                PlaySim2DScoreEffect(ev.homeOnOffense, Sim2DIsThreePointer(ev));
-            else if (Sim2DIsMadeFreeThrow(ev))
-                PlaySim2DScoreEffect(ev.homeOnOffense, false, true);
+            ApplySim2DFinalState(ev);
 
             if (Sim2DIsOffensiveRebound(ev))
             {
@@ -719,11 +830,27 @@ public partial class MatchDayController
                 }
                 else if (FindSim2DPlayerForStat(previous, "to") > 0)
                 {
+                    // F0: el motor distingue pérdida fuera de banda (out_of_bounds)
+                    // de pérdida lateral (sideline). Si el balón salió por la línea
+                    // de fondo, el siguiente saque es de fondo; si salió por la
+                    // banda, es lateral. El tipo solo cambia la puesta en escena.
+                    bool outOfBounds = previous.turnoverType == "out_of_bounds";
                     bool sideline = previous.turnoverType == "sideline";
-                    _sim2DInboundType = sideline ? Sim2DInboundType.Sideline : Sim2DInboundType.DeadBall;
-                    _sim2DInboundY = sideline
-                        ? (_sim2DBallY < 0.5f ? 0.09f : 0.91f)
-                        : Mathf.Clamp(_sim2DBallY, 0.12f, 0.88f);
+                    if (outOfBounds && _sim2DBallY > 0.35f && _sim2DBallY < 0.65f)
+                    {
+                        _sim2DInboundType = Sim2DInboundType.Baseline;
+                        _sim2DInboundY = 0.5f;
+                    }
+                    else if (outOfBounds || sideline)
+                    {
+                        _sim2DInboundType = Sim2DInboundType.Sideline;
+                        _sim2DInboundY = _sim2DBallY < 0.5f ? 0.09f : 0.91f;
+                    }
+                    else
+                    {
+                        _sim2DInboundType = Sim2DInboundType.DeadBall;
+                        _sim2DInboundY = Mathf.Clamp(_sim2DBallY, 0.12f, 0.88f);
+                    }
                     _sim2DBallHandlerId = FindSim2DPointGuardForCurrentOffense();
                 }
                 else
@@ -806,7 +933,8 @@ public partial class MatchDayController
         _sim2DCourt.style.alignSelf = Align.Center;
     }
 
-    void LayoutSim2DTargets(GameSimulator.PlayByPlayEvent ev, int eventIndex, bool animate)
+    void LayoutSim2DTargets(GameSimulator.PlayByPlayEvent ev, int eventIndex, bool animate,
+                            GameSimulator.PlayByPlayEvent previous = null)
     {
         foreach (var state in _sim2DPlayers.Values)
         {
@@ -834,7 +962,22 @@ public partial class MatchDayController
         _sim2DBallPath.Clear();
         _sim2DPlayerPaths.Clear();
         _sim2DBallFollowsHandler = false;
-        ApplySim2DActionTargets(ev, eventIndex);
+        _sim2DCues = new List<Sim2DChoreographer.Cue>();
+        _sim2DScoreSteps = new List<Sim2DChoreographer.ScoreStep>();
+        _sim2DCueIndex = 0;
+        _sim2DScoreStepIndex = 0;
+        _sim2DDeltasTime = 0.96f;
+        _sim2DScoreEffectDone = false;
+
+        // Opción B: el coreógrafo convierte el evento en un guion (spacing real,
+        // transición, pases, defensa por posición, TL y fuera de banda). Si el
+        // evento no tiene deltas (inicio de cuarto, expulsión), se usa el layout
+        // de respaldo de siempre.
+        var script = BuildSim2DScript(ev, eventIndex, previous);
+        if (script != null)
+            ApplySim2DScript(script);
+        else
+            ApplySim2DActionTargets(ev, eventIndex);
 
         if (!animate)
         {
@@ -851,6 +994,113 @@ public partial class MatchDayController
             _sim2DBallY = ballStart.y;
             ApplySim2DBallPosition();
         }
+    }
+
+    Sim2DChoreographer.Script BuildSim2DScript(GameSimulator.PlayByPlayEvent ev, int eventIndex,
+                                               GameSimulator.PlayByPlayEvent previous)
+    {
+        if (ev?.deltas == null || ev.deltas.Count == 0) return null;
+        var offenseIds = OrderSim2DOnCourt(
+            _sim2DHomeOnOffense ? _sim2DHomeOnCourt : _sim2DAwayOnCourt);
+        var defenseIds = OrderSim2DOnCourt(
+            _sim2DHomeOnOffense ? _sim2DAwayOnCourt : _sim2DHomeOnCourt);
+        if (offenseIds.Count == 0) return null;
+        var offense = BuildSim2DPlayerInfos(offenseIds);
+        var defense = BuildSim2DPlayerInfos(defenseIds);
+        return Sim2DChoreographer.Build(ev, previous, offense, defense,
+            _sim2DHomeOnOffense, MapSim2DInbound(_sim2DInboundType), _sim2DInboundY,
+            eventIndex, _sim2DGameId, _sim2DDisplayedHome, _sim2DDisplayedAway,
+            _sim2DHomeOnOffense);
+    }
+
+    List<Sim2DChoreographer.PlayerInfo> BuildSim2DPlayerInfos(List<int> ids)
+    {
+        var result = new List<Sim2DChoreographer.PlayerInfo>(ids.Count);
+        foreach (int id in ids)
+        {
+            if (!_sim2DPlayers.TryGetValue(id, out var state)) continue;
+            var player = state.Player;
+            string name = !string.IsNullOrEmpty(player.last_name)
+                ? player.last_name
+                : player.first_name;
+            result.Add(new Sim2DChoreographer.PlayerInfo
+            {
+                Id = player.id,
+                TeamId = state.TeamId,
+                Position = player.position,
+                Name = name,
+                Overall = player.overall
+            });
+        }
+        return result;
+    }
+
+    static Sim2DChoreographer.InboundKind MapSim2DInbound(Sim2DInboundType type)
+    {
+        return type switch
+        {
+            Sim2DInboundType.TipOff => Sim2DChoreographer.InboundKind.TipOff,
+            Sim2DInboundType.Baseline => Sim2DChoreographer.InboundKind.Baseline,
+            Sim2DInboundType.Sideline => Sim2DChoreographer.InboundKind.Sideline,
+            Sim2DInboundType.DeadBall => Sim2DChoreographer.InboundKind.DeadBall,
+            Sim2DInboundType.Outlet => Sim2DChoreographer.InboundKind.Outlet,
+            _ => Sim2DChoreographer.InboundKind.None
+        };
+    }
+
+    void ApplySim2DScript(Sim2DChoreographer.Script script)
+    {
+        foreach (var path in script.PlayerPaths)
+        {
+            if (!_sim2DPlayers.TryGetValue(path.PlayerId, out var state)) continue;
+            var waypoints = new List<Sim2DPlayerWaypoint>(path.Points.Count);
+            foreach (var point in path.Points)
+            {
+                waypoints.Add(new Sim2DPlayerWaypoint
+                {
+                    Position = new Vector2(point.X, point.Y),
+                    Time = point.Time
+                });
+            }
+            if (waypoints.Count == 0) continue;
+            _sim2DPlayerPaths[path.PlayerId] = waypoints;
+            var last = waypoints[waypoints.Count - 1];
+            state.TargetX = last.Position.x;
+            state.TargetY = last.Position.y;
+        }
+
+        foreach (var point in script.BallPath)
+        {
+            _sim2DBallPath.Add(new Sim2DBallWaypoint
+            {
+                Position = new Vector2(point.X, point.Y),
+                Time = point.Time,
+                IsShot = point.IsShot
+            });
+        }
+        if (_sim2DBallPath.Count > 0)
+        {
+            var lastBall = _sim2DBallPath[_sim2DBallPath.Count - 1];
+            _sim2DBallTargetX = lastBall.Position.x;
+            _sim2DBallTargetY = lastBall.Position.y;
+        }
+
+        _sim2DBallHandlerId = script.BallHandlerId;
+        _sim2DBallFollowsHandler = script.BallFollowsHandler;
+        _sim2DCues = script.Cues;
+        _sim2DCueIndex = 0;
+        _sim2DScoreSteps = script.ScoreSteps;
+        _sim2DScoreStepIndex = 0;
+        _sim2DDeltasTime = script.DeltasTime;
+        _sim2DDeltasApplied = false;
+        _sim2DScoreEffectDone = false;
+
+        foreach (int id in script.ActionIds)
+            if (_sim2DPlayers.TryGetValue(id, out var action))
+                action.Node?.EnableInClassList("sim2d-player--action", true);
+        if (script.PressureId > 0
+            && _sim2DPlayers.TryGetValue(script.PressureId, out var pressure))
+            pressure.Node?.EnableInClassList("sim2d-player--pressure", true);
     }
 
     // Posición de arranque de una jugada sin animación: el primer punto real del
@@ -1575,6 +1825,9 @@ public partial class MatchDayController
             elapsed += Time.unscaledDeltaTime;
             float rawT = Mathf.Clamp01(elapsed / duration);
             float t = Mathf.SmoothStep(0f, 1f, rawT);
+            UpdateSim2DCues(rawT);
+            UpdateSim2DScoreSteps(rawT);
+            UpdateSim2DDeltas(rawT);
             UpdateSim2DClock(quarter, Mathf.Lerp(clockStart, clockTarget,
                 Mathf.Clamp01(elapsed / clockDuration)));
             UpdateSim2DShotClock(Mathf.Lerp(shotClockStart, shotClockTarget, rawT));
@@ -1958,9 +2211,18 @@ public partial class MatchDayController
 
         var final = _sim2DLog[_sim2DLog.Count - 1];
         UpdateSim2DScoreboard(final.homeScore, final.awayScore, final.quarter, final.timeElapsed);
+        _sim2DDisplayedHome = final.homeScore;
+        _sim2DDisplayedAway = final.awayScore;
         _sim2DTickerText.text = LocalizationService.T("ui.code.match_day_controller.fin_del_partido");
         UpdateSim2DRoster();
         LayoutSim2DTargets(final, _sim2DLog.Count - 1, animate: false);
+        _sim2DCues = new List<Sim2DChoreographer.Cue>();
+        _sim2DScoreSteps = new List<Sim2DChoreographer.ScoreStep>();
+        _sim2DCueIndex = 0;
+        _sim2DScoreStepIndex = 0;
+        _sim2DDeltasApplied = true;
+        _sim2DDeltasTime = 0.96f;
+        _sim2DPendingDeltas = null;
         OnSim2DComplete();
     }
 

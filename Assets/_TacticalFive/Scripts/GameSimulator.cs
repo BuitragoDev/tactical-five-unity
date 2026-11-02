@@ -75,6 +75,12 @@ public static class GameSimulator
         /// vista 2D muestre el quinteto correcto y refleje las sustituciones.</summary>
         public List<int> homeOnCourt = new();
         public List<int> awayOnCourt = new();
+        /// <summary>Resultado de cada tiro libre del ataque (true = anotado), en orden.
+        /// Metadato de presentación para que la vista 2D muestre 1/2/3 intentos; no
+        /// afecta al resultado. Null si la jugada no tuvo tiros libres.</summary>
+        public List<bool> freeThrowResults;
+        /// <summary>Id del jugador que tiró los libres (0 si no hubo).</summary>
+        public int freeThrowShooterId;
     }
 
     public class StatDelta
@@ -93,6 +99,11 @@ public static class GameSimulator
         public bool offensiveRebound;
         /// <summary>Clasificación solo para la crónica; no afecta al resultado.</summary>
         public string turnoverType;
+        /// <summary>Resultado de cada tiro libre (true = anotado), en orden. Metadato de
+        /// presentación; el resultado del partido ya está en `pts`.</summary>
+        public List<bool> freeThrowResults;
+        /// <summary>Id del jugador que tiró los libres (0 si no hubo).</summary>
+        public int freeThrowShooterId;
     }
 
     /// <summary>
@@ -902,7 +913,8 @@ public static class GameSimulator
 
     static void AddLog(List<PlayByPlayEvent> log, int quarter, string desc, int homeScore, int awayScore,
         float elapsed, List<StatDelta> deltas = null, List<int> homeOnCourt = null,
-        List<int> awayOnCourt = null, bool homeOnOffense = false, string turnoverType = null)
+        List<int> awayOnCourt = null, bool homeOnOffense = false, string turnoverType = null,
+        List<bool> freeThrowResults = null, int freeThrowShooterId = 0)
     {
         if (log == null || string.IsNullOrEmpty(desc)) return;
         log.Add(new PlayByPlayEvent
@@ -916,7 +928,9 @@ public static class GameSimulator
             homeOnOffense = homeOnOffense,
             turnoverType = turnoverType,
             homeOnCourt = homeOnCourt ?? new List<int>(),
-            awayOnCourt = awayOnCourt ?? new List<int>()
+            awayOnCourt = awayOnCourt ?? new List<int>(),
+            freeThrowResults = freeThrowResults,
+            freeThrowShooterId = freeThrowShooterId
         });
     }
 
@@ -1052,7 +1066,8 @@ public static class GameSimulator
                     elapsed, deltas,
                     homeOn.Select(i => homePS[i].player_id).ToList(),
                     awayOn.Select(i => awayPS[i].player_id).ToList(),
-                    homeOnOffense, outcome.turnoverType);
+                    homeOnOffense, outcome.turnoverType,
+                    outcome.freeThrowResults, outcome.freeThrowShooterId);
             }
 
             attacksSoFar++;
@@ -1089,12 +1104,12 @@ public static class GameSimulator
         float toPct = TurnoverChance(offR, defR, BallSecurity(off), defPlan);
         if (random.Value < toPct)
         {
-            string toName = DoTO(off, def, random, out bool sidelineTurnover);
+            string toName = DoTO(off, def, random, out string turnoverKind);
             return new PossessionOutcome
             {
                 pts = 0,
                 desc = $"{toName ?? "Pérdida de balón"} pierde el balón",
-                turnoverType = sidelineTurnover ? "sideline" : null
+                turnoverType = turnoverKind
             };
         }
 
@@ -1109,13 +1124,16 @@ public static class GameSimulator
                 var ftShooter = PickShooter(off, glLeague, random);
                 if (ftShooter != null)
                 {
-                    int made = ShootFreeThrows(ftShooter, 2, out bool live, random);
+                    var ftResults = new List<bool>();
+                    int made = ShootFreeThrows(ftShooter, 2, out bool live, random, ftResults);
                     var outcome = new PossessionOutcome
                     {
                         pts = made,
                         desc = made > 0
                             ? $"{ftShooter.name} convierte {made}/2 tiros libres (bonus; falta de {foulName})"
-                            : $"{ftShooter.name} falla los 2 tiros libres (bonus; falta de {foulName})"
+                            : $"{ftShooter.name} falla los 2 tiros libres (bonus; falta de {foulName})",
+                        freeThrowResults = ftResults,
+                        freeThrowShooterId = ftShooter.player_id
                     };
                     if (live) AttachLiveRebound(outcome, def, off, glLeague, random);
                     return outcome;
@@ -1168,13 +1186,16 @@ public static class GameSimulator
             {
                 string foulName = DoFoul(def, random);
                 defFouls?.RegisterFoul();
-                int bonusMade = ShootFreeThrows(shooter, 1, out bool liveAndOne, random);
+                var andOneResults = new List<bool>();
+                int bonusMade = ShootFreeThrows(shooter, 1, out bool liveAndOne, random, andOneResults);
                 var andOne = new PossessionOutcome
                 {
                     pts = 2 + bonusMade,
                     desc = bonusMade > 0
                         ? $"{shooter.name} anota y añade el tiro libre (falta de {foulName ?? "defensa"})"
-                        : $"{shooter.name} anota de dos pero falla el tiro adicional"
+                        : $"{shooter.name} anota de dos pero falla el tiro adicional",
+                    freeThrowResults = andOneResults,
+                    freeThrowShooterId = shooter.player_id
                 };
                 if (liveAndOne) AttachLiveRebound(andOne, def, off, glLeague, random);
                 return andOne;
@@ -1227,13 +1248,16 @@ public static class GameSimulator
             // Toda falta cuenta para el bonus de equipo; las de tiro pagan libres igual.
             defFouls?.RegisterFoul();
             int nShots = isThree ? 3 : 2;
-            int made = ShootFreeThrows(shooter, nShots, out bool liveRebound, random);
+            var ftResults = new List<bool>();
+            int made = ShootFreeThrows(shooter, nShots, out bool liveRebound, random, ftResults);
             var outcome = new PossessionOutcome
             {
                 pts = made,
                 desc = made > 0
                     ? $"{shooter.name} convierte {made}/{nShots} tiros libres (falta de {foulName ?? "defensa"})"
-                    : $"{shooter.name} falla los {nShots} tiros libres"
+                    : $"{shooter.name} falla los {nShots} tiros libres",
+                freeThrowResults = ftResults,
+                freeThrowShooterId = shooter.player_id
             };
             // El último libre fallado deja el balón vivo (F2-03).
             if (liveRebound) AttachLiveRebound(outcome, def, off, glLeague, random);
@@ -1461,10 +1485,10 @@ public static class GameSimulator
     }
 
     static string DoTO(List<PlayerStatSnapshot> off, List<PlayerStatSnapshot> def,
-        IRandomSource random, out bool sidelineTurnover)
+        IRandomSource random, out string turnoverKind)
     {
         random ??= UnityRandomSource.Instance;
-        sidelineTurnover = false;
+        turnoverKind = null;
         string toName = null;
         var handlers = off.Where(p => p.position is "PG" or "SG" or "SF").ToList();
         if (handlers.Count == 0) handlers = off;
@@ -1487,7 +1511,7 @@ public static class GameSimulator
         float stealRoll = random.Value;
         if (stealRoll >= 0.5f)
         {
-            sidelineTurnover = IsSidelineTurnoverRoll(stealRoll);
+            turnoverKind = ClassifyNoStealTurnover(stealRoll);
             return toName;
         }
         if (def.Count == 0) return toName;
@@ -1509,6 +1533,18 @@ public static class GameSimulator
 
     public static bool IsSidelineTurnoverRoll(float roll) => roll >= 0.5f && roll < 0.7f;
 
+    /// <summary>Dentro de la banda sin robo (0,50-0,70), la mitad inferior se
+    /// representa como balón fuera de banda. Es solo metadato visual: la tirada,
+    /// el resultado y el número de eventos no cambian.</summary>
+    public static bool IsOutOfBoundsTurnoverRoll(float roll) => roll >= 0.5f && roll < 0.6f;
+
+    static string ClassifyNoStealTurnover(float roll)
+    {
+        if (IsOutOfBoundsTurnoverRoll(roll)) return "out_of_bounds";
+        if (IsSidelineTurnoverRoll(roll)) return "sideline";
+        return null;
+    }
+
     /// <summary>Probabilidad de falta sin tiro en la penetración (F2-03).</summary>
     static float ReachInFoulChance(GamePlan defPlan) => Mathf.Max(0f, BASE_REACH_IN_FOUL_CHANCE + defPlan.FoulDelta());
 
@@ -1518,17 +1554,20 @@ public static class GameSimulator
     /// rebote (F2-03). Si el último entra, el balón muere.
     /// </summary>
     public static int ShootFreeThrows(PlayerStatSnapshot shooter, int shots, out bool liveRebound,
-        IRandomSource random = null)
+        IRandomSource random = null, List<bool> results = null)
     {
         random ??= UnityRandomSource.Instance;
         liveRebound = false;
+        results?.Clear();
         if (shooter == null) return 0;
         float pct = 0.75f + (shooter.overall - 70) * 0.002f;
         int made = 0;
         for (int i = 0; i < shots; i++)
         {
             shooter.fta++;
-            if (random.Value < pct)
+            bool scored = random.Value < pct;
+            results?.Add(scored);
+            if (scored)
             {
                 shooter.ftm++; shooter.points++; made++;
             }
