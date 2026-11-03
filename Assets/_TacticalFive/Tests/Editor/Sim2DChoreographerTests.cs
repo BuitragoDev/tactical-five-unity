@@ -337,6 +337,20 @@ public class Sim2DChoreographerTests
     }
 
     [Test]
+    public void Build_MadeBasket_InboundsFromOwnBaseline()
+    {
+        var ev = Ev(D(1, "fga"), D(1, "fgm"), D(1, "pts", 2));
+
+        // Cada equipo ataca su aro: tras canasta el rival saca desde la línea de
+        // fondo donde se anotó (la propia del que ahora ataca), no desde la que ataca.
+        var attackingRight = Build(ev, Sim2DChoreographer.InboundKind.Baseline, attackRight: true);
+        var attackingLeft = Build(ev, Sim2DChoreographer.InboundKind.Baseline, attackRight: false);
+
+        Assert.That(attackingRight.BallPath[0].X, Is.EqualTo(0.035f).Within(0.01f));
+        Assert.That(attackingLeft.BallPath[0].X, Is.EqualTo(0.965f).Within(0.01f));
+    }
+
+    [Test]
     public void Build_WithoutDeltas_ReturnsNull()
     {
         var ev = new GameSimulator.PlayByPlayEvent
@@ -345,5 +359,173 @@ public class Sim2DChoreographerTests
         };
 
         Assert.That(Build(ev), Is.Null);
+    }
+
+    // ── F5: icono del ticker, faltas, variedad y presupuesto ────────────────
+
+    [Test]
+    public void Build_MadeShot_UsesBasketIcon()
+    {
+        var ev = Ev(D(3, "fga"), D(3, "fg3a"), D(3, "fgm"), D(3, "pts", 3));
+
+        Assert.That(Build(ev).IconName, Is.EqualTo("basket_icon"));
+    }
+
+    [Test]
+    public void Build_MissedShot_UsesShotIcon()
+    {
+        var ev = Ev(D(1, "fga"));
+
+        Assert.That(Build(ev).IconName, Is.EqualTo("tiro"));
+    }
+
+    [Test]
+    public void Build_MissedShotWithRebound_UsesShotIcon()
+    {
+        // El icono principal es el tiro; el rebote se narra en el ticker.
+        var ev = Ev(D(1, "fga"), D(12, "dreb"));
+
+        Assert.That(Build(ev).IconName, Is.EqualTo("tiro"));
+    }
+
+    [Test]
+    public void Build_Steal_UsesStealIcon()
+    {
+        var ev = Ev(D(1, "to"), D(12, "stl"));
+
+        Assert.That(Build(ev).IconName, Is.EqualTo("robo"));
+    }
+
+    [Test]
+    public void Build_LossWithoutSteal_UsesLossIcon()
+    {
+        var ev = Ev(D(1, "to"));
+
+        Assert.That(Build(ev).IconName, Is.EqualTo("perdidas"));
+    }
+
+    [Test]
+    public void Build_Block_UsesBlockIcon()
+    {
+        var ev = Ev(D(1, "fga"), D(14, "blk"));
+
+        Assert.That(Build(ev).IconName, Is.EqualTo("tapones"));
+    }
+
+    [Test]
+    public void Build_Foul_UsesWhistleIconAndFoulCue()
+    {
+        var ev = Ev(D(1, "fta"), D(1, "ftm"), D(1, "pts", 1));
+        ev.foulType = "shooting";
+        ev.foulerName = "J12";
+        ev.freeThrowResults = new List<bool> { true };
+
+        var script = Build(ev);
+
+        Assert.That(script.IconName, Is.EqualTo("silbato"));
+        Assert.That(script.Cues.Any(c => c.Kind == Sim2DChoreographer.CueKind.Foul), Is.True);
+        Assert.That(script.Cues.First(c => c.Kind == Sim2DChoreographer.CueKind.Foul).Text,
+            Does.Contain("J12"));
+    }
+
+    [Test]
+    public void Build_AndOne_FoulCueComesAfterShotCue()
+    {
+        var ev = Ev(D(1, "fga"), D(1, "fgm"), D(1, "pts", 2),
+                    D(1, "fta"), D(1, "ftm"), D(1, "pts", 1));
+        ev.foulType = "and_one";
+        ev.foulerName = "J12";
+        ev.freeThrowResults = new List<bool> { true };
+
+        var script = Build(ev);
+
+        var shot = script.Cues.First(c => c.Kind == Sim2DChoreographer.CueKind.Shot);
+        var foul = script.Cues.First(c => c.Kind == Sim2DChoreographer.CueKind.Foul);
+        Assert.That(foul.Time, Is.GreaterThan(shot.Time));
+        Assert.That(script.IconName, Is.EqualTo("silbato"));
+    }
+
+    [Test]
+    public void Build_ReachInBonus_NarratesFreeThrows()
+    {
+        var ev = Ev(D(1, "fta"), D(1, "fta"), D(1, "ftm"), D(1, "pts", 1));
+        ev.foulType = "reach_in";
+        ev.foulBonus = true;
+        ev.foulerName = "J13";
+        ev.freeThrowResults = new List<bool> { true, false };
+
+        var script = Build(ev);
+
+        Assert.That(script.Cues.Any(c => c.Kind == Sim2DChoreographer.CueKind.Foul), Is.True);
+        Assert.That(script.Cues.Any(c => c.Kind == Sim2DChoreographer.CueKind.FreeThrow), Is.True);
+    }
+
+    [Test]
+    public void Build_SameEvent_ProducesSameCommentary()
+    {
+        var ev = Ev(D(1, "fga"), D(1, "fgm"), D(1, "pts", 2));
+
+        var first = Build(ev, eventIndex: 7);
+        var second = Build(ev, eventIndex: 7);
+
+        Assert.That(first.Cues.Count, Is.EqualTo(second.Cues.Count));
+        for (int i = 0; i < first.Cues.Count; i++)
+            Assert.That(first.Cues[i].Text, Is.EqualTo(second.Cues[i].Text));
+    }
+
+    [Test]
+    public void Build_Commentary_HasVarietyAcrossEvents()
+    {
+        var texts = new HashSet<string>();
+        for (int i = 0; i < 12; i++)
+        {
+            var ev = Ev(D(1, "fga"), D(1, "fgm"), D(1, "pts", 2));
+            var script = Build(ev, eventIndex: i);
+            var shot = script.Cues.First(c => c.Kind == Sim2DChoreographer.CueKind.Shot);
+            texts.Add(shot.Text);
+        }
+
+        Assert.That(texts.Count, Is.GreaterThan(1));
+    }
+
+    [Test]
+    public void Build_RepeatedCalls_StayWithinCostBudget()
+    {
+        var ev = Ev(D(3, "fga"), D(3, "fg3a"), D(3, "fgm"), D(3, "pts", 3), D(1, "ast"));
+
+        // Calentamiento (JIT y cachés de listas).
+        for (int i = 0; i < 20; i++) Build(ev, eventIndex: i);
+
+        const int iterations = 200;
+        var watch = System.Diagnostics.Stopwatch.StartNew();
+        for (int i = 0; i < iterations; i++) Build(ev, eventIndex: i);
+        watch.Stop();
+
+        double perBuildMs = watch.Elapsed.TotalMilliseconds / iterations;
+        TestContext.WriteLine($"Coste medio por jugada: {perBuildMs:F3} ms");
+
+        // El guion se construye una vez por evento, no por frame: un presupuesto
+        // holgado evita que una regresión de allocations pase desapercibida.
+        Assert.That(perBuildMs, Is.LessThan(2.0),
+            $"Coste medio por jugada: {perBuildMs:F3} ms");
+    }
+
+    [Test]
+    public void Build_RepeatedCalls_DoNotGrowTheScript()
+    {
+        var ev = Ev(D(3, "fga"), D(3, "fg3a"), D(3, "fgm"), D(3, "pts", 3), D(1, "ast"));
+
+        var first = Build(ev, eventIndex: 3);
+        int cues = first.Cues.Count;
+        int paths = first.PlayerPaths.Count;
+        int balls = first.BallPath.Count;
+
+        for (int i = 0; i < 50; i++)
+        {
+            var again = Build(ev, eventIndex: 3);
+            Assert.That(again.Cues.Count, Is.EqualTo(cues));
+            Assert.That(again.PlayerPaths.Count, Is.EqualTo(paths));
+            Assert.That(again.BallPath.Count, Is.EqualTo(balls));
+        }
     }
 }

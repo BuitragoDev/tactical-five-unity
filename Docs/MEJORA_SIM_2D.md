@@ -1,6 +1,6 @@
 # MEJORA DE LA SIMULACIÓN VISUAL 2D — Plan y seguimiento
 
-> **Estado:** implementado (F0–F4; F5 parcial) · rama `mejora-simulador` · fecha 2026-11-02.
+> **Estado:** implementado (F0–F5) · rama `mejora-simulador` · fecha 2026-11-03.
 > Este documento es la checklist viva de la feature. Si la implementación se corta,
 > aquí queda qué está hecho, qué falta y cómo continuar.
 
@@ -111,34 +111,56 @@ MatchDayController.Sim2D.* (renderer: keyframes, ticker, marcador, TL, OOB)
 - [x] Closeout al tirador y caja en el rebote.
 - [x] Sin colapsos al balón (`FindNearest` solo para closeout).
 
-### F5 — Pulido (parcial)
+### F5 — Pulido (completo)
 - [x] HUD: reloj de 24/14 derivado del reloj de partido y de la posesión.
-- [ ] Variedad de comentarios (evitar repetición): hay varias plantillas, pero
-      la selección es determinista y todavía puede repetirse en jugadas seguidas.
-- [ ] Icono del ticker por tipo de jugada.
-- [ ] Cambios visibles en dead balls: el quinteto se actualiza en el siguiente
-      evento, sin animación de entrada/salida desde la banda.
-- [ ] Faltas y silbato: F0 no añadió metadato de falta; el play-by-play no las
-      representa como acción propia.
-- [ ] Rendimiento: el guion se construye una vez por evento (no por frame), pero
-      no se ha medido el coste de allocations en un partido completo.
+- [x] Variedad de comentarios: plantillas con variantes deterministas elegidas con
+      `StableHash(eventIndex, gameId, salt)` (nunca el RNG del partido). Cubre
+      subida, organización, tiro, canasta, fallo, rebote, tapón, pérdida y falta;
+      los métodos aceptan `int variant = 0` para no romper llamadas antiguas.
+- [x] Icono del ticker por tipo de jugada (`Script.IconName`), reutilizando los
+      PNG existentes de `Resources/Icons`: `silbato` (falta), `robo`, `perdidas`,
+      `tapones`, `tiro` (tiro/tiro libre), `basket_icon` (canasta), `rebote` y
+      `accion` (periodo/sin clasificar). El renderer cachea sprite y textura.
+- [x] Cambios visibles en dead balls: el que sale sigue en pista, camina al
+      banquillo y se oculta a mitad de jugada (`HideAt = 0,14`); el que entra
+      arranca desde el banquillo y completa su recorrido normal. El ticker avisa
+      («Entra X por Y»). Se detecta comparando `homeOnCourt`/`awayOnCourt` del
+      evento con el anterior, sin tocar el motor.
+- [x] Faltas y silbato: `PlayByPlayEvent`/`PossessionOutcome` llevan
+      `foulType` (`reach_in`, `shooting`, `and_one`, `ejection`), `foulerId`,
+      `foulerName` y `foulBonus`. El coreógrafo añade un cue de falta (el 2+1 se
+      canta después de la canasta) y el renderer reproduce el silbato.
+- [x] SFX de partido (clips **provisionales**, ver `THIRD_PARTY_ASSETS.md`):
+      `silbato` en faltas, `bocina` en inicio/fin de periodo y `canasta` en
+      canasta o tiro libre anotado. `AudioManager.PlaySFX(nombre, volumen)`
+      respeta el volumen de SFX y cachea los clips.
+- [x] Rendimiento: el guion se construye una vez por evento (no por frame). Coste
+      medido: **0,021 ms** por guion (200 iteraciones tras calentar) y el guion no
+      crece entre llamadas (`Build_RepeatedCalls_*`).
 
 ### Verificación
-- [x] `Sim2DChoreographerTests` (spacing, matchups, determinismo, TL, OOB, acciones sin balón, reloj): **17/17**.
-- [x] Suite EditMode completa verde: **625/625** (608 base + 17 nuevos).
+- [x] `Sim2DChoreographerTests` (spacing, matchups, determinismo, TL, OOB, acciones sin balón, reloj, F5): **30/30** (última ejecución filtrada antes del arreglo del saque).
+- [ ] `Sim2DChoreographerTests` tras el arreglo del saque de fondo (31 casos): pendiente de ejecutar; el editor tiene el proyecto abierto y bloquea `-batchmode`.
+- [ ] Suite EditMode completa: pendiente de ejecutar por el mismo motivo (el último total conocido era 625/625 en F3).
 - [ ] Partido de prueba visual (x1 y x10) sin desincronización: pendiente de una pasada manual en el editor; en batchmode no se puede validar la sincronización visual.
 - [x] Docs actualizadas: `Docs/GAMEPLAY.md`, `.agent/MEMORY.md`, este doc.
+
+### Correcciones posteriores
+- **Saque de fondo tras canasta (2026-11-03):** el saque usaba la línea de fondo del aro **que se ataca**; debe salir de la línea **propia** (la del aro donde se anotó). `Sim2DCourt.OwnBaselineInbound(attackRight)` centraliza el punto (`BaselineX(!attackRight)`) y el coreógrafo lo usa para `InboundKind.Baseline` (canasta, tiro libre y fuera de banda en la línea de fondo). Regresión cubierta por `Build_MadeBasket_InboundsFromOwnBaseline`.
 
 ## 4. Archivos
 
 | Archivo | Cambio |
 |---|---|
-| `Scripts/GameSimulator.cs` | F0: metadatos de TL y tipo de pérdida. |
+| `Scripts/GameSimulator.cs` | F0: metadatos de TL y tipo de pérdida. F5: metadatos de falta (`foulType`, `foulerId`, `foulerName`, `foulBonus`). |
 | `Scripts/Core/Sim2D/Sim2DCourt.cs` | **Nuevo**: geometría, zonas, matchups, TL. |
-| `Scripts/Core/Sim2D/Sim2DChoreographer.cs` | **Nuevo**: guion de posesión. |
-| `Scripts/Core/Sim2D/Sim2DCommentary.cs` | **Nuevo**: textos del ticker. |
-| `Scripts/UI/MatchDayController.Visual.cs` | Renderer: aplica guion, cues, marcador, TL/OOB. |
-| `Tests/Editor/Sim2DChoreographerTests.cs` | **Nuevo**: tests puros. |
+| `Scripts/Core/Sim2D/Sim2DChoreographer.cs` | **Nuevo**: guion de posesión. F5: `IconName`, cue de falta, variantes de comentario. |
+| `Scripts/Core/Sim2D/Sim2DCommentary.cs` | **Nuevo**: textos del ticker. F5: variantes deterministas, falta, tapón, pérdida y cambio. |
+| `Scripts/Core/AudioManager.cs` | F5: `PlaySFX(nombre, volumen)` para los SFX de partido. |
+| `Scripts/UI/MatchDayController.Visual.cs` | Renderer: aplica guion, cues, marcador, TL/OOB. F5: icono por jugada, SFX y animación de cambios. |
+| `Art/Resources/Audios/{silbato,bocina,canasta}.wav` | **Nuevo (provisional)**: SFX de partido. |
+| `Art/Resources/Icons/silbato.png` | **Nuevo**: icono de falta en el ticker. |
+| `Tests/Editor/Sim2DChoreographerTests.cs` | **Nuevo**: tests puros (F0–F5). |
 | `Docs/GAMEPLAY.md` / `.agent/MEMORY.md` | Documentación de la feature. |
 
 ## 5. Progreso
@@ -154,3 +176,5 @@ MatchDayController.Sim2D.* (renderer: keyframes, ticker, marcador, TL, OOB)
 | 2026-11-02 | F5 | Parcial | HUD 24/14; faltan icono de ticker, faltas, animación de cambios y medición de allocations. |
 | 2026-11-02 | Tests | Hecho | `Sim2DChoreographerTests`: 13/13 en verde. Suite EditMode completa: 621/621. |
 | 2026-11-02 | F3 (2.ª pasada) | Hecho | Bloqueo y continuación, corte al aro y posteo con rutas, ticker y reacción defensiva; `Sim2DChoreographerTests`: 17/17 y suite completa 625/625. |
+| 2026-11-03 | F5 | Hecho | Icono del ticker por jugada, faltas con silbato, animación de cambios, variantes de comentario y coste medido (0,021 ms/jugada). `Sim2DChoreographerTests`: 30/30. |
+| 2026-11-03 | Fix | Hecho | El saque tras canasta sale de la línea de fondo propia (`OwnBaselineInbound`), no de la del aro atacado. Test de regresión añadido; pendiente ejecutar la suite con el editor cerrado. |

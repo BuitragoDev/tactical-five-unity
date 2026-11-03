@@ -44,7 +44,9 @@ public static class Sim2DChoreographer
         Outcome,
         FreeThrow,
         Rebound,
-        Turnover
+        Turnover,
+        Foul,
+        Substitution
     }
 
     public class Cue
@@ -77,6 +79,8 @@ public static class Sim2DChoreographer
         /// <summary>Acción sin balón elegida para esta posesión (para tests y depuración).</summary>
         public OffBallActionKind OffBallKind;
         public int OffBallActorId;
+        /// <summary>Icono del ticker para esta jugada (nombre dentro de Resources/Icons).</summary>
+        public string IconName = "accion";
     }
 
     public enum InboundKind
@@ -174,7 +178,9 @@ public static class Sim2DChoreographer
         var script = new Script
         {
             BallHandlerId = handler.Id,
-            IsFreeThrow = isFt && !andOne
+            IsFreeThrow = isFt && !andOne,
+            IconName = PickIcon(ev, made, isShot, isTurnover, isBlock, isFt,
+                stealer != null, rebounder != null)
         };
 
         if (isFt && !andOne)
@@ -184,6 +190,7 @@ public static class Sim2DChoreographer
                 : SynthesizeFreeThrows(ftm, fta);
             BuildFreeThrowStandalone(script, ev, offense, defense, attackRight,
                 previousHome, previousAway, offenseIsHome, ftShooter, results, rebounder);
+            AddFoulCue(script, ev, eventIndex, gameId);
             SortCues(script);
             return script;
         }
@@ -194,8 +201,36 @@ public static class Sim2DChoreographer
             handler, assisterId, made, three, isShot, isTurnover, isBlock, andOne,
             putback, fastBreak);
 
+        // El 2+1 se narra dentro de BuildFieldGoal, después de la canasta.
+        if (ev.foulType != "and_one")
+            AddFoulCue(script, ev, eventIndex, gameId);
         SortCues(script);
         return script;
+    }
+
+    /// <summary>Icono del ticker según la jugada. Reutiliza los iconos existentes
+    /// de <c>Resources/Icons</c>; la falta manda sobre el resto.</summary>
+    static string PickIcon(GameSimulator.PlayByPlayEvent ev, bool made, bool isShot,
+        bool isTurnover, bool isBlock, bool isFt, bool hasSteal, bool hasRebound)
+    {
+        if (ev != null && !string.IsNullOrEmpty(ev.foulType)) return "silbato";
+        if (isTurnover) return hasSteal ? "robo" : "perdidas";
+        if (isBlock) return "tapones";
+        if (isFt) return "tiro";
+        if (made) return "basket_icon";
+        if (isShot) return "tiro";
+        if (hasRebound) return "rebote";
+        return "accion";
+    }
+
+    static void AddFoulCue(Script script, GameSimulator.PlayByPlayEvent ev,
+        int eventIndex, int gameId, float time = 0.03f)
+    {
+        if (ev == null || string.IsNullOrEmpty(ev.foulType)) return;
+        int variant = StableHash(eventIndex, gameId, 53);
+        AddCue(script, time,
+            Sim2DCommentary.Foul(ev.foulerName, ev.foulType, ev.foulBonus, variant),
+            1, CueKind.Foul);
     }
 
     // ── Jugada de campo ──────────────────────────────────────────────────────
@@ -263,7 +298,7 @@ public static class Sim2DChoreographer
             reboundTime = 0.62f;
         }
 
-        Vector2 inboundPoint = Sim2DCourt.SpotPosition(Sim2DCourt.Spot.InboundBaseline, attackRight);
+        Vector2 inboundPoint = Sim2DCourt.OwnBaselineInbound(attackRight);
         Vector2 receivePoint = Sim2DCourt.SpotPosition(Sim2DCourt.Spot.Backcourt, attackRight);
         int inbounderId = 0;
         int outletPasserId = 0;
@@ -275,7 +310,7 @@ public static class Sim2DChoreographer
                 var inbounder = PickInbounder(offense, handler, false);
                 inbounderId = inbounder?.Id ?? 0;
                 inboundPoint = inbound == InboundKind.Baseline
-                    ? Sim2DCourt.SpotPosition(Sim2DCourt.Spot.InboundBaseline, attackRight)
+                    ? Sim2DCourt.OwnBaselineInbound(attackRight)
                     : new Vector2(0.5f, Mathf.Clamp(inboundY, 0.06f, 0.94f));
                 receivePoint = new Vector2(Sim2DCourt.BackcourtX(attackRight), 0.5f);
                 break;
@@ -493,7 +528,8 @@ public static class Sim2DChoreographer
             }
             else
             {
-                AddCue(script, 0.58f, $"{offender.Name} pierde el balón.", 0, CueKind.Turnover);
+                AddCue(script, 0.58f, Sim2DCommentary.Turnover(offender.Name,
+                    StableHash(eventIndex, gameId, 59)), 0, CueKind.Turnover);
             }
         }
         else if (isBlock && shooter != null)
@@ -503,7 +539,8 @@ public static class Sim2DChoreographer
             if (blocker != null)
                 AddBall(script, shotTime + 0.10f, spots[shooter.Id]);
             AddCue(script, shotTime + 0.06f,
-                $"{blocker?.Name ?? "La defensa"} tapona.", 0, CueKind.Outcome);
+                Sim2DCommentary.Block(blocker?.Name ?? "La defensa",
+                    StableHash(eventIndex, gameId, 61)), 0, CueKind.Outcome);
         }
 
         // ── Ticker de construcción ──
@@ -526,8 +563,11 @@ public static class Sim2DChoreographer
             AddCue(script, 0.04f, Sim2DCommentary.SecondChance(handler.Name), 1, CueKind.BuildUp);
         }
 
-        AddCue(script, receiveTime + 0.06f, Sim2DCommentary.BringUp(handler.Name), 1, CueKind.BuildUp);
-        AddCue(script, Mathf.Max(0.30f, bringTime - 0.02f), Sim2DCommentary.Organize(handler.Name),
+        AddCue(script, receiveTime + 0.06f,
+            Sim2DCommentary.BringUp(handler.Name, StableHash(eventIndex, gameId, 63)),
+            1, CueKind.BuildUp);
+        AddCue(script, Mathf.Max(0.30f, bringTime - 0.02f),
+            Sim2DCommentary.Organize(handler.Name, StableHash(eventIndex, gameId, 67)),
             2, CueKind.BuildUp);
 
         if (offBall != null)
@@ -535,7 +575,9 @@ public static class Sim2DChoreographer
 
         if (isShot && shooter != null)
         {
-            AddCue(script, shotTime, Sim2DCommentary.Shot(shooter.Name, three), 0, CueKind.Shot);
+            AddCue(script, shotTime,
+                Sim2DCommentary.Shot(shooter.Name, three, StableHash(eventIndex, gameId, 71)),
+                0, CueKind.Shot);
             AddCue(script, shotTime + 0.05f, null, 0, CueKind.Outcome);
         }
 
@@ -560,11 +602,15 @@ public static class Sim2DChoreographer
             AppendFreeThrowPhase(script, offense, defense, attackRight, ftBaseHome, ftBaseAway,
                 offenseIsHome, ftShooter ?? shooter, results, rebounder,
                 shotTime + 0.06f, 0.98f);
+            // La falta del 2+1 se canta después de la canasta.
+            AddFoulCue(script, ev, eventIndex, gameId, shotTime + 0.07f);
         }
 
         if (!made && rebounder != null)
         {
-            AddCue(script, reboundTime, Sim2DCommentary.Rebound(rebounder.Name, offensiveRebound),
+            AddCue(script, reboundTime,
+                Sim2DCommentary.Rebound(rebounder.Name, offensiveRebound,
+                    StableHash(eventIndex, gameId, 73)),
                 1, CueKind.Rebound);
         }
 

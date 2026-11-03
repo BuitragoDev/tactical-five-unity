@@ -94,6 +94,11 @@ public class AudioManager : MonoBehaviour
 
     public void PlaySFX(string clipName)
     {
+        PlaySFX(clipName, 1f);
+    }
+
+    public void PlaySFX(string clipName, float volume)
+    {
         if (sfxSource == null) return;
 
         if (!_sfxCache.TryGetValue(clipName, out var clip) || clip == null)
@@ -107,7 +112,7 @@ public class AudioManager : MonoBehaviour
             _sfxCache[clipName] = clip;
         }
 
-        sfxSource.PlayOneShot(clip);
+        sfxSource.PlayOneShot(clip, Mathf.Clamp01(volume));
     }
 
     public void SetMasterVolume(float value)

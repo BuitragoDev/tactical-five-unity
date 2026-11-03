@@ -34,8 +34,7 @@ public static class Sim2DCourt
         DunkerLeft,
         DunkerRight,
         Rim,
-        Backcourt,
-        InboundBaseline
+        Backcourt
     }
 
     public static float TowardBasket(bool attackRight) => attackRight ? 1f : -1f;
@@ -49,6 +48,14 @@ public static class Sim2DCourt
 
     /// <summary>Campo propio del equipo que ataca (donde recibe el saque).</summary>
     public static float BackcourtX(bool attackRight) => attackRight ? 0.30f : 0.70f;
+
+    /// <summary>
+    /// Punto de saque en la línea de fondo **propia** del equipo que ataca: es la
+    /// línea donde se anotó la canasta (o donde salió el balón), no la del aro
+    /// que se ataca. Tras canasta el rival saca desde ahí y sube el balón.
+    /// </summary>
+    public static Vector2 OwnBaselineInbound(bool attackRight) =>
+        new Vector2(BaselineX(!attackRight), 0.5f);
 
     /// <summary>Primera línea del campo rival (donde se instala el ataque).</summary>
     public static float FrontcourtX(bool attackRight) => attackRight ? 0.70f : 0.30f;
@@ -79,7 +86,6 @@ public static class Sim2DCourt
             Spot.DunkerRight => new Vector2(0.92f, 0.54f),
             Spot.Rim => new Vector2(0.931f, 0.50f),
             Spot.Backcourt => new Vector2(0.30f, 0.50f),
-            Spot.InboundBaseline => new Vector2(0.965f, 0.50f),
             _ => new Vector2(0.50f, 0.50f)
         };
         return Mirror(point, attackRight);

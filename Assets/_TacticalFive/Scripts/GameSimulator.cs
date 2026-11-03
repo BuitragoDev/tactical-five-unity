@@ -81,6 +81,15 @@ public static class GameSimulator
         public List<bool> freeThrowResults;
         /// <summary>Id del jugador que tiró los libres (0 si no hubo).</summary>
         public int freeThrowShooterId;
+        /// <summary>Tipo de falta de la jugada (presentación): "reach_in", "shooting",
+        /// "and_one" o "ejection". Null si la jugada no tuvo falta.</summary>
+        public string foulType;
+        /// <summary>Id del jugador que cometió la falta (0 si no hubo).</summary>
+        public int foulerId;
+        /// <summary>Nombre del jugador que cometió la falta (null si no hubo).</summary>
+        public string foulerName;
+        /// <summary>La falta sin tiro dejó al atacante en bonus (tiros libres).</summary>
+        public bool foulBonus;
     }
 
     public class StatDelta
@@ -104,6 +113,15 @@ public static class GameSimulator
         public List<bool> freeThrowResults;
         /// <summary>Id del jugador que tiró los libres (0 si no hubo).</summary>
         public int freeThrowShooterId;
+        /// <summary>Tipo de falta de la jugada (presentación): "reach_in", "shooting"
+        /// o "and_one". Null si la jugada no tuvo falta.</summary>
+        public string foulType;
+        /// <summary>Id del jugador que cometió la falta (0 si no hubo).</summary>
+        public int foulerId;
+        /// <summary>Nombre del jugador que cometió la falta (null si no hubo).</summary>
+        public string foulerName;
+        /// <summary>La falta sin tiro dejó al atacante en bonus (tiros libres).</summary>
+        public bool foulBonus;
     }
 
     /// <summary>
@@ -914,7 +932,8 @@ public static class GameSimulator
     static void AddLog(List<PlayByPlayEvent> log, int quarter, string desc, int homeScore, int awayScore,
         float elapsed, List<StatDelta> deltas = null, List<int> homeOnCourt = null,
         List<int> awayOnCourt = null, bool homeOnOffense = false, string turnoverType = null,
-        List<bool> freeThrowResults = null, int freeThrowShooterId = 0)
+        List<bool> freeThrowResults = null, int freeThrowShooterId = 0,
+        string foulType = null, int foulerId = 0, string foulerName = null, bool foulBonus = false)
     {
         if (log == null || string.IsNullOrEmpty(desc)) return;
         log.Add(new PlayByPlayEvent
@@ -930,7 +949,11 @@ public static class GameSimulator
             homeOnCourt = homeOnCourt ?? new List<int>(),
             awayOnCourt = awayOnCourt ?? new List<int>(),
             freeThrowResults = freeThrowResults,
-            freeThrowShooterId = freeThrowShooterId
+            freeThrowShooterId = freeThrowShooterId,
+            foulType = foulType,
+            foulerId = foulerId,
+            foulerName = foulerName,
+            foulBonus = foulBonus
         });
     }
 
@@ -1067,7 +1090,8 @@ public static class GameSimulator
                     homeOn.Select(i => homePS[i].player_id).ToList(),
                     awayOn.Select(i => awayPS[i].player_id).ToList(),
                     homeOnOffense, outcome.turnoverType,
-                    outcome.freeThrowResults, outcome.freeThrowShooterId);
+                    outcome.freeThrowResults, outcome.freeThrowShooterId,
+                    outcome.foulType, outcome.foulerId, outcome.foulerName, outcome.foulBonus);
             }
 
             attacksSoFar++;
@@ -1116,11 +1140,15 @@ public static class GameSimulator
         // Falta sin tiro en la penetración (F2-03). Cuenta como falta de equipo: si
         // deja al atacante en bonus, se paga con dos tiros libres; si no, el ataque
         // continúa desde el saque (misma posesión, sin ataque extra).
+        string reachFoulName = null;
+        int reachFoulerId = 0;
+        bool reachBonus = false;
         if (random.Value < ReachInFoulChance(defPlan))
         {
-            string foulName = DoFoul(def, random);
-            if (foulName != null && defFouls != null && defFouls.RegisterFoul())
+            reachFoulName = DoFoul(def, out reachFoulerId, random);
+            if (reachFoulName != null && defFouls != null && defFouls.RegisterFoul())
             {
+                reachBonus = true;
                 var ftShooter = PickShooter(off, glLeague, random);
                 if (ftShooter != null)
                 {
@@ -1130,20 +1158,30 @@ public static class GameSimulator
                     {
                         pts = made,
                         desc = made > 0
-                            ? $"{ftShooter.name} convierte {made}/2 tiros libres (bonus; falta de {foulName})"
-                            : $"{ftShooter.name} falla los 2 tiros libres (bonus; falta de {foulName})",
+                            ? $"{ftShooter.name} convierte {made}/2 tiros libres (bonus; falta de {reachFoulName})"
+                            : $"{ftShooter.name} falla los 2 tiros libres (bonus; falta de {reachFoulName})",
                         freeThrowResults = ftResults,
                         freeThrowShooterId = ftShooter.player_id
                     };
+                    WithFoul(outcome, "reach_in", reachFoulerId, reachFoulName, true);
                     if (live) AttachLiveRebound(outcome, def, off, glLeague, random);
                     return outcome;
                 }
             }
         }
 
+        // La falta sin bonus no corta el ataque, pero se conserva como metadato de
+        // presentación para que la vista 2D pueda enseñar el silbato.
+        PossessionOutcome ReachFoul(PossessionOutcome outcome)
+        {
+            if (outcome == null || reachFoulName == null || outcome.foulType != null)
+                return outcome;
+            return WithFoul(outcome, "reach_in", reachFoulerId, reachFoulName, false);
+        }
+
         var shooter = PickShooter(off, glLeague, random);
         if (shooter == null)
-            return new PossessionOutcome { pts = 0, desc = "Pérdida" };
+            return ReachFoul(new PossessionOutcome { pts = 0, desc = "Pérdida" });
 
         string shot = ShotType(shooter, offPlan, random, trailingLateGame);
         var defender = def.OrderByDescending(p => p.defense).FirstOrDefault();
@@ -1162,15 +1200,15 @@ public static class GameSimulator
             {
                 shooter.fg3m++; shooter.fgm++; shooter.points += 3;
                 string astr = DoAst(off, shooter, glLeague, random);
-                return new PossessionOutcome
+                return ReachFoul(new PossessionOutcome
                 {
                     pts = 3,
                     desc = astr != null
                         ? $"{shooter.name} encesta un triple (asist. {astr})"
                         : $"{shooter.name} encesta un triple"
-                };
+                });
             }
-            return MissHandler(def, off, shooter, true, glLeague, defPlan, defFouls, random);
+            return ReachFoul(MissHandler(def, off, shooter, true, glLeague, defPlan, defFouls, random));
         }
 
         float fp2 = FisicoPenalty(shooter.fisico);
@@ -1184,7 +1222,7 @@ public static class GameSimulator
             string astr = DoAst(off, shooter, glLeague, random);
             if (random.Value < 0.06f)
             {
-                string foulName = DoFoul(def, random);
+                string foulName = DoFoul(def, out int foulerId, random);
                 defFouls?.RegisterFoul();
                 var andOneResults = new List<bool>();
                 int bonusMade = ShootFreeThrows(shooter, 1, out bool liveAndOne, random, andOneResults);
@@ -1197,18 +1235,19 @@ public static class GameSimulator
                     freeThrowResults = andOneResults,
                     freeThrowShooterId = shooter.player_id
                 };
+                WithFoul(andOne, "and_one", foulerId, foulName, false);
                 if (liveAndOne) AttachLiveRebound(andOne, def, off, glLeague, random);
                 return andOne;
             }
-            return new PossessionOutcome
+            return ReachFoul(new PossessionOutcome
             {
                 pts = 2,
                 desc = astr != null
                     ? $"{shooter.name} anota de dos (asist. {astr})"
                     : $"{shooter.name} anota de dos"
-            };
+            });
         }
-        return MissHandler(def, off, shooter, false, glLeague, defPlan, defFouls, random);
+        return ReachFoul(MissHandler(def, off, shooter, false, glLeague, defPlan, defFouls, random));
     }
 
     static PossessionOutcome MissHandler(List<PlayerStatSnapshot> def, List<PlayerStatSnapshot> off, PlayerStatSnapshot shooter, bool isThree, bool glLeague = false, GamePlan defPlan = default, DefenseFouls defFouls = null,
@@ -1244,7 +1283,7 @@ public static class GameSimulator
         float foulChance = (isThree ? 0.12f : 0.08f) + defPlan.FoulDelta();
         if (random.Value < foulChance)
         {
-            string foulName = DoFoul(def, random);
+            string foulName = DoFoul(def, out int foulerId, random);
             // Toda falta cuenta para el bonus de equipo; las de tiro pagan libres igual.
             defFouls?.RegisterFoul();
             int nShots = isThree ? 3 : 2;
@@ -1259,6 +1298,7 @@ public static class GameSimulator
                 freeThrowResults = ftResults,
                 freeThrowShooterId = shooter.player_id
             };
+            WithFoul(outcome, "shooting", foulerId, foulName, false);
             // El último libre fallado deja el balón vivo (F2-03).
             if (liveRebound) AttachLiveRebound(outcome, def, off, glLeague, random);
             return outcome;
@@ -1610,15 +1650,18 @@ public static class GameSimulator
         return pos * Mathf.Max(0.35f, 1f - player.pf * 0.10f);
     }
 
-    static string DoFoul(List<PlayerStatSnapshot> court, IRandomSource random = null)
+    static string DoFoul(List<PlayerStatSnapshot> court, out int foulerId,
+        IRandomSource random = null)
     {
         random ??= UnityRandomSource.Instance;
+        foulerId = 0;
         if (court == null || court.Count == 0) return null;
         var weights = court.Select(FoulWeight).ToList();
         float total = weights.Sum();
         if (total <= 0)
         {
             court[0].pf++;
+            foulerId = court[0].player_id;
             return court[0].name;
         }
 
@@ -1630,11 +1673,25 @@ public static class GameSimulator
             if (r <= c)
             {
                 court[i].pf++;
+                foulerId = court[i].player_id;
                 return court[i].name;
             }
         }
         court[^1].pf++;
+        foulerId = court[^1].player_id;
         return court[^1].name;
+    }
+
+    /// <summary>Copia la falta sobre el resultado sin alterar puntos ni RNG.</summary>
+    static PossessionOutcome WithFoul(PossessionOutcome outcome, string foulType,
+        int foulerId, string foulerName, bool bonus)
+    {
+        if (outcome == null || string.IsNullOrEmpty(foulType)) return outcome;
+        outcome.foulType = foulType;
+        outcome.foulerId = foulerId;
+        outcome.foulerName = foulerName;
+        outcome.foulBonus = bonus;
+        return outcome;
     }
 
     /// <summary>
@@ -1693,7 +1750,12 @@ public static class GameSimulator
         int quarter, int homeScore, int awayScore, float elapsed)
     {
         foreach (string name in EjectFouledOut(on, all))
-            AddLog(log, quarter, $"{name} comete su sexta falta y deja la pista", homeScore, awayScore, elapsed);
+        {
+            var fouler = all?.FirstOrDefault(p => p.name == name);
+            AddLog(log, quarter, $"{name} comete su sexta falta y deja la pista",
+                homeScore, awayScore, elapsed,
+                foulType: "ejection", foulerId: fouler?.player_id ?? 0, foulerName: name);
+        }
     }
 
     static HashSet<int> DoSub(HashSet<int> on, List<PlayerStatSnapshot> players, float[] quarterMinutes,

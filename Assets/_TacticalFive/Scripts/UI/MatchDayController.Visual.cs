@@ -40,6 +40,10 @@ public partial class MatchDayController
     private Label _sim2DScore, _sim2DQuarter, _sim2DClock, _sim2DTickerText;
     private Label _sim2DPossession, _sim2DVenue, _sim2DShotClockLabel;
     private VisualElement _sim2DTickerIcon;
+    // F5: caché de iconos del ticker. Se reutilizan los PNG de Resources/Icons y
+    // no se recargan en cada jugada.
+    private readonly Dictionary<string, Sprite> _sim2DIconSprites = new();
+    private readonly Dictionary<string, Texture2D> _sim2DIconTextures = new();
     private Label _sim2DHeaderPlayer, _sim2DHeaderPts, _sim2DHeaderReb, _sim2DHeaderAsi;
     private Button _sim2DHomeTab, _sim2DAwayTab, _sim2DPause, _sim2DSkip;
     private Button _sim2DSpeed1, _sim2DSpeed5, _sim2DSpeed10, _sim2DSpeed20;
@@ -53,6 +57,10 @@ public partial class MatchDayController
     private bool _sim2DHomeOnOffense = true;
     private List<int> _sim2DHomeOnCourt = new();
     private List<int> _sim2DAwayOnCourt = new();
+    // Quintetos del evento anterior: permiten detectar los cambios (F5) sin tocar
+    // el motor; la crónica ya trae homeOnCourt/awayOnCourt por jugada.
+    private List<int> _sim2DPrevHomeOnCourt = new();
+    private List<int> _sim2DPrevAwayOnCourt = new();
     private float _sim2DBallX = 0.5f, _sim2DBallY = 0.5f;
     private float _sim2DBallTargetX = 0.5f, _sim2DBallTargetY = 0.5f;
     private int _sim2DBallHandlerId;
@@ -89,6 +97,10 @@ public partial class MatchDayController
         public float StartX = 0.5f, StartY = 0.5f;
         public float TargetX = 0.5f, TargetY = 0.5f;
         public bool OnCourt;
+        // F5: cambio desde la banda. El que sale sigue visible mientras camina al
+        // banquillo y se oculta a mitad de jugada; el que entra arranca del banquillo.
+        public bool Leaving;
+        public float HideAt = 1f;
     }
 
     private class Sim2DScoreParticle
@@ -168,20 +180,7 @@ public partial class MatchDayController
         _sim2DClock = _root.Q<Label>("Sim2DClock");
         _sim2DTickerText = _root.Q<Label>("Sim2DTickerText");
         _sim2DTickerIcon = _root.Q<VisualElement>("Sim2DTickerIcon");
-        if (_sim2DTickerIcon != null)
-        {
-            var actionSprite = Resources.Load<Sprite>("Icons/accion");
-            if (actionSprite != null)
-            {
-                _sim2DTickerIcon.style.backgroundImage = new StyleBackground(actionSprite);
-            }
-            else
-            {
-                var actionTexture = Resources.Load<Texture2D>("Icons/accion");
-                if (actionTexture != null)
-                    _sim2DTickerIcon.style.backgroundImage = new StyleBackground(actionTexture);
-            }
-        }
+        SetSim2DTickerIcon("accion");
         _sim2DPossession = _root.Q<Label>("Sim2DPossession");
         _sim2DVenue = _root.Q<Label>("Sim2DVenue");
         _sim2DShotClockLabel = _root.Q<Label>("Sim2DShotClock");
@@ -201,6 +200,33 @@ public partial class MatchDayController
 
         _sim2DSpeed = NormalizeSim2DSpeed(PlayerPrefs.GetInt(SIM2D_SPEED_PREF, 1));
         UpdateSim2DSpeedButtons();
+    }
+
+    /// <summary>Icono del ticker por tipo de jugada (F5). Reutiliza los PNG de
+    /// <c>Resources/Icons</c> y cachea sprite y textura por nombre.</summary>
+    void SetSim2DTickerIcon(string iconName)
+    {
+        if (_sim2DTickerIcon == null) return;
+        string key = string.IsNullOrEmpty(iconName) ? "accion" : iconName;
+
+        if (!_sim2DIconSprites.TryGetValue(key, out var sprite))
+        {
+            sprite = Resources.Load<Sprite>($"Icons/{key}");
+            _sim2DIconSprites[key] = sprite;
+        }
+        if (sprite != null)
+        {
+            _sim2DTickerIcon.style.backgroundImage = new StyleBackground(sprite);
+            return;
+        }
+
+        if (!_sim2DIconTextures.TryGetValue(key, out var texture))
+        {
+            texture = Resources.Load<Texture2D>($"Icons/{key}");
+            _sim2DIconTextures[key] = texture;
+        }
+        if (texture != null)
+            _sim2DTickerIcon.style.backgroundImage = new StyleBackground(texture);
     }
 
     void ConfigureSim2DHeader()
@@ -688,6 +714,22 @@ public partial class MatchDayController
         UpdateSim2DRoster();
     }
 
+    /// <summary>SFX del partido (F5): silbato en faltas y bocina al cerrar periodo.
+    /// Los clips son provisionales; si faltan, <see cref="AudioManager"/> solo avisa.</summary>
+    void PlaySim2DEventSound(GameSimulator.PlayByPlayEvent ev)
+    {
+        if (ev == null) return;
+        if (!string.IsNullOrEmpty(ev.foulType))
+        {
+            AudioManager.Instance?.PlaySFX("silbato", 0.8f);
+            return;
+        }
+        // Los eventos de periodo y de fin no traen deltas (las posesiones sí,
+        // aunque la lista venga vacía): es la única distinción estable.
+        if (ev.deltas == null)
+            AudioManager.Instance?.PlaySFX("bocina", 0.7f);
+    }
+
     void ApplySim2DScoreStep(Sim2DChoreographer.ScoreStep step, GameSimulator.PlayByPlayEvent ev)
     {
         if (step == null) return;
@@ -698,11 +740,13 @@ public partial class MatchDayController
         if (!_sim2DScoreEffectDone && Sim2DIsFieldGoalMade(ev))
         {
             PlaySim2DScoreEffect(ev.homeOnOffense, Sim2DIsThreePointer(ev));
+            AudioManager.Instance?.PlaySFX("canasta", 0.6f);
             _sim2DScoreEffectDone = true;
         }
         else if (Sim2DIsMadeFreeThrow(ev))
         {
             PlaySim2DScoreEffect(ev.homeOnOffense, false, true);
+            AudioManager.Instance?.PlaySFX("canasta", 0.35f);
         }
     }
 
@@ -749,6 +793,8 @@ public partial class MatchDayController
             bool hasLineups = ev.homeOnCourt != null && ev.homeOnCourt.Count > 0;
             if (hasLineups)
             {
+                _sim2DPrevHomeOnCourt = _sim2DHomeOnCourt;
+                _sim2DPrevAwayOnCourt = _sim2DAwayOnCourt;
                 _sim2DHomeOnCourt = new List<int>(ev.homeOnCourt);
                 _sim2DAwayOnCourt = new List<int>(ev.awayOnCourt ?? new List<int>());
                 _sim2DHomeOnOffense = ev.homeOnOffense;
@@ -756,6 +802,7 @@ public partial class MatchDayController
             }
 
             _sim2DCurrentEvent = ev;
+            PlaySim2DEventSound(ev);
             _sim2DPendingDeltas = ev.deltas;
             _sim2DDeltasApplied = false;
             // El marcador arranca en el resultado anterior: los puntos entran en el
@@ -939,6 +986,8 @@ public partial class MatchDayController
         foreach (var state in _sim2DPlayers.Values)
         {
             state.OnCourt = false;
+            state.Leaving = false;
+            state.HideAt = 1f;
             state.StartX = state.X;
             state.StartY = state.Y;
             state.TargetX = state.X;
@@ -950,6 +999,11 @@ public partial class MatchDayController
 
         LayoutSim2DTeam(_sim2DHomeOnCourt, true, eventIndex);
         LayoutSim2DTeam(_sim2DAwayOnCourt, false, eventIndex);
+
+        // F5: el que sale sigue visible y camina al banquillo; el que entra arranca
+        // desde el banquillo. Se hace antes del repintado de visibilidad.
+        if (animate)
+            MarkSim2DSubstitutions();
 
         foreach (var state in _sim2DPlayers.Values)
         {
@@ -975,9 +1029,18 @@ public partial class MatchDayController
         // de respaldo de siempre.
         var script = BuildSim2DScript(ev, eventIndex, previous);
         if (script != null)
+        {
             ApplySim2DScript(script);
+            SetSim2DTickerIcon(script.IconName);
+        }
         else
+        {
             ApplySim2DActionTargets(ev, eventIndex);
+            SetSim2DTickerIcon(null);
+        }
+
+        if (animate)
+            AnimateSim2DSubstitutions();
 
         if (!animate)
         {
@@ -994,6 +1057,111 @@ public partial class MatchDayController
             _sim2DBallY = ballStart.y;
             ApplySim2DBallPosition();
         }
+    }
+
+    // ── Cambios (F5) ──────────────────────────────────────────────────────────
+
+    /// <summary>Marca a los que salen (siguen visibles hasta el banquillo) y coloca
+    /// a los que entran en el banquillo antes de animar la jugada.</summary>
+    void MarkSim2DSubstitutions()
+    {
+        var leavingHome = Sim2DIdsLeaving(_sim2DPrevHomeOnCourt, _sim2DHomeOnCourt);
+        var leavingAway = Sim2DIdsLeaving(_sim2DPrevAwayOnCourt, _sim2DAwayOnCourt);
+
+        for (int i = 0; i < leavingHome.Count; i++)
+            MarkSim2DLeaving(leavingHome[i], true, i);
+        for (int i = 0; i < leavingAway.Count; i++)
+            MarkSim2DLeaving(leavingAway[i], false, i);
+
+        var enteringHome = Sim2DIdsLeaving(_sim2DHomeOnCourt, _sim2DPrevHomeOnCourt);
+        var enteringAway = Sim2DIdsLeaving(_sim2DAwayOnCourt, _sim2DPrevAwayOnCourt);
+        for (int i = 0; i < enteringHome.Count; i++)
+            PlaceSim2DAtBench(enteringHome[i], true, i);
+        for (int i = 0; i < enteringAway.Count; i++)
+            PlaceSim2DAtBench(enteringAway[i], false, i);
+    }
+
+    static List<int> Sim2DIdsLeaving(List<int> from, List<int> to)
+    {
+        if (from == null || from.Count == 0) return new List<int>();
+        return from.Where(id => to == null || !to.Contains(id)).ToList();
+    }
+
+    void MarkSim2DLeaving(int id, bool home, int index)
+    {
+        if (!_sim2DPlayers.TryGetValue(id, out var state) || state.Node == null) return;
+        Vector2 bench = Sim2DBenchPosition(home, index);
+        state.OnCourt = true;
+        state.Leaving = true;
+        state.HideAt = 0.14f;
+        state.TargetX = bench.x;
+        state.TargetY = bench.y;
+        state.Node.style.display = DisplayStyle.Flex;
+    }
+
+    void PlaceSim2DAtBench(int id, bool home, int index)
+    {
+        if (!_sim2DPlayers.TryGetValue(id, out var state)) return;
+        Vector2 bench = Sim2DBenchPosition(home, index);
+        state.X = bench.x;
+        state.Y = bench.y;
+        state.StartX = bench.x;
+        state.StartY = bench.y;
+    }
+
+    static Vector2 Sim2DBenchPosition(bool home, int index)
+    {
+        // El banquillo se representa en el borde inferior, fuera de la cancha.
+        float x = home ? 0.16f + index * 0.07f : 0.84f - index * 0.07f;
+        return new Vector2(Mathf.Clamp01(x), 0.985f);
+    }
+
+    /// <summary>Recorrido al banquillo de los que salen y aviso en el ticker.
+    /// Se llama después de aplicar el guion para no pisar sus recorridos.</summary>
+    void AnimateSim2DSubstitutions()
+    {
+        var leavingHome = Sim2DIdsLeaving(_sim2DPrevHomeOnCourt, _sim2DHomeOnCourt);
+        var leavingAway = Sim2DIdsLeaving(_sim2DPrevAwayOnCourt, _sim2DAwayOnCourt);
+        var enteringHome = Sim2DIdsLeaving(_sim2DHomeOnCourt, _sim2DPrevHomeOnCourt);
+        var enteringAway = Sim2DIdsLeaving(_sim2DAwayOnCourt, _sim2DPrevAwayOnCourt);
+
+        for (int i = 0; i < leavingHome.Count; i++)
+            AddSim2DBenchPath(leavingHome[i], true, i);
+        for (int i = 0; i < leavingAway.Count; i++)
+            AddSim2DBenchPath(leavingAway[i], false, i);
+
+        if (leavingHome.Count == 0 && leavingAway.Count == 0
+            && enteringHome.Count == 0 && enteringAway.Count == 0) return;
+
+        string enters = Sim2DPlayerNames(enteringHome.Concat(enteringAway).ToList());
+        string leaves = Sim2DPlayerNames(leavingHome.Concat(leavingAway).ToList());
+        _sim2DCues.Add(new Sim2DChoreographer.Cue
+        {
+            Time = 0.04f,
+            Text = Sim2DCommentary.Substitution(enters, leaves),
+            Priority = 1,
+            Kind = Sim2DChoreographer.CueKind.Substitution
+        });
+        _sim2DCues.Sort((a, b) => a.Time.CompareTo(b.Time));
+        _sim2DCueIndex = 0;
+    }
+
+    void AddSim2DBenchPath(int id, bool home, int index)
+    {
+        if (!_sim2DPlayers.TryGetValue(id, out var state)) return;
+        Vector2 bench = Sim2DBenchPosition(home, index);
+        _sim2DPlayerPaths[id] = new List<Sim2DPlayerWaypoint>
+        {
+            new Sim2DPlayerWaypoint { Position = bench, Time = state.HideAt }
+        };
+    }
+
+    string Sim2DPlayerNames(List<int> ids)
+    {
+        if (ids == null || ids.Count == 0) return "";
+        return string.Join(", ", ids
+            .Where(id => _sim2DPlayers.ContainsKey(id))
+            .Select(id => ShortName(_sim2DPlayers[id].Player)));
     }
 
     Sim2DChoreographer.Script BuildSim2DScript(GameSimulator.PlayByPlayEvent ev, int eventIndex,
@@ -1834,6 +2002,17 @@ public partial class MatchDayController
             foreach (var state in _sim2DPlayers.Values)
             {
                 if (!state.OnCourt) continue;
+                // F5: el que sale camina al banquillo y desaparece a mitad de jugada.
+                if (state.Leaving && rawT >= state.HideAt)
+                {
+                    state.X = state.TargetX;
+                    state.Y = state.TargetY;
+                    ApplySim2DNodePosition(state);
+                    if (state.Node != null) state.Node.style.display = DisplayStyle.None;
+                    state.OnCourt = false;
+                    state.Leaving = false;
+                    continue;
+                }
                 Vector2 from = start[state.Player.id];
                 Vector2 playerPosition = GetSim2DPlayerPositionAt(state, from, rawT, t);
                 state.X = playerPosition.x;
@@ -1848,6 +2027,16 @@ public partial class MatchDayController
 
         foreach (var state in _sim2DPlayers.Values)
         {
+            if (state.Leaving)
+            {
+                state.X = state.TargetX;
+                state.Y = state.TargetY;
+                ApplySim2DNodePosition(state);
+                if (state.Node != null) state.Node.style.display = DisplayStyle.None;
+                state.OnCourt = false;
+                state.Leaving = false;
+                continue;
+            }
             if (!state.OnCourt) continue;
             state.X = state.TargetX;
             state.Y = state.TargetY;
